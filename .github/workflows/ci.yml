@@ -128,10 +128,10 @@ jobs:
           name: coverage-mobile
           path: reports/coverage/mobile
       - name: Build coverage summary
-        run: node ops/ci/collect-coverage.js --component summary
+        run: node ops/ci/collect-coverage.js --component summary && node ops/ci/generate-coverage-html.js
       - name: Upload coverage summary artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-summary
-          path: reports/coverage/summary.md
+          path: reports/coverage
           if-no-files-found: error

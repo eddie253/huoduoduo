@@ -14,6 +14,30 @@ function copyIfExists(src, dest) {
   return true;
 }
 
+function copyDirIfExists(src, dest) {
+  if (!src || !fs.existsSync(src)) {
+    return false;
+  }
+
+  const stat = fs.statSync(src);
+  if (!stat.isDirectory()) {
+    return false;
+  }
+
+  ensureDir(dest);
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const from = path.join(src, entry.name);
+    const to = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirIfExists(from, to);
+    } else {
+      ensureDir(path.dirname(to));
+      fs.copyFileSync(from, to);
+    }
+  }
+  return true;
+}
+
 function argValue(name) {
   const token = `--${name}`;
   const idx = process.argv.indexOf(token);
@@ -56,6 +80,20 @@ function readBffSummary(summaryPath) {
   return json.total || null;
 }
 
+function formatTaipeiTime(date = new Date()) {
+  const base = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).format(date);
+  return `${base} (Asia/Taipei, UTC+8)`;
+}
+
 const component = (argValue('component') || 'summary').toLowerCase();
 const repoRoot = path.resolve(__dirname, '..', '..');
 const reportRoot = path.join(repoRoot, 'reports', 'coverage');
@@ -81,6 +119,10 @@ if (component === 'bff' || component === 'all') {
       path.join(sourceBffDir, 'coverage-summary.json'),
       path.join(reportBffDir, 'coverage-summary.json')
     ) || copiedBff;
+  copyDirIfExists(
+    path.join(sourceBffDir, 'lcov-report'),
+    path.join(reportBffDir, 'lcov-report')
+  );
 
   if (!copiedBff) {
     console.error('No BFF coverage artifacts found to collect.');
@@ -109,7 +151,7 @@ const mobileSummary = parseMobileLcov(mobileLcovPath);
 const lines = [
   '# Coverage Summary',
   '',
-  `Generated at: ${new Date().toISOString()}`,
+  `Generated at: ${formatTaipeiTime()}`,
   '',
   '## BFF (Jest v8)',
 ];

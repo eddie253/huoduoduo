@@ -24,6 +24,7 @@ Coverage reports are normalized under:
 1. `reports/coverage/bff/`
 2. `reports/coverage/mobile/`
 3. `reports/coverage/summary.md`
+4. `reports/coverage/index.html` (visual dashboard)
 
 ## CI Enforcement
 1. BFF threshold failure fails `bff_gateway` job.
@@ -35,7 +36,8 @@ Coverage reports are normalized under:
 2. `npm run mobile:test:coverage`
 3. `npm run mobile:coverage:check`
 4. `npm run coverage:collect`
-5. `npm run coverage:verify`
+5. `npm run coverage:html`
+6. `npm run coverage:verify`
 
 ## Governance
 1. Threshold updates require PR review and explicit rationale.
