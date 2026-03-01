@@ -13,6 +13,7 @@ import { ShipmentModule } from './modules/shipment/shipment.module';
 import { WebviewModule } from './modules/webview/webview.module';
 import { HttpLoggingInterceptor } from './observability/http-logging.interceptor';
 import { BearerAuthGuard } from './security/bearer-auth.guard';
+import { NoStoreResponseInterceptor } from './security/no-store-response.interceptor';
 import { SecurityModule } from './security/security.module';
 
 @Module({
@@ -62,6 +63,10 @@ import { SecurityModule } from './security/security.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: HttpLoggingInterceptor
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: NoStoreResponseInterceptor
     }
   ]
 })

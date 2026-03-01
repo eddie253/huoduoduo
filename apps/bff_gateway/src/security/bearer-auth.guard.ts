@@ -26,6 +26,8 @@ export class BearerAuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<any>();
+    const response = context.switchToHttp().getResponse<any>();
+    this.setNoStoreHeaders(response);
 
     const header = request.headers.authorization as string | undefined;
     if (!header || !header.startsWith('Bearer ')) {
@@ -39,5 +41,16 @@ export class BearerAuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException('Invalid bearer token.');
     }
+  }
+
+  private setNoStoreHeaders(response: {
+    setHeader?: (name: string, value: string) => void;
+  }): void {
+    if (!response?.setHeader) {
+      return;
+    }
+    response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    response.setHeader('Pragma', 'no-cache');
+    response.setHeader('Expires', '0');
   }
 }

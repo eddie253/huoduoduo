@@ -22,9 +22,10 @@ Complete "contract-verifiable + risk-controllable" delivery for current monorepo
 
 1. Contract checks pass in CI:
 1. route diff
-2. bff lint/test/build
-3. flutter analyze/test/build apk
-4. flutter build ios --no-codesign (macOS runner)
+2. error-code map check
+3. bff lint/test/build
+4. flutter analyze/test/build apk
+5. flutter build ios --no-codesign (macOS runner)
 2. Bridge contract unit tests in Flutter side.
 3. Updated risk evidence in architecture docs.
 
@@ -44,6 +45,7 @@ Complete "contract-verifiable + risk-controllable" delivery for current monorepo
 | OpenAPI and controller drift | `ops/ci/check-route-diff.js` required |
 | Legacy baseline accidental edits | `ops/ci/check-legacy-baseline-readonly.sh` required |
 | Bridge behavior drift | bridge matrix + unit tests |
+| WebView stale transaction due cache | enforce Wave 4 cache policy + header evidence |
 | iOS blocked by local Windows env | compile gate moved to macOS CI |
 
 ## Execution order

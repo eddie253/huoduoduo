@@ -32,6 +32,11 @@ class TestTokenStore {
 describe('API integration', () => {
   let app: INestApplication;
   const submitShipmentDelivery = jest.fn();
+  const assertNoStoreHeaders = (result: { headers: Record<string, string> }): void => {
+    expect(result.headers['cache-control']).toBe('no-store, no-cache, must-revalidate');
+    expect(result.headers.pragma).toBe('no-cache');
+    expect(result.headers.expires).toBe('0');
+  };
 
   beforeAll(async () => {
     const mockLegacySoapClient: Partial<LegacySoapClient> = {
@@ -135,6 +140,7 @@ describe('API integration', () => {
     expect(ok.status).toBe(200);
     expect(ok.body.accessToken).toBeDefined();
     expect(ok.body.refreshToken).toBeDefined();
+    assertNoStoreHeaders(ok as unknown as { headers: Record<string, string> });
 
     const bad = await request(app.getHttpServer()).post('/v1/auth/login').send({
       account: 'bad_user',
@@ -143,6 +149,7 @@ describe('API integration', () => {
       platform: 'android'
     });
     expect(bad.status).toBe(401);
+    assertNoStoreHeaders(bad as unknown as { headers: Record<string, string> });
   });
 
   it('POST /auth/refresh returns 200 and rotates token', async () => {
@@ -161,6 +168,7 @@ describe('API integration', () => {
     expect(refresh.body.accessToken).toBeDefined();
     expect(refresh.body.refreshToken).toBeDefined();
     expect(refresh.body.refreshToken).not.toBe(login.body.refreshToken);
+    assertNoStoreHeaders(refresh as unknown as { headers: Record<string, string> });
   });
 
   it('GET /bootstrap/webview returns cookies payload', async () => {
@@ -179,11 +187,13 @@ describe('API integration', () => {
     expect(result.body.baseUrl).toBeDefined();
     expect(Array.isArray(result.body.cookies)).toBe(true);
     expect(result.body.cookies.length).toBeGreaterThanOrEqual(3);
+    assertNoStoreHeaders(result as unknown as { headers: Record<string, string> });
   });
 
   it('GET /bootstrap/webview returns 401 when missing authorization', async () => {
     const result = await request(app.getHttpServer()).get('/v1/bootstrap/webview');
     expect(result.status).toBe(401);
+    assertNoStoreHeaders(result as unknown as { headers: Record<string, string> });
   });
 
   it('POST /shipments/{id}/delivery forwards payload to legacy client', async () => {
@@ -207,6 +217,7 @@ describe('API integration', () => {
       .send(payload);
 
     expect(response.status).toBe(200);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
     expect(submitShipmentDelivery).toHaveBeenCalledWith(
       'T001',
       expect.objectContaining({
@@ -214,5 +225,59 @@ describe('API integration', () => {
         imageFileName: 'proof.jpg'
       })
     );
+  });
+
+  it('GET /shipments/{id} returns no-store headers', async () => {
+    const login = await request(app.getHttpServer()).post('/v1/auth/login').send({
+      account: 'shipment_user',
+      password: 'password123',
+      deviceId: 'device-1',
+      platform: 'android'
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/v1/shipments/T001')
+      .set('Authorization', `Bearer ${login.body.accessToken}`);
+
+    expect(response.status).toBe(200);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('GET /reservations returns no-store headers', async () => {
+    const login = await request(app.getHttpServer()).post('/v1/auth/login').send({
+      account: 'reservation_user',
+      password: 'password123',
+      deviceId: 'device-1',
+      platform: 'android'
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/v1/reservations?mode=standard')
+      .set('Authorization', `Bearer ${login.body.accessToken}`);
+
+    expect(response.status).toBe(200);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('POST /push/register returns no-store headers', async () => {
+    const login = await request(app.getHttpServer()).post('/v1/auth/login').send({
+      account: 'push_user',
+      password: 'password123',
+      deviceId: 'device-1',
+      platform: 'android'
+    });
+
+    const response = await request(app.getHttpServer())
+      .post('/v1/push/register')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({
+        deviceId: 'device-1',
+        platform: 'android',
+        fcmToken: 'fcm-token-1',
+        appVersion: 1
+      });
+
+    expect(response.status).toBe(200);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
   });
 });

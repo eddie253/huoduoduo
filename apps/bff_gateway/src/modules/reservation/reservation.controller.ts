@@ -5,7 +5,9 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { DeleteReservationQueryDto, ReservationQueryDto } from './dto/reservation-query.dto';
 import { ReservationResponseDto } from './dto/reservation-response.dto';
 import { ReservationService } from './reservation.service';
+import { NoStoreResponse } from '../../security/no-store-response.decorator';
 
+@NoStoreResponse()
 @Controller('reservations')
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}

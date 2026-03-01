@@ -31,13 +31,13 @@ This file is the single checklist for deciding which docs are:
 
 | Path | Reason |
 |---|---|
-| `docs/ARCHITECTURE_WEBVIEW_CACHE.md` | Legacy implementation notes, low ongoing value |
-| `docs/AUTOMATION_TESTING.md` | Legacy testing context, replaced by wave smoke + CI |
-| `docs/NETWORK_IP_PORT_MAPPING.md` | One-time environment note |
-| `docs/NETWORK_ROUTE_TEST_REPORT_2026-02-28.md` | Historical snapshot |
-| `docs/NETWORK_SUMMARY_REPORT_2026-02-28.md` | Historical snapshot |
-| `docs/OUTBOUND_ENDPOINTS_AUDIT.md` | Legacy audit snapshot (not active source of truth) |
-| `docs/architecture/LEGACY_BASELINE_MANIFEST.txt` | Generated artifact (changes by run) |
+| `docs_local/legacy_docs/ARCHITECTURE_WEBVIEW_CACHE.md` | Legacy implementation notes, low ongoing value |
+| `docs_local/legacy_docs/AUTOMATION_TESTING.md` | Legacy testing context, replaced by wave smoke + CI |
+| `docs_local/legacy_docs/NETWORK_IP_PORT_MAPPING.md` | One-time environment note |
+| `docs_local/legacy_docs/NETWORK_ROUTE_TEST_REPORT_2026-02-28.md` | Historical snapshot |
+| `docs_local/legacy_docs/NETWORK_SUMMARY_REPORT_2026-02-28.md` | Historical snapshot |
+| `docs_local/legacy_docs/OUTBOUND_ENDPOINTS_AUDIT.md` | Legacy audit snapshot (not active source of truth) |
+| `docs_local/legacy_docs/LEGACY_BASELINE_MANIFEST.txt` | Generated artifact (changes by run) |
 
 ## Archive / Deprecated rule
 

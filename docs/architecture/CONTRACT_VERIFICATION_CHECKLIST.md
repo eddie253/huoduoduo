@@ -11,6 +11,7 @@ Commands:
 
 ```bash
 npm run bff:route-diff
+npm run bff:error-code-map
 npm run bff:test -- --runInBand
 ```
 
@@ -38,6 +39,17 @@ Reference:
 
 1. `contracts/bridge/js-bridge-v1.md`
 2. `contracts/legacy/bridge-matrix-v1.md`
+
+## WebView cache/session policy
+
+1. [ ] Driver session survives app background/foreground without forced relogin.
+2. [ ] Transaction routes use no-cache/no-store strategy.
+3. [ ] Header evidence exists for transaction responses (`Cache-Control`, `Pragma`, `Expires`).
+4. [ ] Logout clears cookie/storage/cache artifacts.
+
+Reference:
+
+1. `docs/architecture/WAVE4_WEBVIEW_CACHE_POLICY.md`
 
 ## Error-code normalization
 

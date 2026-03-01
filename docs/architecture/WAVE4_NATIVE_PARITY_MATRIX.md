@@ -39,6 +39,8 @@ Status values:
 |---|---|---|---|---|
 | push register flow | done | done | in_progress | verify end-to-end with BFF |
 | shipment proof upload | todo | todo | todo | delivery/exception payload parity |
+| local media index + upload queue (SQLite) | in_progress | in_progress | in_progress | repository + orchestrator foundation landed, retry worker remains |
+| webview session/cache policy | in_progress | in_progress | in_progress | keepAlive + route cache policy + no-store headers landed |
 | location permission + map fallback | todo | todo | todo | align permission UX |
 
 ## Parity acceptance
@@ -46,3 +48,4 @@ Status values:
 1. Core flow pass rate >= 95% on Android + iOS real devices.
 2. Each deferred item must have explicit risk, owner, and target wave.
 3. No regression on Wave 2 smoke path.
+4. Transaction routes must prove `no-store/no-cache` header behavior in evidence.

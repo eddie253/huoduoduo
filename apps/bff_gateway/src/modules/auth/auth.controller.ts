@@ -4,8 +4,10 @@ import { Throttle } from '@nestjs/throttler';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
 import { AuthService } from './auth.service';
+import { NoStoreResponse } from '../../security/no-store-response.decorator';
 import { Public } from '../../security/public.decorator';
 
+@NoStoreResponse()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

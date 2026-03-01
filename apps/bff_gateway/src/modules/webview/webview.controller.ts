@@ -1,9 +1,11 @@
 import { Controller, Get, Req, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
+import { NoStoreResponse } from '../../security/no-store-response.decorator';
 import { WebviewBootstrapDto } from '../auth/auth.service';
 import { WebviewService } from './webview.service';
 
+@NoStoreResponse()
 @Controller('bootstrap')
 export class WebviewController {
   constructor(private readonly webviewService: WebviewService) {}

@@ -3,7 +3,9 @@ import { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
 import { RegisterPushTokenDto } from './dto/register-push-token.dto';
 import { NotificationService } from './notification.service';
+import { NoStoreResponse } from '../../security/no-store-response.decorator';
 
+@NoStoreResponse()
 @Controller('push')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}

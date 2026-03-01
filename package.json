@@ -12,7 +12,8 @@
     "bff:build": "npm --workspace apps/bff_gateway run build",
     "bff:test": "npm --workspace apps/bff_gateway run test",
     "bff:route-diff": "node ops/ci/check-route-diff.js",
-    "bff:verify": "npm run bff:route-diff && npm run bff:lint && npm run bff:test -- --runInBand && npm run bff:build",
+    "bff:error-code-map": "node ops/ci/check-error-code-map.js",
+    "bff:verify": "npm run bff:route-diff && npm run bff:error-code-map && npm run bff:lint && npm run bff:test -- --runInBand && npm run bff:build",
     "wave2:uat-smoke": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-wave2-uat-smoke.ps1"
   }
 }

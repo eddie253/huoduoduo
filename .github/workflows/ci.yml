@@ -37,6 +37,8 @@ jobs:
         run: npm --workspace apps/bff_gateway run build
       - name: Route diff check
         run: node ops/ci/check-route-diff.js
+      - name: Error-code map check
+        run: node ops/ci/check-error-code-map.js
       - name: Audit high (warn only)
         continue-on-error: true
         run: npm --workspace apps/bff_gateway run audit:high

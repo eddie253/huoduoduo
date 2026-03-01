@@ -10,6 +10,13 @@ Flutter client for the Wave 2 migration baseline.
 - Secure token storage
 - WebView shell using `flutter_inappwebview`
 - Legacy-compatible JS bridge adapter (`window.android.*`)
+- Local media queue skeleton (SQLite metadata only, no credential storage)
+
+## Local media queue policy (Wave 4 prep)
+
+1. SQLite stores only media metadata and upload state (`trackingNo/filePath/fileName/status/retryCount`).
+2. Tokens/passwords/secrets are forbidden in local SQLite metadata.
+3. Real credentials remain in secure storage only.
 
 ## Local validation
 
@@ -41,3 +48,12 @@ flutter run -d <ios-device-id> --dart-define=API_BASE_URL=http://<bff-host>:3000
 ```
 
 Manual flow is the same as Android core smoke.
+
+## Windows + Mac split workflow
+
+1. Windows phase:
+1. implement shared Dart code
+2. run `flutter analyze`, `flutter test`, `flutter build apk --debug`
+2. Mac phase:
+1. run `flutter build ios --no-codesign`
+2. run iOS real-device smoke after signing setup

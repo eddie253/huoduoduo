@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Huoduoduo Express BFF API
-  version: 0.2.0
+  version: 0.2.1
   description: Transitional REST API in front of legacy SOAP services (UAT baseline).
 servers:
   - url: https://api.example.com/v1
@@ -48,6 +48,13 @@ paths:
       responses:
         "200":
           description: Login success.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -73,6 +80,13 @@ paths:
       responses:
         "200":
           description: Refresh success.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -95,6 +109,13 @@ paths:
       responses:
         "200":
           description: Logout success.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -113,6 +134,13 @@ paths:
       responses:
         "200":
           description: Bootstrap metadata.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -132,6 +160,13 @@ paths:
       responses:
         "200":
           description: Registration accepted.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -157,6 +192,13 @@ paths:
       responses:
         "200":
           description: Shipment detail payload.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -186,6 +228,13 @@ paths:
       responses:
         "200":
           description: Accepted.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -214,6 +263,13 @@ paths:
       responses:
         "200":
           description: Accepted.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -232,6 +288,13 @@ paths:
       responses:
         "200":
           description: Reservation list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -254,6 +317,13 @@ paths:
       responses:
         "200":
           description: Reservation created.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -285,6 +355,13 @@ paths:
       responses:
         "200":
           description: Reservation deleted.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
           content:
             application/json:
               schema:
@@ -293,6 +370,22 @@ paths:
                   ok:
                     type: boolean
 components:
+  headers:
+    CacheControlNoStore:
+      description: No-store policy for sensitive and transaction responses.
+      schema:
+        type: string
+      example: no-store, no-cache, must-revalidate
+    PragmaNoCache:
+      description: Legacy-compatible no-cache directive.
+      schema:
+        type: string
+      example: no-cache
+    ExpiresZero:
+      description: Expiration forced to immediate.
+      schema:
+        type: string
+      example: "0"
   securitySchemes:
     bearerAuth:
       type: http
@@ -310,12 +403,26 @@ components:
   responses:
     LegacyBusinessError:
       description: Legacy backend business error.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControlNoStore'
+        Pragma:
+          $ref: '#/components/headers/PragmaNoCache'
+        Expires:
+          $ref: '#/components/headers/ExpiresZero'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     LegacyTransportError:
       description: Legacy backend transport/parsing error.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControlNoStore'
+        Pragma:
+          $ref: '#/components/headers/PragmaNoCache'
+        Expires:
+          $ref: '#/components/headers/ExpiresZero'
       content:
         application/json:
           schema:

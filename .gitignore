@@ -64,11 +64,14 @@ gradle.properties
 gradlew
 gradlew.bat
 window_dump*.xml
-PLAN*.md
+/PLAN*.md
+docs/plans/*
+!docs/plans/PLAN9.md
 test_output*.txt
 test_output*.log
 docs/architecture/LEGACY_BASELINE_MANIFEST.txt
 git
+docs_local/
 
 # legacy reports/docs kept local
 docs/ARCHITECTURE_WEBVIEW_CACHE.md

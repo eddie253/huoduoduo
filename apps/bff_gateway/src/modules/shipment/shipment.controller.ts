@@ -5,7 +5,9 @@ import { DeliveryRequestDto } from './dto/delivery-request.dto';
 import { ExceptionRequestDto } from './dto/exception-request.dto';
 import { ShipmentResponseDto } from './dto/shipment-response.dto';
 import { ShipmentService } from './shipment.service';
+import { NoStoreResponse } from '../../security/no-store-response.decorator';
 
+@NoStoreResponse()
 @Controller('shipments')
 export class ShipmentController {
   constructor(private readonly shipmentService: ShipmentService) {}
