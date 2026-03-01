@@ -15,9 +15,13 @@ This file is the single checklist for deciding which docs are:
 | `docs/architecture/FLUTTER_BFF_V1_IMPLEMENTATION.md` | Current architecture baseline | Architecture |
 | `docs/architecture/WAVE2_UAT_EVIDENCE.md` | UAT execution evidence | QA / Backend |
 | `docs/architecture/LEGACY_BASELINE_FREEZE.md` | Legacy read-only policy | Architecture |
+| `docs/architecture/WAVE3_EXECUTION_SPEC.md` | Wave 3 execution source | Architecture |
+| `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.md` | Contract gate checklist | Backend/Mobile |
+| `docs/architecture/WAVE4_NATIVE_PARITY_MATRIX.md` | Wave 4 parity tracker | Mobile |
+| `docs/architecture/E2E_SMOKE_RUNBOOK.md` | End-to-end smoke SOP | QA |
 | `docs/security/MASVS_ASVS_MAPPING_V1.md` | Security control mapping | Security |
 | `docs/adr/0001-strangler-parallel-adoption.md` | Decision record | Architecture |
-| `contracts/openapi/didi-v1.openapi.yaml` | API source contract | Backend |
+| `contracts/openapi/huoduoduo-v1.openapi.yaml` | API source contract | Backend |
 | `contracts/bridge/js-bridge-v1.md` | Bridge source contract | Mobile |
 | `contracts/legacy/soap-mapping-v1.md` | Legacy integration mapping | Backend |
 | `contracts/legacy/bridge-matrix-v1.md` | Legacy bridge parity matrix | Mobile |

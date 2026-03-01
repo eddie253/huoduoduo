@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..', '..');
-const openApiPath = path.join(repoRoot, 'contracts', 'openapi', 'didi-v1.openapi.yaml');
+const openApiPath = path.join(repoRoot, 'contracts', 'openapi', 'huoduoduo-v1.openapi.yaml');
 const controllersRoot = path.join(repoRoot, 'apps', 'bff_gateway', 'src', 'modules');
 
 function readOpenApiPaths() {

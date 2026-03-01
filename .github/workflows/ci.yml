@@ -80,6 +80,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate OpenAPI file exists
-        run: test -f contracts/openapi/didi-v1.openapi.yaml
+        run: test -f contracts/openapi/huoduoduo-v1.openapi.yaml
       - name: Validate JS bridge contract exists
         run: test -f contracts/bridge/js-bridge-v1.md

@@ -18,7 +18,8 @@ Reference:
 2. `contracts/legacy/soap-mapping-v1.md`
 3. `contracts/legacy/bridge-matrix-v1.md`
 4. `contracts/legacy/error-code-mapping-v1.md`
-5. `docs/DOCS_REORGANIZATION_MATRIX.md`
+5. `docs/architecture/DOCS_REORGANIZATION_MATRIX.md`
+6. `docs/architecture/README.md`
 
 ## Local verification
 

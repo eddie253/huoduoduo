@@ -1,7 +1,7 @@
 {
   "name": "bff_gateway",
   "version": "0.1.0",
-  "description": "Didi Express BFF gateway with transitional token broker and SOAP adapters.",
+  "description": "Huoduoduo Express BFF gateway with transitional token broker and SOAP adapters.",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

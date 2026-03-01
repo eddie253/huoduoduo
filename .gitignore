@@ -39,6 +39,9 @@ node_modules/
 apps/bff_gateway/node_modules/
 apps/bff_gateway/dist/
 apps/bff_gateway/coverage/
+apps/bff_gateway/.env
+.env
+**/.env
 
 # monorepo: Flutter
 apps/mobile_flutter/.dart_tool/

@@ -14,6 +14,8 @@ npm ci
 npm run bff:dev
 ```
 
+Use local `.env` for development. Keep `.env.example` as template only (no real values).
+
 ## Local verification (from repo root)
 
 ```bash
