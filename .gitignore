@@ -55,7 +55,7 @@ apps/mobile_flutter/ios/Flutter/App.framework
 # =========================
 # Legacy local-only (do not push)
 # =========================
-app/
+/app/
 zbarlibary/
 gradle/
 build.gradle
