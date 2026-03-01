@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import request = require('supertest');
 import { AppModule } from './app.module';
 import { LegacySoapClient, LegacyUser, WebCookieModel } from './adapters/soap/legacy-soap.client';
 import { RedisTokenStoreService, RefreshTokenState } from './security/redis-token-store.service';
