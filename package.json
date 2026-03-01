@@ -1,0 +1,18 @@
+{
+  "name": "didi-refactor-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Monorepo root for Flutter + BFF migration baseline.",
+  "workspaces": [
+    "apps/bff_gateway"
+  ],
+  "scripts": {
+    "bff:dev": "npm --workspace apps/bff_gateway run start:dev",
+    "bff:lint": "npm --workspace apps/bff_gateway run lint",
+    "bff:build": "npm --workspace apps/bff_gateway run build",
+    "bff:test": "npm --workspace apps/bff_gateway run test",
+    "bff:route-diff": "node ops/ci/check-route-diff.js",
+    "bff:verify": "npm run bff:route-diff && npm run bff:lint && npm run bff:test -- --runInBand && npm run bff:build",
+    "wave2:uat-smoke": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-wave2-uat-smoke.ps1"
+  }
+}

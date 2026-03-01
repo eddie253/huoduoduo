@@ -1,0 +1,531 @@
+openapi: 3.1.0
+info:
+  title: Didi Express BFF API
+  version: 0.2.0
+  description: Transitional REST API in front of legacy SOAP services (UAT baseline).
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Local
+tags:
+  - name: Health
+  - name: Auth
+  - name: Bootstrap
+  - name: Push
+  - name: Shipments
+  - name: Reservations
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Service health check.
+      responses:
+        "200":
+          description: Service healthy.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and issue access/refresh tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Login success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        "422":
+          $ref: '#/components/responses/LegacyBusinessError'
+        "502":
+          $ref: '#/components/responses/LegacyTransportError'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate refresh token and issue new access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Refresh success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+  /auth/logout:
+    post:
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      summary: Revoke refresh token.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Logout success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked:
+                    type: boolean
+                  subject:
+                    type: string
+  /bootstrap/webview:
+    get:
+      tags: [Bootstrap]
+      security:
+        - bearerAuth: []
+      summary: Get webview startup metadata and cookies.
+      responses:
+        "200":
+          description: Bootstrap metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebviewBootstrap'
+  /push/register:
+    post:
+      tags: [Push]
+      security:
+        - bearerAuth: []
+      summary: Register device push token to legacy backend.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPushTokenRequest'
+      responses:
+        "200":
+          description: Registration accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  registeredAt:
+                    type: string
+                    format: date-time
+  /shipments/{trackingNo}:
+    get:
+      tags: [Shipments]
+      security:
+        - bearerAuth: []
+      summary: Get shipment detail (GetShipment_elf fallback GetShipment).
+      parameters:
+        - name: trackingNo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shipment detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentResponse'
+        "422":
+          $ref: '#/components/responses/LegacyBusinessError'
+        "502":
+          $ref: '#/components/responses/LegacyTransportError'
+  /shipments/{trackingNo}/delivery:
+    post:
+      tags: [Shipments]
+      security:
+        - bearerAuth: []
+      summary: Submit shipment delivery payload.
+      parameters:
+        - name: trackingNo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryRequest'
+      responses:
+        "200":
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /shipments/{trackingNo}/exception:
+    post:
+      tags: [Shipments]
+      security:
+        - bearerAuth: []
+      summary: Submit shipment exception payload.
+      parameters:
+        - name: trackingNo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExceptionRequest'
+      responses:
+        "200":
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /reservations:
+    get:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: List reservations by mode.
+      parameters:
+        - $ref: '#/components/parameters/ReservationMode'
+      responses:
+        "200":
+          description: Reservation list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservationResponse'
+    post:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: Create reservation by mode.
+      parameters:
+        - $ref: '#/components/parameters/ReservationMode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
+      responses:
+        "200":
+          description: Reservation created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservationNo:
+                    type: string
+                  mode:
+                    type: string
+                    enum: [standard, bulk]
+  /reservations/{id}:
+    delete:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: Delete reservation by id and mode.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/ReservationMode'
+        - name: address
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reservation deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ReservationMode:
+      name: mode
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [standard, bulk]
+        default: standard
+  responses:
+    LegacyBusinessError:
+      description: Legacy backend business error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    LegacyTransportError:
+      description: Legacy backend transport/parsing error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    LoginRequest:
+      type: object
+      required: [account, password, deviceId, platform]
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+        deviceId:
+          type: string
+        platform:
+          type: string
+          enum: [android, ios]
+    RefreshResponse:
+      type: object
+      required: [accessToken, refreshToken]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    LoginResponse:
+      type: object
+      required: [accessToken, refreshToken, user, webviewBootstrap]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        webviewBootstrap:
+          $ref: '#/components/schemas/WebviewBootstrap'
+    UserProfile:
+      type: object
+      required: [id, contractNo, name, role]
+      properties:
+        id:
+          type: string
+        contractNo:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+    WebviewBootstrap:
+      type: object
+      required: [baseUrl, registerUrl, resetPasswordUrl, cookies]
+      properties:
+        baseUrl:
+          type: string
+          format: uri
+        registerUrl:
+          type: string
+          format: uri
+        resetPasswordUrl:
+          type: string
+          format: uri
+        cookies:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebCookie'
+    WebCookie:
+      type: object
+      required: [name, value, domain, path, secure, httpOnly]
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        domain:
+          type: string
+        path:
+          type: string
+        secure:
+          type: boolean
+        httpOnly:
+          type: boolean
+    DeliveryRequest:
+      type: object
+      required: [imageBase64, imageFileName, latitude, longitude]
+      properties:
+        driverId:
+          type: string
+        imageBase64:
+          type: string
+        imageFileName:
+          type: string
+        signatureBase64:
+          type: string
+        latitude:
+          type: string
+        longitude:
+          type: string
+    ExceptionRequest:
+      type: object
+      required: [imageBase64, imageFileName, reasonCode, latitude, longitude]
+      properties:
+        driverId:
+          type: string
+        imageBase64:
+          type: string
+        imageFileName:
+          type: string
+        reasonCode:
+          type: string
+        reasonMessage:
+          type: string
+        latitude:
+          type: string
+        longitude:
+          type: string
+    ShipmentResponse:
+      type: object
+      required:
+        - trackingNo
+        - recipient
+        - address
+        - phone
+        - mobile
+        - zipCode
+        - city
+        - district
+        - status
+      properties:
+        trackingNo:
+          type: string
+        recipient:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        mobile:
+          type: string
+        zipCode:
+          type: string
+        city:
+          type: string
+        district:
+          type: string
+        status:
+          type: string
+        signedAt:
+          type: string
+          nullable: true
+        signedImageFileName:
+          type: string
+          nullable: true
+        signedLocation:
+          type: string
+          nullable: true
+    CreateReservationRequest:
+      type: object
+      required: [address, shipmentNos]
+      properties:
+        areaCode:
+          type: string
+        address:
+          type: string
+        shipmentNos:
+          type: array
+          items:
+            type: string
+        fee:
+          type: number
+        note:
+          type: string
+    ReservationResponse:
+      type: object
+      required: [reservationNo, address, shipmentNos, mode]
+      properties:
+        reservationNo:
+          type: string
+        address:
+          type: string
+        fee:
+          type: number
+          nullable: true
+        shipmentNos:
+          type: array
+          items:
+            type: string
+        mode:
+          type: string
+          enum: [standard, bulk]
+    RegisterPushTokenRequest:
+      type: object
+      required: [deviceId, platform, fcmToken]
+      properties:
+        deviceId:
+          type: string
+        platform:
+          type: string
+          enum: [android, ios]
+        fcmToken:
+          type: string
+        appVersion:
+          type: integer
+          minimum: 0

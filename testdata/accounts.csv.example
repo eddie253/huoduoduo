@@ -1,0 +1,4 @@
+case_id,account,password,expected_login,expected_message_contains,note
+uat_login_pass,replace_with_uat_account,replace_with_uat_password,pass,,valid login sample
+uat_login_fail,bad_account,bad_password,fail,,invalid login sample
+uat_login_empty_pwd,replace_with_uat_account,,fail,,empty password sample

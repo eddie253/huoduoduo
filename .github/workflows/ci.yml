@@ -1,0 +1,85 @@
+name: Monorepo CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  legacy_baseline_readonly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enforce legacy baseline read-only
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: bash ops/ci/check-legacy-baseline-readonly.sh
+
+  bff_gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install deps
+        run: npm ci
+      - name: Lint
+        run: npm --workspace apps/bff_gateway run lint
+      - name: Test
+        run: npm --workspace apps/bff_gateway run test -- --runInBand
+      - name: Build
+        run: npm --workspace apps/bff_gateway run build
+      - name: Route diff check
+        run: node ops/ci/check-route-diff.js
+      - name: Audit high (warn only)
+        continue-on-error: true
+        run: npm --workspace apps/bff_gateway run audit:high
+
+  mobile_flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Install deps
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Test
+        run: flutter test
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+
+  mobile_flutter_ios_compile:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Install deps
+        run: flutter pub get
+      - name: Build iOS without codesign
+        run: flutter build ios --no-codesign
+
+  contract_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate OpenAPI file exists
+        run: test -f contracts/openapi/didi-v1.openapi.yaml
+      - name: Validate JS bridge contract exists
+        run: test -f contracts/bridge/js-bridge-v1.md

@@ -1,0 +1,28 @@
+name: mobile_flutter
+description: Didi Express Flutter migration shell (v1).
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.3.0
+  dio: ^5.7.0
+  device_info_plus: ^10.1.2
+  flutter_secure_storage: ^9.2.2
+  flutter_inappwebview: ^6.1.5
+  google_maps_flutter: ^2.9.0
+  firebase_messaging: ^15.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

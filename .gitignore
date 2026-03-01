@@ -1,0 +1,74 @@
+# =========================
+# Android Studio / Gradle
+# =========================
+*.iml
+.gradle/
+local.properties
+.DS_Store
+
+# Android build folders
+/build/
+*/build/
+app/build/
+.externalNativeBuild/
+captures/
+
+# IntelliJ / Android Studio project files
+.idea/
+.idea/caches
+.idea/libraries
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# =========================
+# Output Artifacts
+# =========================
+*.apk
+*.aab
+
+# local automation inputs
+/testdata/accounts.csv
+
+# local automation outputs
+/reports/
+
+# monorepo: Node/Nest
+node_modules/
+apps/bff_gateway/node_modules/
+apps/bff_gateway/dist/
+apps/bff_gateway/coverage/
+
+# monorepo: Flutter
+apps/mobile_flutter/.dart_tool/
+apps/mobile_flutter/.flutter-plugins
+apps/mobile_flutter/.flutter-plugins-dependencies
+apps/mobile_flutter/.packages
+apps/mobile_flutter/build/
+apps/mobile_flutter/ios/Flutter/Flutter.framework
+apps/mobile_flutter/ios/Flutter/App.framework
+
+# =========================
+# Legacy local-only (do not push)
+# =========================
+app/
+zbarlibary/
+gradle/
+build.gradle
+settings.gradle
+gradle.properties
+gradlew
+gradlew.bat
+window_dump*.xml
+PLAN*.md
+test_output*.txt
+test_output*.log
+docs/architecture/LEGACY_BASELINE_MANIFEST.txt
+git
+
+# legacy reports/docs kept local
+docs/ARCHITECTURE_WEBVIEW_CACHE.md
+docs/AUTOMATION_TESTING.md
+docs/NETWORK_*.md
+docs/OUTBOUND_ENDPOINTS_AUDIT.md

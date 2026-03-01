@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  bff_gateway:
+    image: node:20-alpine
+    working_dir: /repo
+    volumes:
+      - ../../:/repo
+      - repo_node_modules:/repo/node_modules
+    command: sh -c "npm ci && npm --workspace apps/bff_gateway run start:dev"
+    environment:
+      PORT: 3000
+      JWT_SECRET: dev-only-secret-change-me
+      ACCESS_TOKEN_TTL_SECONDS: 900
+      REFRESH_TOKEN_TTL_SECONDS: 604800
+      SOAP_BASE_URL: https://old.huoduoduo.com.tw
+      SOAP_NAMESPACE: https://driver.huoduoduo.com.tw/
+      SOAP_PATH: /Inquiry/didiservice.asmx
+      SOAP_TIMEOUT_MS: 15000
+      WEBVIEW_BASE_URL: https://app.elf.com.tw/cn/entrust.aspx?IDCompany=S1
+      WEBVIEW_REGISTER_URL: https://old.huoduoduo.com.tw/register/register.aspx
+      WEBVIEW_RESET_URL: https://old.huoduoduo.com.tw/register/register_resetpwd.aspx
+      WEBVIEW_COOKIE_DOMAIN: old.huoduoduo.com.tw
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  repo_node_modules:
