@@ -39,6 +39,7 @@ node_modules/
 apps/bff_gateway/node_modules/
 apps/bff_gateway/dist/
 apps/bff_gateway/coverage/
+apps/bff_gateway/src/coverage/
 apps/bff_gateway/.env
 .env
 **/.env
@@ -68,6 +69,7 @@ window_dump*.xml
 docs/plans/*
 !docs/plans/PLAN9.md
 !docs/plans/PLAN10.md
+!docs/plans/PLAN11.md
 test_output*.txt
 test_output*.log
 docs/architecture/LEGACY_BASELINE_MANIFEST.txt

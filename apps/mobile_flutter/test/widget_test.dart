@@ -7,6 +7,6 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: DidiApp()));
     await tester.pumpAndSettle();
 
-    expect(find.text('Didi Login'), findsOneWidget);
+    expect(find.text('貨多多物流'), findsOneWidget);
   });
 }

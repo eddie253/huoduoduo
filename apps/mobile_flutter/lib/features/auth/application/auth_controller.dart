@@ -49,8 +49,9 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
       state = AsyncData<AuthSession?>(session);
       return session;
     } catch (error, stackTrace) {
-      state = AsyncError<AuthSession?>(_toDisplayError(error), stackTrace);
-      rethrow;
+      final mapped = _toDisplayError(error);
+      state = AsyncError<AuthSession?>(mapped, stackTrace);
+      throw mapped;
     }
   }
 
@@ -84,8 +85,9 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
       if (data is Map<String, dynamic>) {
         final code = data['code']?.toString();
         final message = data['message']?.toString();
-        if (code != null && message != null) {
-          return Exception('$code: $message');
+        if (code != null) {
+          final mapped = _mapErrorCodeMessage(code, fallback: message);
+          return Exception('$code: $mapped');
         }
         if (message != null) {
           return Exception(message);
@@ -97,5 +99,18 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
       return error;
     }
     return Exception('Unknown error');
+  }
+
+  String _mapErrorCodeMessage(String code, {String? fallback}) {
+    switch (code) {
+      case 'LEGACY_TIMEOUT':
+        return '系統連線逾時，請稍後再試。';
+      case 'LEGACY_BAD_RESPONSE':
+        return '系統服務暫時異常，請稍後再試。';
+      case 'LEGACY_BUSINESS_ERROR':
+        return fallback ?? '帳號或密碼錯誤，請重新輸入。';
+      default:
+        return fallback ?? '登入失敗，請稍後再試。';
+    }
   }
 }

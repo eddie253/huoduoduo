@@ -84,8 +84,13 @@ export class LegacySoapClient {
   }
 
   async buildWebviewCookies(account: string, identify: string): Promise<WebCookieModel[]> {
-    const defaultDomain =
-      this.configService.get<string>('WEBVIEW_COOKIE_DOMAIN') ?? 'old.huoduoduo.com.tw';
+    const configuredDomain = this.configService.get<string>('WEBVIEW_COOKIE_DOMAIN');
+    const baseUrl = this.configService.get<string>(
+      'WEBVIEW_BASE_URL',
+      'https://app.elf.com.tw/cn/entrust.aspx?IDCompany=S1'
+    );
+    const baseUrlHost = this.safeReadHost(baseUrl);
+    const defaultDomain = configuredDomain || baseUrlHost || 'old.huoduoduo.com.tw';
     return [
       {
         name: 'Account',
@@ -112,6 +117,15 @@ export class LegacySoapClient {
         httpOnly: false
       }
     ];
+  }
+
+  private safeReadHost(url: string): string | null {
+    try {
+      const parsed = new URL(url);
+      return parsed.host || null;
+    } catch {
+      return null;
+    }
   }
 
   async updateRegId(

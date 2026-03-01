@@ -21,7 +21,7 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         final bootstrap = state.extra;
         if (bootstrap is! WebviewBootstrap) {
-          return const _MissingBootstrapPage();
+          return const LoginPage();
         }
         return WebViewShellPage(bootstrap: bootstrap);
       }
@@ -55,17 +55,3 @@ final GoRouter appRouter = GoRouter(
     )
   ]
 );
-
-class _MissingBootstrapPage extends StatelessWidget {
-  const _MissingBootstrapPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Routing Error')),
-      body: const Center(
-        child: Text('Missing WebView bootstrap payload. Navigate from login flow.')
-      )
-    );
-  }
-}

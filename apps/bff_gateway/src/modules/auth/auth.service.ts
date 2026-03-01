@@ -119,7 +119,7 @@ export class AuthService {
   async getWebviewBootstrap(account: string, identify: string): Promise<WebviewBootstrapDto> {
     const baseUrl = this.configService.get<string>(
       'WEBVIEW_BASE_URL',
-      'https://app.elf.com.tw/cn/entrust.aspx?IDCompany=S1'
+      'https://old.huoduoduo.com.tw/app/rvt/ge.aspx'
     );
     const registerUrl = this.configService.get<string>(
       'WEBVIEW_REGISTER_URL',

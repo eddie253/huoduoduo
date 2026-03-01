@@ -22,6 +22,17 @@ Use local `.env` for development. Keep `.env.example` as template only (no real 
 npm run bff:verify
 ```
 
+## Coverage (Jest v8)
+
+```bash
+npm run bff:test:coverage
+```
+
+Coverage artifacts are generated in:
+
+- `apps/bff_gateway/coverage/` (raw)
+- `reports/coverage/bff/` (collected)
+
 ## UAT smoke (from repo root)
 
 ### Manual tracking number

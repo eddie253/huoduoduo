@@ -27,6 +27,24 @@ flutter test
 flutter build apk --debug
 ```
 
+## Coverage
+
+```bash
+flutter test --coverage
+```
+
+Monorepo helper commands (from repo root):
+
+```bash
+npm run mobile:test:coverage
+npm run mobile:coverage:check
+```
+
+Coverage artifacts are generated in:
+
+- `apps/mobile_flutter/coverage/lcov.info` (raw)
+- `reports/coverage/mobile/lcov.info` (collected)
+
 ## Android real-device smoke
 
 ```bash

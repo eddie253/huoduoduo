@@ -10,10 +10,16 @@
     "bff:dev": "npm --workspace apps/bff_gateway run start:dev",
     "bff:lint": "npm --workspace apps/bff_gateway run lint",
     "bff:build": "npm --workspace apps/bff_gateway run build",
+    "bff:start:local": "powershell -ExecutionPolicy Bypass -File .\\scripts\\start-local-bff.ps1",
     "bff:test": "npm --workspace apps/bff_gateway run test",
+    "bff:test:coverage": "npm --workspace apps/bff_gateway run test:coverage -- --runInBand",
     "bff:route-diff": "node ops/ci/check-route-diff.js",
     "bff:error-code-map": "node ops/ci/check-error-code-map.js",
     "bff:verify": "npm run bff:route-diff && npm run bff:error-code-map && npm run bff:lint && npm run bff:test -- --runInBand && npm run bff:build",
+    "mobile:test:coverage": "node ops/ci/run-flutter-coverage.js",
+    "mobile:coverage:check": "node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 40",
+    "coverage:collect": "node ops/ci/collect-coverage.js --component summary",
+    "coverage:verify": "npm run bff:test:coverage && npm run mobile:test:coverage && npm run mobile:coverage:check && npm run coverage:collect",
     "wave2:uat-smoke": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-wave2-uat-smoke.ps1"
   }
 }

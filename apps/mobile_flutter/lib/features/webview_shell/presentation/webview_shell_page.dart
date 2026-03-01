@@ -19,7 +19,10 @@ class _WebViewShellPageState extends State<WebViewShellPage> {
   final _cachePolicyResolver = const WebviewCachePolicyResolver();
   InAppWebViewController? _controller;
   String? _errorText;
+  bool _didErrorFallback = false;
   static final InAppWebViewKeepAlive _keepAlive = InAppWebViewKeepAlive();
+  static final WebUri _legacyFallbackUri =
+      WebUri('https://old.huoduoduo.com.tw/app/rvt/ge.aspx');
 
   static const String _bridgeAdapterScript = '''
 (function () {
@@ -38,7 +41,9 @@ class _WebViewShellPageState extends State<WebViewShellPage> {
     __bridgeVersion: '1.0',
     error: function () { return emit('error', {}); },
     RefreshEnable: function (enable) { return emit('RefreshEnable', { enable: String(enable) }); },
+    pre_page: function () { return emit('pre_page', {}); },
     redirect: function (page) { return emit('redirect', { page: String(page || '') }); },
+    openImage: function (url) { return emit('openImage', { url: String(url || '') }); },
     openfile: function (url) { return emit('openfile', { url: String(url || '') }); },
     open_IMG_Scanner: function (type) { return emit('open_IMG_Scanner', { type: String(type || '') }); },
     openMsgExit: function (msg) { return emit('openMsgExit', { msg: String(msg || '') }); },
@@ -58,16 +63,50 @@ class _WebViewShellPageState extends State<WebViewShellPage> {
   Future<void> _bootstrapWebView(InAppWebViewController controller) async {
     final cookieManager = CookieManager.instance();
     final baseUri = WebUri(widget.bootstrap.baseUrl);
+    final baseHost = baseUri.host.toLowerCase();
+    final cookieHosts = <String>{
+      baseHost,
+      ...widget.bootstrap.cookies
+          .map((cookie) => cookie.domain.trim().toLowerCase())
+          .where((host) => host.isNotEmpty && _isAllowedHost(host)),
+    };
+
+    for (final host in cookieHosts) {
+      await cookieManager.deleteCookies(
+        url: WebUri('https://$host'),
+        domain: host,
+      );
+    }
 
     for (final cookie in widget.bootstrap.cookies) {
+      // Legacy-compatible behavior: write host-only cookies on the loaded URL host.
       await cookieManager.setCookie(
-          url: baseUri,
+        url: baseUri,
+        name: cookie.name,
+        value: cookie.value,
+        path: cookie.path,
+        isSecure: cookie.secure,
+        isHttpOnly: cookie.httpOnly,
+      );
+
+      final cookieHost = cookie.domain.trim().toLowerCase();
+      if (cookieHost.isNotEmpty &&
+          cookieHost != baseHost &&
+          _isAllowedHost(cookieHost)) {
+        // Keep compatibility with domain-specific cookies when provided.
+        final domainUrl = WebUri(
+          '${cookie.secure ? 'https' : 'http'}://$cookieHost${cookie.path}',
+        );
+        await cookieManager.setCookie(
+          url: domainUrl,
           name: cookie.name,
           value: cookie.value,
-          domain: cookie.domain,
+          domain: cookieHost,
           path: cookie.path,
           isSecure: cookie.secure,
-          isHttpOnly: cookie.httpOnly);
+          isHttpOnly: cookie.httpOnly,
+        );
+      }
     }
 
     await controller.loadUrl(
@@ -76,6 +115,15 @@ class _WebViewShellPageState extends State<WebViewShellPage> {
         cachePolicy: _cachePolicyResolver.cachePolicyFor(baseUri),
       ),
     );
+  }
+
+  bool _shouldFallbackFromErrorPage(WebUri? url) {
+    if (url == null || _didErrorFallback) {
+      return false;
+    }
+    final host = (url.host).toLowerCase();
+    final path = (url.path).toLowerCase();
+    return host == 'app.elf.com.tw' && path == '/error.aspx';
   }
 
   @override
@@ -99,7 +147,16 @@ class _WebViewShellPageState extends State<WebViewShellPage> {
                 controller.addJavaScriptHandler(
                     handlerName: 'bridge',
                     callback: (args) => _bridgeService.handle(args, context));
-                await _bootstrapWebView(controller);
+                try {
+                  await _bootstrapWebView(controller);
+                } catch (e) {
+                  if (!mounted) {
+                    return;
+                  }
+                  setState(() {
+                    _errorText = 'WebView bootstrap failed: $e';
+                  });
+                }
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
                 final uri = navigationAction.request.url;
@@ -125,8 +182,35 @@ class _WebViewShellPageState extends State<WebViewShellPage> {
                 return NavigationActionPolicy.ALLOW;
               },
               onLoadStop: (controller, url) async {
-                await controller.evaluateJavascript(
-                    source: _bridgeAdapterScript);
+                if (_shouldFallbackFromErrorPage(url)) {
+                  _didErrorFallback = true;
+                  try {
+                    await controller.loadUrl(
+                      urlRequest: URLRequest(
+                        url: _legacyFallbackUri,
+                        cachePolicy:
+                            _cachePolicyResolver.cachePolicyFor(_legacyFallbackUri),
+                      ),
+                    );
+                  } catch (e) {
+                    if (mounted) {
+                      setState(() {
+                        _errorText = 'Fallback load failed: $e';
+                      });
+                    }
+                  }
+                  return;
+                }
+                try {
+                  await controller.evaluateJavascript(
+                      source: _bridgeAdapterScript);
+                } catch (e) {
+                  if (mounted) {
+                    setState(() {
+                      _errorText = 'Bridge injection failed: $e';
+                    });
+                  }
+                }
               },
               onReceivedError: (controller, request, error) {
                 setState(() {

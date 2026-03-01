@@ -44,6 +44,10 @@ class JsBridgeService {
               'enable': message.params['enable']?.toString() ?? 'true',
             },
           );
+        case 'pre_page':
+          return _handleLegacyPrePage(context);
+        case 'openImage':
+          return _handleLegacyOpenImage(message);
         case 'redirect':
           return await _handleRedirect(message, context);
         case 'openfile':
@@ -73,6 +77,37 @@ class JsBridgeService {
         'Bridge runtime error',
       );
     }
+  }
+
+  Future<Map<String, dynamic>> _handleLegacyPrePage(
+    BuildContext context,
+  ) async {
+    final closed = await _actionExecutor.closePage(context);
+    return _ok(closed ? 'legacy_pre_page_closed' : 'legacy_pre_page_ignored');
+  }
+
+  Future<Map<String, dynamic>> _handleLegacyOpenImage(
+    BridgeMessage message,
+  ) async {
+    final url = message.params['url']?.toString() ?? '';
+    final uri = _parseHttpsUri(url, allowedHosts: _allowedWebHosts);
+    if (uri == null) {
+      return _error(
+        BridgeErrorCode.permissionDenied,
+        'Legacy openImage URL is not allowed',
+      );
+    }
+    final opened = await _actionExecutor.launchExternal(uri);
+    if (!opened) {
+      return _error(
+        BridgeErrorCode.runtimeError,
+        'Unable to open image URL',
+      );
+    }
+    return _ok(
+      'legacy_image_opened',
+      data: <String, dynamic>{'url': uri.toString()},
+    );
   }
 
   Future<Map<String, dynamic>> _handleRedirect(
