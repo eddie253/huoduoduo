@@ -84,6 +84,12 @@ WHERE type='index' AND name='idx_media_upload_queue_status_created'
         await repository.listByStatus(MediaQueueStatus.uploaded);
     expect(uploadedItems.length, 1);
     expect(uploadedItems.first.lastErrorCode, isNull);
+
+    await repository.markDeadLetter(item.id, errorCode: 'MAX_RETRY_EXCEEDED');
+    final deadLetterItems =
+        await repository.listByStatus(MediaQueueStatus.deadLetter);
+    expect(deadLetterItems.length, 1);
+    expect(deadLetterItems.first.lastErrorCode, 'MAX_RETRY_EXCEEDED');
   });
 
   test('rejects sensitive metadata keys', () async {

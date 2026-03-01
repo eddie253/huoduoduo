@@ -9,12 +9,14 @@ import 'media_local_schema.dart';
 abstract class MediaLocalRepository {
   Future<void> init();
   Future<MediaQueueItem> enqueue(MediaQueueDraft draft);
+  Future<MediaQueueItem?> getById(int id);
   Future<List<MediaQueueItem>> listByStatus(
     MediaQueueStatus status, {
     int limit = 50,
   });
   Future<void> markUploaded(int id);
   Future<void> markFailed(int id, {String? errorCode});
+  Future<void> markDeadLetter(int id, {String? errorCode});
   Future<int> cleanupUploadedOlderThan(DateTime threshold);
   Future<void> close();
 }
@@ -123,6 +125,21 @@ class SqfliteMediaLocalRepository implements MediaLocalRepository {
   }
 
   @override
+  Future<MediaQueueItem?> getById(int id) async {
+    final db = await _database.open();
+    final rows = await db.query(
+      MediaLocalSchema.tableName,
+      where: 'id = ?',
+      whereArgs: <Object?>[id],
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      return null;
+    }
+    return _mapRow(rows.first);
+  }
+
+  @override
   Future<void> markUploaded(int id) async {
     final db = await _database.open();
     final now = DateTime.now().toUtc().toIso8601String();
@@ -154,6 +171,22 @@ WHERE id = ?
         now,
         id,
       ],
+    );
+  }
+
+  @override
+  Future<void> markDeadLetter(int id, {String? errorCode}) async {
+    final db = await _database.open();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await db.update(
+      MediaLocalSchema.tableName,
+      <String, Object?>{
+        'status': MediaQueueStatus.deadLetter.value,
+        'updated_at': now,
+        'last_error_code': errorCode,
+      },
+      where: 'id = ?',
+      whereArgs: <Object?>[id],
     );
   }
 

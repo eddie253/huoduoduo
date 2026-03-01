@@ -67,6 +67,7 @@ window_dump*.xml
 /PLAN*.md
 docs/plans/*
 !docs/plans/PLAN9.md
+!docs/plans/PLAN10.md
 test_output*.txt
 test_output*.log
 docs/architecture/LEGACY_BASELINE_MANIFEST.txt

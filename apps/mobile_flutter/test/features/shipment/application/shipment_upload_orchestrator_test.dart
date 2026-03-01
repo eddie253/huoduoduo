@@ -86,6 +86,59 @@ void main() {
     expect(failed.first.lastErrorCode, 'LEGACY_TIMEOUT');
   });
 
+  test('moves failed item to dead letter when retry limit is exceeded',
+      () async {
+    final imageFile = File(p.join(tempDir.path, 'delivery_dead_letter.jpg'));
+    await imageFile.writeAsBytes(<int>[7, 8, 9]);
+
+    final orchestrator = ShipmentUploadOrchestrator(
+      shipmentRepository: _FailShipmentRepository(),
+      mediaLocalRepository: mediaLocalRepository,
+    );
+
+    final first = await orchestrator.uploadDelivery(
+      trackingNo: '907563299214',
+      filePath: imageFile.path,
+      fileName: 'delivery_dead_letter.jpg',
+      latitude: '25.03',
+      longitude: '121.56',
+      maxRetryCount: 5,
+    );
+    expect(first.status, MediaQueueStatus.failed);
+
+    final retry = await orchestrator.retryFailedUploads(maxRetryCount: 1);
+    expect(retry.processed, 1);
+    expect(retry.deadLetter, 1);
+
+    final deadLetter =
+        await mediaLocalRepository.listByStatus(MediaQueueStatus.deadLetter);
+    expect(deadLetter, hasLength(1));
+  });
+
+  test('uploads exception payload successfully', () async {
+    final imageFile = File(p.join(tempDir.path, 'exception_ok.jpg'));
+    await imageFile.writeAsBytes(<int>[1, 2, 3, 4]);
+
+    final repository = _SuccessShipmentRepository();
+    final orchestrator = ShipmentUploadOrchestrator(
+      shipmentRepository: repository,
+      mediaLocalRepository: mediaLocalRepository,
+    );
+
+    final result = await orchestrator.uploadException(
+      trackingNo: '907563299214',
+      filePath: imageFile.path,
+      fileName: 'exception_ok.jpg',
+      reasonCode: 'WEATHER',
+      reasonMessage: 'rain',
+      latitude: '25.03',
+      longitude: '121.56',
+    );
+
+    expect(result.status, MediaQueueStatus.uploaded);
+    expect(repository.exceptionSubmitCount, 1);
+  });
+
   test('rejects sensitive metadata before enqueue', () async {
     final imageFile = File(p.join(tempDir.path, 'delivery_sensitive.jpg'));
     await imageFile.writeAsBytes(<int>[1, 2, 3]);
@@ -110,6 +163,8 @@ void main() {
 }
 
 class _SuccessShipmentRepository implements ShipmentRepository {
+  int exceptionSubmitCount = 0;
+
   @override
   Future<void> submitDelivery({
     required String trackingNo,
@@ -128,7 +183,9 @@ class _SuccessShipmentRepository implements ShipmentRepository {
     String? reasonMessage,
     required String latitude,
     required String longitude,
-  }) async {}
+  }) async {
+    exceptionSubmitCount++;
+  }
 }
 
 class _FailShipmentRepository extends _SuccessShipmentRepository {

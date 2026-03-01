@@ -18,30 +18,30 @@ Status values:
 | `error()` | done | done | done | keep behavior consistent |
 | `RefreshEnable()` | done | done | done | keep behavior consistent |
 | `redirect()` | done | done | done | keep behavior consistent |
-| `openfile()` | todo | todo | deferred | implement file picker/download flow |
-| `open_IMG_Scanner()` | todo | todo | deferred | scanner plugin integration |
+| `openfile()` | done | code_first | in_progress | HTTPS + allowlist external open |
+| `open_IMG_Scanner()` | done | code_first | in_progress | scanner page wired via mobile_scanner |
 | `openMsgExit()` | done | done | done | dialog flow available |
-| `cfs_sign()` | todo | todo | deferred | signature UX and upload path |
-| `APPEvent()` | todo | todo | deferred | split per event kind below |
+| `cfs_sign()` | done | code_first | in_progress | signature canvas + PNG export route |
+| `APPEvent()` | done | code_first | in_progress | split event handlers implemented |
 
 ## APPEvent sub-event parity
 
 | Event kind | Android | iOS | Status | Notes |
 |---|---|---|---|---|
-| map navigation | todo | todo | todo | external map/open native map |
-| dial phone | todo | todo | todo | tel scheme/permission flow |
-| close page | todo | todo | todo | router pop/back behavior |
-| contract/open external page | todo | todo | todo | deep link / web redirect |
+| map navigation | done | code_first | in_progress | external map URI handling wired |
+| dial phone | done | code_first | in_progress | tel scheme dispatch wired |
+| close page | done | code_first | in_progress | navigator pop behavior wired |
+| contract/open external page | done | code_first | in_progress | HTTPS allowlist external open |
 
 ## Non-bridge native capabilities
 
 | Capability | Android | iOS | Status | Notes |
 |---|---|---|---|---|
 | push register flow | done | done | in_progress | verify end-to-end with BFF |
-| shipment proof upload | todo | todo | todo | delivery/exception payload parity |
-| local media index + upload queue (SQLite) | in_progress | in_progress | in_progress | repository + orchestrator foundation landed, retry worker remains |
+| shipment proof upload | done | code_first | in_progress | delivery/exception upload from queue flow |
+| local media index + upload queue (SQLite) | done | code_first | in_progress | retry + dead-letter + startup maintenance wired |
 | webview session/cache policy | in_progress | in_progress | in_progress | keepAlive + route cache policy + no-store headers landed |
-| location permission + map fallback | todo | todo | todo | align permission UX |
+| location permission + map fallback | in_progress | code_first | in_progress | map external flow wired, permission UX pending on-device |
 
 ## Parity acceptance
 
