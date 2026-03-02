@@ -1,5 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_flutter/app/app.dart';
 
 void main() {
@@ -7,6 +8,9 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: DidiApp()));
     await tester.pumpAndSettle();
 
+    expect(find.byKey(const Key('login.accountField')), findsOneWidget);
+    expect(find.byKey(const Key('login.passwordField')), findsOneWidget);
+    expect(find.byKey(const Key('login.submitButton')), findsOneWidget);
     expect(find.text('貨多多物流'), findsOneWidget);
   });
 }

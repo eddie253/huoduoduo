@@ -1,4 +1,4 @@
-﻿# Login Session Parity Checklist (PLAN11)
+# Login Session Parity Checklist (PLAN11 + PLAN14)
 
 ## Scope
 
@@ -12,9 +12,13 @@ This checklist validates login-session behavior parity between legacy Android ap
 4. BFF commit id:
 5. Tester:
 
-## Checklist
+## Checklist (Screen ID Driven)
 
 ## 1. LOGIN_SUCCESS
+
+Screen IDs:
+1. `NAT-HOME-TOOLBAR`
+2. `NAT-WEBVIEW-SHELL`
 
 1. Preconditions:
 1. valid account/password available
@@ -32,6 +36,9 @@ This checklist validates login-session behavior parity between legacy Android ap
 
 ## 2. LOGIN_FAILURE_INVALID_CREDENTIAL
 
+Screen IDs:
+1. `NAT-LOGIN`
+
 1. Preconditions: invalid password prepared
 2. Steps:
 1. submit invalid credential
@@ -45,6 +52,9 @@ This checklist validates login-session behavior parity between legacy Android ap
 
 ## 3. SESSION_COOKIE_SET
 
+Screen IDs:
+1. `NAT-WEBVIEW-SHELL`
+
 1. Preconditions: successful login
 2. Steps:
 1. inspect webview cookies after bootstrap
@@ -56,6 +66,9 @@ This checklist validates login-session behavior parity between legacy Android ap
 1. cookie inspection output (masked)
 
 ## 4. APP_RESTART_SESSION_RESTORE
+
+Screen IDs:
+1. `NAT-WEBVIEW-SHELL`
 
 1. Preconditions: logged in state established
 2. Steps:
@@ -69,6 +82,9 @@ This checklist validates login-session behavior parity between legacy Android ap
 
 ## 5. FOREGROUND_BACKGROUND_PRESERVE
 
+Screen IDs:
+1. `NAT-WEBVIEW-SHELL`
+
 1. Preconditions: user in webview session
 2. Steps:
 1. move app to background
@@ -81,6 +97,9 @@ This checklist validates login-session behavior parity between legacy Android ap
 
 ## 6. REFRESH_ROTATION
 
+Screen IDs:
+1. `NAT-WEBVIEW-SHELL`
+
 1. Preconditions: refresh endpoint available
 2. Steps:
 1. perform refresh once
@@ -92,6 +111,10 @@ This checklist validates login-session behavior parity between legacy Android ap
 1. API call logs (masked)
 
 ## 7. LOGOUT_HARD_CLEAR
+
+Screen IDs:
+1. `NAT-LOGOUT-CONFIRM`
+2. `NAT-WEBVIEW-SHELL`
 
 1. Preconditions: logged in state established
 2. Steps:
@@ -107,6 +130,10 @@ This checklist validates login-session behavior parity between legacy Android ap
 
 ## 8. UNAUTHORIZED_REDIRECT
 
+Screen IDs:
+1. `NAT-WEBVIEW-SHELL`
+2. `NAT-LOGIN`
+
 1. Preconditions: missing/invalid token
 2. Steps:
 1. access protected route
@@ -116,6 +143,10 @@ This checklist validates login-session behavior parity between legacy Android ap
 1. route transition capture
 
 ## 9. NON_ALLOWLIST_BLOCK
+
+Screen IDs:
+1. `NAT-WEBVIEW-SHELL`
+2. `NAT-OPEN-FILE`
 
 1. Preconditions: test URL outside allowlist
 2. Steps:
@@ -128,6 +159,10 @@ This checklist validates login-session behavior parity between legacy Android ap
 
 ## 10. NO_SENSITIVE_LOCAL_STORAGE
 
+Screen IDs:
+1. `NAT-UPLOAD-ERR-MSG`
+2. `NAT-SHIPMENT-QUEUE` (Flutter parity)
+
 1. Preconditions: shipment queue actions executed
 2. Steps:
 1. inspect SQLite metadata records
@@ -137,9 +172,14 @@ This checklist validates login-session behavior parity between legacy Android ap
 1. DB query output
 2. test report reference
 
+## Exclusion Rule
+
+1. `maphwo.MapsActivity` is `out_of_scope` for PLAN14 and must not be treated as blocker.
+
 ## Final Verdict
 
 1. Core parity pass rate:
 2. Blocker count:
 3. Waived items (with reason):
 4. Go/No-Go:
+

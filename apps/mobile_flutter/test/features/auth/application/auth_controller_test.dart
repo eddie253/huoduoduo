@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -119,6 +119,101 @@ void main() {
     expect(fakeCleanup.lastDomains, AppConfig.allowedWebHosts);
     expect(fakeTokenStorage.cleared, isTrue);
     expect(container.read(authControllerProvider).value, isNull);
+  });
+
+  test('logout still runs cleanup when refresh token is missing', () async {
+    final fakeRepo = _FakeAuthRepository(
+      loginHandler: (_) async => _sessionFixture(),
+    );
+    final fakeTokenStorage = _FakeTokenStorage();
+    final fakeCleanup = _FakeCleanupService();
+
+    final container = ProviderContainer(
+      overrides: <Override>[
+        authRepositoryProvider.overrideWithValue(fakeRepo),
+        tokenStorageProvider.overrideWithValue(fakeTokenStorage),
+        webviewSessionCleanupServiceProvider.overrideWithValue(fakeCleanup),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller = container.read(authControllerProvider.notifier);
+    await controller.logout();
+
+    expect(fakeRepo.lastLogoutRefreshToken, isNull);
+    expect(fakeCleanup.called, isTrue);
+    expect(fakeTokenStorage.cleared, isTrue);
+  });
+
+  test('login failure with Dio message uses message fallback', () async {
+    final fakeRepo = _FakeAuthRepository(
+      loginHandler: (_) async {
+        throw DioException(
+          requestOptions: RequestOptions(path: '/auth/login'),
+          message: 'temporary network issue',
+          type: DioExceptionType.connectionError,
+        );
+      },
+    );
+
+    final container = ProviderContainer(
+      overrides: <Override>[
+        authRepositoryProvider.overrideWithValue(fakeRepo),
+        tokenStorageProvider.overrideWithValue(_FakeTokenStorage()),
+        webviewSessionCleanupServiceProvider
+            .overrideWithValue(_FakeCleanupService()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller = container.read(authControllerProvider.notifier);
+    await expectLater(
+      () => controller.login(
+        account: 'A114851669',
+        password: 'bad',
+        platform: 'android',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception error) => error.toString(),
+          'message',
+          contains('temporary network issue'),
+        ),
+      ),
+    );
+  });
+
+  test('login failure with non-exception object maps to unknown error',
+      () async {
+    final fakeRepo = _FakeAuthRepository(
+      loginHandler: (_) async => throw 'raw failure',
+    );
+
+    final container = ProviderContainer(
+      overrides: <Override>[
+        authRepositoryProvider.overrideWithValue(fakeRepo),
+        tokenStorageProvider.overrideWithValue(_FakeTokenStorage()),
+        webviewSessionCleanupServiceProvider
+            .overrideWithValue(_FakeCleanupService()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller = container.read(authControllerProvider.notifier);
+    await expectLater(
+      () => controller.login(
+        account: 'A114851669',
+        password: 'bad',
+        platform: 'android',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception error) => error.toString(),
+          'message',
+          contains('Unknown error'),
+        ),
+      ),
+    );
   });
 }
 

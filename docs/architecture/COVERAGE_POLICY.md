@@ -15,7 +15,7 @@ Provide deterministic and enforceable coverage gates for the monorepo.
 4. branches >= 75
 
 ### Flutter Thresholds
-1. baseline gate: line coverage >= 40
+1. baseline gate: line coverage >= 50
 2. target (ratchet): line coverage >= 80
 3. threshold is enforced by `ops/ci/check-flutter-coverage.js`
 
@@ -35,7 +35,7 @@ Coverage reports are normalized under:
 1. `npm run bff:test:coverage`
 2. `npm run mobile:test:coverage`
 3. `npm run mobile:coverage:check`
-4. `npm run coverage:collect`
+4. `npm run coverage:collect:all`
 5. `npm run coverage:html`
 6. `npm run coverage:verify`
 

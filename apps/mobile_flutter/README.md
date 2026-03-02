@@ -51,6 +51,28 @@ Coverage artifacts are generated in:
 flutter run -d <android-device-id> --dart-define=API_BASE_URL=http://<bff-host>:3000/v1
 ```
 
+## Android integration test: login -> webview
+
+1. Create local env file (not tracked by git):
+
+```bash
+Copy-Item .env.local.example .env.local
+```
+
+2. Fill `.env.local` with `UAT_ACCOUNT` and `UAT_PASSWORD`.
+3. Ensure BFF is running and emulator/device is online.
+4. Run from repo root:
+
+```bash
+npm run mobile:test:login-it
+```
+
+Optional device target:
+
+```bash
+powershell -ExecutionPolicy Bypass -File .\scripts\run-mobile-login-it.ps1 -DeviceId emulator-5554
+```
+
 Manual flow:
 
 1. Login with UAT account.

@@ -15,6 +15,10 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  static const Key accountFieldKey = Key('login.accountField');
+  static const Key passwordFieldKey = Key('login.passwordField');
+  static const Key submitButtonKey = Key('login.submitButton');
+
   final _formKey = GlobalKey<FormState>();
   final _accountController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -80,6 +84,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _legacyInput({
+    Key? fieldKey,
     required TextEditingController controller,
     required String hintText,
     required String iconAsset,
@@ -91,6 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     String? Function(String?)? validator,
   }) {
     return TextFormField(
+      key: fieldKey,
       controller: controller,
       textInputAction: textInputAction,
       autofillHints: autofillHints,
@@ -148,12 +154,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Widget _primaryAction({
+    Key? key,
     required String text,
     required IconData icon,
     required VoidCallback? onPressed,
     bool loading = false,
   }) {
     return FilledButton.icon(
+      key: key,
       onPressed: onPressed,
       icon: loading
           ? const SizedBox(
@@ -277,6 +285,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           child: Column(
                             children: <Widget>[
                               _legacyInput(
+                                fieldKey: accountFieldKey,
                                 controller: _accountController,
                                 textInputAction: TextInputAction.next,
                                 autofillHints: const <String>[
@@ -293,6 +302,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                               const SizedBox(height: 12),
                               _legacyInput(
+                                fieldKey: passwordFieldKey,
                                 controller: _passwordController,
                                 textInputAction: TextInputAction.done,
                                 autofillHints: const <String>[
@@ -320,6 +330,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 icon: Icons.login_rounded,
                                 onPressed: isLoading ? null : _submit,
                                 loading: isLoading,
+                                key: submitButtonKey,
                               ),
                               const SizedBox(height: 10),
                               Row(

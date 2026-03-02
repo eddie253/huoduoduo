@@ -43,6 +43,7 @@ apps/bff_gateway/src/coverage/
 apps/bff_gateway/.env
 .env
 **/.env
+**/.env.local
 
 # monorepo: Flutter
 apps/mobile_flutter/.dart_tool/

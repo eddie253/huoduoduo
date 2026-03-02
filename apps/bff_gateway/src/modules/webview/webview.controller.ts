@@ -3,7 +3,7 @@ import { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
 import { NoStoreResponse } from '../../security/no-store-response.decorator';
 import { WebviewBootstrapDto } from '../auth/auth.service';
-import { WebviewService } from './webview.service';
+import { BulletinDto, WebviewService } from './webview.service';
 
 @NoStoreResponse()
 @Controller('bootstrap')
@@ -17,5 +17,14 @@ export class WebviewController {
       throw new UnauthorizedException('Missing auth claims.');
     }
     return this.webviewService.getBootstrap(claims.account, claims.identify);
+  }
+
+  @Get('bulletin')
+  getCurrentBulletin(@Req() request: Request): Promise<BulletinDto> {
+    const claims = (request as Request & { user?: AuthClaims }).user;
+    if (!claims) {
+      throw new UnauthorizedException('Missing auth claims.');
+    }
+    return this.webviewService.getCurrentBulletin();
   }
 }

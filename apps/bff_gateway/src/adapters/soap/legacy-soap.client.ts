@@ -45,6 +45,12 @@ export interface ReservationRecord {
   mode: ReservationMode;
 }
 
+export interface BulletinRecord {
+  uid: string;
+  title: string;
+  date: string | null;
+}
+
 @Injectable()
 export class LegacySoapClient {
   constructor(
@@ -117,6 +123,20 @@ export class LegacySoapClient {
         httpOnly: false
       }
     ];
+  }
+
+  async getBulletins(): Promise<BulletinRecord[]> {
+    const raw = await this.transport.call({
+      method: 'GetBulletin'
+    });
+    this.throwIfBusinessError(raw, 'GetBulletin');
+
+    const rows = this.parseJsonArray(raw);
+    const mapped = rows
+      .map((item) => this.normalizeBulletin(item))
+      .filter((item): item is BulletinRecord => item != null);
+
+    return mapped;
   }
 
   private safeReadHost(url: string): string | null {
@@ -331,6 +351,34 @@ export class LegacySoapClient {
       fee: this.pickNumber(input, ['運費', 'FEE']),
       shipmentNos,
       mode
+    };
+  }
+
+  private normalizeBulletin(input: Record<string, unknown>): BulletinRecord | null {
+    const title =
+      this.pickString(input, [
+        '\u516C\u544A\u6A19\u984C',
+        '\u516C\u544A\u6A19\u9898',
+        'title',
+        'Title',
+        'BulletinTitle'
+      ]) ?? '';
+
+    if (title.trim().length === 0) {
+      return null;
+    }
+
+    return {
+      uid:
+        this.pickString(input, ['UID', '\u516C\u544AUID', 'Id', 'id']) ??
+        '0',
+      title,
+      date: this.pickString(input, [
+        '\u516C\u544A\u65E5\u671F',
+        '\u65E5\u671F',
+        'Date',
+        'CreateTime'
+      ])
     };
   }
 

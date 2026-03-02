@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Huoduoduo Express BFF API
-  version: 0.2.1
+  version: 0.2.2
   description: Transitional REST API in front of legacy SOAP services (UAT baseline).
 servers:
   - url: https://api.example.com/v1
@@ -145,6 +145,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WebviewBootstrap'
+  /bootstrap/bulletin:
+    get:
+      tags: [Bootstrap]
+      security:
+        - bearerAuth: []
+      summary: Get current bulletin text for top announcement strip.
+      responses:
+        "200":
+          description: Bulletin response.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulletinResponse'
   /push/register:
     post:
       tags: [Push]
@@ -514,6 +534,17 @@ components:
           type: boolean
         httpOnly:
           type: boolean
+    BulletinResponse:
+      type: object
+      required: [message, hasAnnouncement, updatedAt]
+      properties:
+        message:
+          type: string
+        hasAnnouncement:
+          type: boolean
+        updatedAt:
+          type: string
+          nullable: true
     DeliveryRequest:
       type: object
       required: [imageBase64, imageFileName, latitude, longitude]

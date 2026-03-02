@@ -81,6 +81,13 @@ describe('API integration', () => {
           }
         ] satisfies WebCookieModel[];
       }),
+      getBulletins: jest.fn(async () => [
+        {
+          uid: '1',
+          title: '系統公告測試',
+          date: '2026-03-02T00:00:00Z'
+        }
+      ]),
       getShipment: jest.fn(async () => ({
         trackingNo: 'T1',
         recipient: 'A',
@@ -194,6 +201,24 @@ describe('API integration', () => {
   it('GET /bootstrap/webview returns 401 when missing authorization', async () => {
     const result = await request(app.getHttpServer()).get('/v1/bootstrap/webview');
     expect(result.status).toBe(401);
+    assertNoStoreHeaders(result as unknown as { headers: Record<string, string> });
+  });
+
+  it('GET /bootstrap/bulletin returns current announcement', async () => {
+    const login = await request(app.getHttpServer()).post('/v1/auth/login').send({
+      account: 'bulletin_user',
+      password: 'password123',
+      deviceId: 'device-1',
+      platform: 'android'
+    });
+
+    const result = await request(app.getHttpServer())
+      .get('/v1/bootstrap/bulletin')
+      .set('Authorization', `Bearer ${login.body.accessToken}`);
+
+    expect(result.status).toBe(200);
+    expect(result.body.message).toBe('系統公告測試');
+    expect(result.body.hasAnnouncement).toBe(true);
     assertNoStoreHeaders(result as unknown as { headers: Record<string, string> });
   });
 

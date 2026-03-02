@@ -160,6 +160,94 @@ void main() {
       throwsA(isA<ArgumentError>()),
     );
   });
+
+  test('runStartupMaintenance moves retry-exceeded failed rows to dead letter',
+      () async {
+    final imageFile = File(p.join(tempDir.path, 'maintenance_dead_letter.jpg'));
+    await imageFile.writeAsBytes(<int>[3, 4, 5]);
+
+    final queued = await mediaLocalRepository.enqueue(
+      MediaQueueDraft(
+        trackingNo: '907563299214',
+        filePath: imageFile.path,
+        fileName: 'maintenance_dead_letter.jpg',
+        mediaType: MediaType.deliveryPhoto,
+        metadata: const <String, String>{
+          'latitude': '25.03',
+          'longitude': '121.56',
+        },
+      ),
+    );
+
+    await mediaLocalRepository.markFailed(queued.id,
+        errorCode: 'LEGACY_TIMEOUT');
+    await mediaLocalRepository.markFailed(queued.id,
+        errorCode: 'LEGACY_TIMEOUT');
+
+    final orchestrator = ShipmentUploadOrchestrator(
+      shipmentRepository: _SuccessShipmentRepository(),
+      mediaLocalRepository: mediaLocalRepository,
+    );
+    await orchestrator.runStartupMaintenance(maxRetryCount: 1);
+
+    final deadLetter =
+        await mediaLocalRepository.listByStatus(MediaQueueStatus.deadLetter);
+    expect(deadLetter, hasLength(1));
+    expect(deadLetter.first.id, queued.id);
+  });
+
+  test('retryFailedUploads uploads failed rows when repository is healthy',
+      () async {
+    final imageFile = File(p.join(tempDir.path, 'retry_success.jpg'));
+    await imageFile.writeAsBytes(<int>[8, 8, 8]);
+
+    final queued = await mediaLocalRepository.enqueue(
+      MediaQueueDraft(
+        trackingNo: '907563299214',
+        filePath: imageFile.path,
+        fileName: 'retry_success.jpg',
+        mediaType: MediaType.deliveryPhoto,
+        metadata: const <String, String>{
+          'latitude': '25.03',
+          'longitude': '121.56',
+        },
+      ),
+    );
+    await mediaLocalRepository.markFailed(queued.id,
+        errorCode: 'LEGACY_TIMEOUT');
+
+    final orchestrator = ShipmentUploadOrchestrator(
+      shipmentRepository: _SuccessShipmentRepository(),
+      mediaLocalRepository: mediaLocalRepository,
+    );
+    final result = await orchestrator.retryFailedUploads();
+
+    expect(result.processed, 1);
+    expect(result.uploaded, 1);
+    expect(result.failed, 0);
+    expect(result.deadLetter, 0);
+  });
+
+  test('extracts UPLOAD_FAILED when error has no legacy error code', () async {
+    final imageFile = File(p.join(tempDir.path, 'unknown_fail.jpg'));
+    await imageFile.writeAsBytes(<int>[6, 6, 6]);
+
+    final orchestrator = ShipmentUploadOrchestrator(
+      shipmentRepository: _UnknownFailShipmentRepository(),
+      mediaLocalRepository: mediaLocalRepository,
+    );
+
+    final result = await orchestrator.uploadDelivery(
+      trackingNo: '907563299214',
+      filePath: imageFile.path,
+      fileName: 'unknown_fail.jpg',
+      latitude: '25.03',
+      longitude: '121.56',
+    );
+
+    expect(result.status, MediaQueueStatus.failed);
+    expect(result.errorCode, 'UPLOAD_FAILED');
+  });
 }
 
 class _SuccessShipmentRepository implements ShipmentRepository {
@@ -198,5 +286,18 @@ class _FailShipmentRepository extends _SuccessShipmentRepository {
     required String longitude,
   }) async {
     throw Exception('LEGACY_TIMEOUT: failed to submit delivery');
+  }
+}
+
+class _UnknownFailShipmentRepository extends _SuccessShipmentRepository {
+  @override
+  Future<void> submitDelivery({
+    required String trackingNo,
+    required String imageBase64,
+    required String imageFileName,
+    required String latitude,
+    required String longitude,
+  }) async {
+    throw Exception('socket closed by peer');
   }
 }

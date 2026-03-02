@@ -17,10 +17,12 @@
     "bff:error-code-map": "node ops/ci/check-error-code-map.js",
     "bff:verify": "npm run bff:route-diff && npm run bff:error-code-map && npm run bff:lint && npm run bff:test -- --runInBand && npm run bff:build",
     "mobile:test:coverage": "node ops/ci/run-flutter-coverage.js",
-    "mobile:coverage:check": "node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 40",
+    "mobile:coverage:check": "node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 50",
+    "mobile:test:login-it": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-mobile-login-it.ps1",
     "coverage:collect": "node ops/ci/collect-coverage.js --component summary",
+    "coverage:collect:all": "node ops/ci/collect-coverage.js --component all",
     "coverage:html": "node ops/ci/generate-coverage-html.js",
-    "coverage:verify": "npm run bff:test:coverage && npm run mobile:test:coverage && npm run mobile:coverage:check && npm run coverage:collect && npm run coverage:html",
+    "coverage:verify": "npm run bff:test:coverage && npm run mobile:test:coverage && npm run mobile:coverage:check && npm run coverage:collect:all && npm run coverage:html",
     "wave2:uat-smoke": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-wave2-uat-smoke.ps1"
   }
 }

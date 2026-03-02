@@ -49,3 +49,7 @@ Status values:
 2. Each deferred item must have explicit risk, owner, and target wave.
 3. No regression on Wave 2 smoke path.
 4. Transaction routes must prove `no-store/no-cache` header behavior in evidence.
+
+## PLAN14 Exclusion
+
+1. `maphwo.MapsActivity` is explicitly `out_of_scope` and excluded from parity blocker criteria.
