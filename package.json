@@ -24,6 +24,7 @@
     "mobile:test:coverage": "node ops/ci/run-flutter-coverage.js",
     "mobile:coverage:check": "node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 50",
     "mobile:test:login-it": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-mobile-login-it.ps1",
+    "mobile:log:bridge": "powershell -ExecutionPolicy Bypass -File .\\scripts\\tail-mobile-bridge-log.ps1",
     "coverage:collect": "node ops/ci/collect-coverage.js --component summary",
     "coverage:collect:all": "node ops/ci/collect-coverage.js --component all",
     "coverage:html": "node ops/ci/generate-coverage-html.js",

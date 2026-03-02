@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/app_config.dart';
@@ -105,6 +106,7 @@ class WebViewShellPage extends ConsumerStatefulWidget {
 
 class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   static const int _menuSlotCount = 8;
+  static const int _bridgeLogMaxLength = 240;
 
   static const Key shellScaffoldKey = Key('webview.shell.scaffold');
   static const Key topBackButtonKey = Key('webview.top.backButton');
@@ -135,6 +137,13 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   static const String _bridgeAdapterScript = '''
 (function () {
   if (window.android && window.android.__bridgeVersion === '1.0') return;
+  function logBridge(tag, payload) {
+    try {
+      console.log('[BRIDGE][' + tag + '] ' + JSON.stringify(payload));
+    } catch (_) {
+      console.log('[BRIDGE][' + tag + ']');
+    }
+  }
   function emit(method, params) {
     var payload = {
       id: String(Date.now()) + '-' + Math.random().toString(16).slice(2),
@@ -143,7 +152,16 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       params: params || {},
       timestamp: Date.now()
     };
-    return window.flutter_inappwebview.callHandler('bridge', payload);
+    logBridge('emit', payload);
+    return window.flutter_inappwebview.callHandler('bridge', payload)
+      .then(function (result) {
+        logBridge('result', { id: payload.id, method: method, result: result });
+        return result;
+      })
+      .catch(function (error) {
+        logBridge('error', { id: payload.id, method: method, error: String(error || '') });
+        throw error;
+      });
   }
   window.android = {
     __bridgeVersion: '1.0',
@@ -199,6 +217,45 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   ShellSection get _currentSection => _navState.currentSection;
   String? get _webTitle => _navState.webTitle;
   String? get _errorText => _navState.errorText;
+
+  String _truncateBridgeLog(Object? value) {
+    final String raw = value?.toString() ?? '';
+    if (raw.length <= _bridgeLogMaxLength) {
+      return raw;
+    }
+    final int hidden = raw.length - _bridgeLogMaxLength;
+    return '${raw.substring(0, _bridgeLogMaxLength)}...(+$hidden chars)';
+  }
+
+  void _logBridgeIncoming(List<dynamic> args) {
+    if (args.isEmpty) {
+      debugPrint('[Bridge][incoming] empty args');
+      return;
+    }
+    final dynamic payload = args.first;
+    if (payload is Map) {
+      final dynamic params = payload['params'];
+      final dynamic kind = params is Map ? params['kind'] : null;
+      final dynamic result = params is Map ? params['result'] : null;
+      debugPrint(
+        '[Bridge][incoming] method=${_truncateBridgeLog(payload['method'])} '
+        'kind=${_truncateBridgeLog(kind)} '
+        'result=${_truncateBridgeLog(result)}',
+      );
+      return;
+    }
+    debugPrint('[Bridge][incoming] payload=${_truncateBridgeLog(payload)}');
+  }
+
+  void _logBridgeOutgoing(Map<String, dynamic> result) {
+    final dynamic error = result['error'];
+    final dynamic errorCode = error is Map ? error['code'] : null;
+    debugPrint(
+      '[Bridge][outgoing] ok=${result['ok']} '
+      'action=${_truncateBridgeLog(result['action'])} '
+      'errorCode=${_truncateBridgeLog(errorCode)}',
+    );
+  }
 
   List<_BottomTab> _buildTabs() => const <_BottomTab>[
         _BottomTab(
@@ -420,6 +477,18 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     }
 
     return launchUrl(parsed, mode: LaunchMode.externalApplication);
+  }
+
+  Future<bool> _ensureLocationPermission() async {
+    var status = await Permission.locationWhenInUse.status;
+    if (status.isGranted) {
+      return true;
+    }
+    if (status.isDenied || status.isRestricted || status.isLimited) {
+      status = await Permission.locationWhenInUse.request();
+      return status.isGranted;
+    }
+    return false;
   }
 
   Future<void> _bootstrapCookies() async {
@@ -837,6 +906,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             javaScriptCanOpenWindowsAutomatically: false,
             useShouldOverrideUrlLoading: true,
             mediaPlaybackRequiresUserGesture: true,
+            geolocationEnabled: true,
             mixedContentMode: MixedContentMode.MIXED_CONTENT_NEVER_ALLOW,
             clearCache: false,
             allowFileAccessFromFileURLs: false,
@@ -847,14 +917,19 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             controller.addJavaScriptHandler(
               handlerName: 'bridge',
               callback: (List<dynamic> args) async {
+                _logBridgeIncoming(args);
                 if (_isLegacyPrePage(args)) {
                   await _handleWebBack();
-                  return <String, dynamic>{
+                  final response = <String, dynamic>{
                     'ok': true,
                     'action': 'legacy_pre_page_closed'
                   };
+                  _logBridgeOutgoing(response);
+                  return response;
                 }
-                return _bridgeService.handle(args, context);
+                final response = await _bridgeService.handle(args, context);
+                _logBridgeOutgoing(response);
+                return response;
               },
             );
 
@@ -910,6 +985,18 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
               });
             }
           },
+          onGeolocationPermissionsShowPrompt: (controller, origin) async {
+            final originUri = Uri.tryParse(origin);
+            final originHost = originUri?.host;
+            final bool allowedOrigin = _isAllowedHost(originHost);
+            final bool locationGranted =
+                allowedOrigin ? await _ensureLocationPermission() : false;
+            return GeolocationPermissionShowPromptResponse(
+              allow: allowedOrigin && locationGranted,
+              origin: origin,
+              retain: allowedOrigin && locationGranted,
+            );
+          },
           onLoadStop: (controller, url) async {
             if (url != null &&
                 !_didErrorFallback &&
@@ -943,6 +1030,15 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                   errorText: '${error.type}: ${error.description}',
                 );
               });
+            }
+          },
+          onConsoleMessage: (controller, consoleMessage) {
+            final message = consoleMessage.message;
+            if (message.contains('[BRIDGE]')) {
+              debugPrint(
+                '[WebConsole][${consoleMessage.messageLevel}] '
+                '${_truncateBridgeLog(message)}',
+              );
             }
           },
         ),

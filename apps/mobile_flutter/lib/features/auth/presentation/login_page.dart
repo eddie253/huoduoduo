@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/app_config.dart';
@@ -40,14 +41,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     final account = _accountController.text.trim();
     final password = _passwordController.text.trim();
+    final platform =
+        Theme.of(context).platform == TargetPlatform.iOS ? 'ios' : 'android';
+    final ready = await _ensureLocationPrerequisites();
+    if (!ready) {
+      return;
+    }
 
     try {
       final session = await ref.read(authControllerProvider.notifier).login(
             account: account,
             password: password,
-            platform: Theme.of(context).platform == TargetPlatform.iOS
-                ? 'ios'
-                : 'android',
+            platform: platform,
           );
       if (!mounted) {
         return;
@@ -64,6 +69,39 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         SnackBar(content: Text(message)),
       );
     }
+  }
+
+  Future<bool> _ensureLocationPrerequisites() async {
+    final serviceStatus = await Permission.locationWhenInUse.serviceStatus;
+    if (!serviceStatus.isEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('請先開啟手機定位服務')),
+        );
+      }
+      return false;
+    }
+
+    var status = await Permission.locationWhenInUse.status;
+    if (status.isGranted || status.isLimited) {
+      return true;
+    }
+
+    if (status.isDenied || status.isRestricted) {
+      status = await Permission.locationWhenInUse.request();
+      if (status.isGranted || status.isLimited) {
+        return true;
+      }
+    }
+
+    if (mounted) {
+      final String message =
+          status.isPermanentlyDenied ? '定位權限已被停用，請到系統設定開啟' : '需要定位權限才能繼續登入';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+    return false;
   }
 
   Future<void> _exitApp() async {
