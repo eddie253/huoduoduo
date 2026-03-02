@@ -1,133 +1,146 @@
-# Wave 3 / Wave 4 Foundation Evidence (PLAN10 + PLAN11 + PLAN14)
+# Wave 3 / Wave 4 Foundation Evidence (PLAN10 + PLAN11 + PLAN14 + PLAN15 + PLAN16)
 
 ## Document Scope
 
-This evidence file tracks delivery status after PLAN10 implementation, PLAN11 login-session parity convergence, and PLAN14 post-login native UI convergence.
+This evidence file tracks delivery status after PLAN10 implementation, PLAN11 login-session parity convergence, PLAN14 post-login native UI convergence, PLAN15 unfinished-item closure, and PLAN16 UI/navigation/theme convergence.
 
 1. PLAN10: bridge/native capability foundation + queue hardening.
 2. PLAN11: login-session 1:1 behavior parity + modernized login UI (without contract change).
-3. PLAN14: post-login native UI inventory, parity mapping, and risk-priority coverage uplift.
+3. PLAN14: post-login native UI inventory and parity mapping.
+4. PLAN15: P9-P14 remaining gap closure (coverage stability + high-risk test uplift + parity sign-off docs).
+5. PLAN16: bottom-tab back behavior parity + settings entry + theme presets/dark mode.
 
 ## Evidence Metadata
 
-1. Updated at: `2026-03-02 04:49:00 +08:00`
-2. Commit baseline: `1955f6e`
-3. Environment: local Windows + Android emulator + UAT-capable BFF config
-4. Credential policy: all account/token values masked in documents
+1. Updated at: `2026-03-02 14:05:00 +08:00`
+2. Commit baseline: `local working tree (PLAN16 implemented, uncommitted)`
+3. Environment: local Windows + Android toolchain + UAT-capable BFF config
+4. Credential policy: all account/token values are masked in reports/docs
 
 ## Verification Commands (executed)
 
 1. `npm run bff:verify` -> PASS
-2. `flutter analyze` -> PASS
-3. `flutter test` -> PASS
-4. `flutter build apk --debug` -> PASS
-5. `npm run coverage:verify` -> PASS
+2. `npm run bff:test:coverage` -> PASS
+3. `npm run mobile:analyze` -> PASS
+4. `npm run mobile:test` -> PASS
+5. `npm run mobile:build:apk:debug` -> PASS
+6. `npm run mobile:test:coverage` -> PASS
+7. `npm run mobile:coverage:check` -> PASS
+8. `npm run coverage:verify` -> PASS
+9. `npm run mobile:verify` -> PASS
 
 ## BFF Gate Evidence
 
-Result summary from latest `npm run coverage:verify`:
+Result summary from latest `npm run bff:test:coverage`:
 
-1. route diff check passed
-2. error-code map check passed (8 documented codes)
-3. lint passed
-4. jest suites passed (`4/4`, tests `17/17`)
-5. build passed
+1. lines: `69.88%` (`1223/1750`)
+2. statements: `69.88%`
+3. functions: `61.70%`
+4. branches: `76.42%`
+5. Jest suites: `4/4`, tests `18/18`
+
+PLAN15 fix:
+
+1. Coverage pollution from `apps/bff_gateway/src/coverage/**` is excluded by config.
+2. Coverage gate is now deterministic in dirty/non-dirty local workspace.
 
 Note:
 
 1. `SoapTransportService` warning observed in test context: `Invalid SOAP_TIMEOUT_MS value "abc"; fallback to 15000.`
 2. This is expected by timeout fallback test coverage and not a release blocker.
 
-## PLAN10 Evidence (retained)
+## Flutter Gate Evidence
 
-1. Bridge deferred methods are executable:
-1. `openfile`
-2. `open_IMG_Scanner`
-3. `cfs_sign`
-4. `APPEvent` map/dial/close/contract
-2. Native pages are no longer placeholders:
-1. scanner
-2. signature
-3. maps/dial
-4. shipment queue operation page
-3. Queue behavior:
-1. enqueue + immediate upload attempt
-2. failed retry increment
-3. dead-letter conversion on retry cap
-4. startup maintenance (uploaded cleanup + failed-to-dead-letter conversion)
+Result summary from latest `npm run mobile:test:coverage` + `npm run mobile:coverage:check`:
 
-## PLAN11 Evidence (retained)
+1. line coverage: `58.07%` (`953/1641`)
+2. threshold: `50%` (PASS)
 
-1. Login parity checklist exists:
-1. `docs/architecture/LOGIN_SESSION_PARITY_CHECKLIST.md`
-2. Login UI modernization completed (without flow change):
-1. card-style form
-2. password reveal toggle
-3. form validation + loading/disabled state
-3. Unauthorized redirect behavior hardened:
-1. route `/webview` without bootstrap payload returns login screen
+PLAN15 uplift:
 
-## PLAN14 Evidence (new)
+1. Before uplift (pre-PLAN15 local baseline): `44.91%` (`631/1405`)
+2. After uplift: `58.07%` (`953/1641`)
+3. Net gain: `+13.16pp`
 
-### Architecture Outputs
+## PLAN16 Navigation / Theme Evidence
 
-1. Post-login inventory generated:
+1. Bottom-tab return parity:
+1. Extracted `ShellNavigationState` to centralize shell return behavior.
+2. Web return rule is deterministic: web history first, then back to the current section root UI.
+3. Added `shell_navigation_state_test.dart` to cover enter/leave/select-section paths.
+2. Settings entry parity:
+1. Top-right in shell root opens `/settings`.
+2. Top-right in web layer keeps refresh behavior.
+3. Wallet "設定" tile now routes to `/settings` (same native page as top-right).
+3. Theme system:
+1. Added 6 presets + dark mode toggle.
+2. Added persisted keys: `ui_theme_preset`, `ui_theme_dark_mode`.
+3. App-wide theme mode and seed color are now Riverpod-driven at app root.
+4. Settings UI:
+1. 4x2 structure retained.
+2. First card is 1x2 (theme preset + dark mode).
+3. Remaining slots are intentionally blank placeholders.
+5. Automated checks added:
+1. `app_theme_controller_test.dart`
+2. `settings_page_test.dart`
+3. `shell_navigation_state_test.dart`
+6. Screenshot evidence:
+1. Theme switching screenshots (6 presets + dark mode) require manual emulator/device capture.
+2. This Windows run is headless CLI-only and records command/test evidence only.
+
+## PLAN15 High-Risk Test Uplift
+
+New tests:
+
+1. `apps/mobile_flutter/test/features/webview_shell/application/bridge_action_executor_test.dart`
+2. `apps/mobile_flutter/test/features/webview_shell/application/webview_session_cleanup_service_test.dart`
+3. `apps/mobile_flutter/test/features/shipment/data/local/media_local_provider_test.dart`
+4. `apps/mobile_flutter/test/features/shipment/presentation/shipment_page_test.dart`
+
+Expanded tests:
+
+1. `apps/mobile_flutter/test/features/auth/application/auth_controller_test.dart` (secure storage failure path)
+
+## Architecture / Parity Outputs
+
+1. Post-login inventory:
 1. `docs/architecture/POST_LOGIN_NATIVE_UI_INVENTORY.md`
-2. Legacy-to-Flutter mapping generated:
+2. Legacy-to-Flutter parity map:
 1. `docs/architecture/NATIVE_UI_PARITY_MAPPING.md`
-3. Screen ID driven checklist updated:
+3. Native capability parity matrix:
+1. `docs/architecture/WAVE4_NATIVE_PARITY_MATRIX.md`
+4. Screen-ID-driven parity checklist:
 1. `docs/architecture/LOGIN_SESSION_PARITY_CHECKLIST.md`
-4. PLAN14 doc generated:
-1. `docs/architecture/PLAN14.md`
-5. Figma flow layer generated (MCP):
-1. [PLAN14 Post-Login Native UI Flow](https://www.figma.com/online-whiteboard/create-diagram/c8acc83a-7de0-425a-8ed1-77e9aab33b14?utm_source=other&utm_content=edit_in_figjam&oai_id=&request_id=e00a7907-fe5c-4f5e-8ff0-df2c0fc64031)
-2. [PLAN14 Native Screen Map](https://www.figma.com/online-whiteboard/create-diagram/ebde4d59-66f0-43a4-bbcc-3d45b89dea83?utm_source=other&utm_content=edit_in_figjam&oai_id=&request_id=044f893e-74b7-4540-bb63-0f38b477293d)
+5. PLAN15 execution plan:
+1. `docs/plans/PLAN15.md`
+6. PLAN16 execution plan:
+1. `docs/plans/PLAN16.md`
 
-### Scope Exclusion Confirmation
+## Scope Exclusion Confirmation
 
-1. `maphwo.MapsActivity` marked as `out_of_scope` in:
+1. `maphwo.MapsActivity` remains `out_of_scope` in:
 1. `POST_LOGIN_NATIVE_UI_INVENTORY.md`
 2. `NATIVE_UI_PARITY_MAPPING.md`
 3. `WAVE4_NATIVE_PARITY_MATRIX.md`
 
-### High-Risk Test Uplift
-
-1. New tests:
-1. `apps/mobile_flutter/test/features/auth/data/auth_repository_test.dart`
-2. `apps/mobile_flutter/test/features/auth/domain/auth_models_test.dart`
-3. `apps/mobile_flutter/test/features/shipment/data/shipment_repository_test.dart`
-4. `apps/mobile_flutter/test/features/shipment/domain/media_queue_models_test.dart`
-2. Expanded tests:
-1. `apps/mobile_flutter/test/features/auth/application/auth_controller_test.dart`
-2. `apps/mobile_flutter/test/features/webview_shell/application/js_bridge_service_test.dart`
-3. `apps/mobile_flutter/test/features/shipment/application/shipment_upload_orchestrator_test.dart`
-
-### Coverage Gate Ratchet
-
-1. Threshold changed:
-1. `package.json`: `mobile:coverage:check` from `40` to `50`
-2. `.github/workflows/ci.yml`: Flutter coverage gate from `40` to `50`
-3. `docs/architecture/COVERAGE_POLICY.md`: baseline gate updated to `>=50`
-2. Coverage result:
-1. Before PLAN14 uplift: `47.91%` (`551/1150`)
-2. After PLAN14 uplift: `54.35%` (`625/1150`)
-
 ## Android Smoke Status
 
-1. Manual checklist remains in `docs/architecture/LOGIN_SESSION_PARITY_CHECKLIST.md`.
-2. Session/map/shipment parity remains READY_FOR_UAT with `maphwo` excluded by policy.
+1. Checklist document is updated and sign-off metadata is filled:
+1. `docs/architecture/LOGIN_SESSION_PARITY_CHECKLIST.md`
+2. Current sign-off: `GO_FOR_UAT_WITH_WAIVE`
+3. Waived items are real-device evidence dependent and tracked explicitly in checklist verdict.
 
 ## iOS Gate Status (Mac)
 
 1. iOS remains code-first on Windows.
-2. Required gate on Mac:
-1. `flutter build ios --no-codesign`
-2. Run PLAN14 checklist once on iOS device/simulator
+2. Required gate on Mac (not executed in this Windows run):
+1. `npm run mobile:build:ios:nocodesign`
+2. execute parity checklist once on iOS device/simulator
 
 ## Contract and Security Invariants
 
 1. OpenAPI canonical remains `contracts/openapi/huoduoduo-v1.openapi.yaml`.
-2. No BFF public path/schema changes introduced by PLAN14.
+2. No BFF public path/schema changes introduced by PLAN15/PLAN16.
 3. Session cleanup invariant remains:
 1. token clear
 2. cookie clear
@@ -137,5 +150,5 @@ Note:
 
 ## Release Readiness Note
 
-1. Engineering gates are green (BFF + Flutter analyze/test/build + coverage verify).
-2. PLAN14 can proceed to UAT sign-off once manual Android Screen ID checklist items are filled with masked evidence.
+1. Engineering gates are green (BFF + Flutter analyze/test/build + coverage verify + mobile verify).
+2. Remaining blocker is not technical gate failure; it is iOS Mac real-device evidence completion.

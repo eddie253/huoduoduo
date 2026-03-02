@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -77,6 +77,8 @@ class _SignaturePageState extends State<SignaturePage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Signature'),
@@ -91,12 +93,13 @@ class _SignaturePageState extends State<SignaturePage> {
             child: Container(
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.teal.shade300),
+                border:
+                    Border.all(color: colors.primary.withValues(alpha: 0.5)),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Signature(
                 controller: _controller,
-                backgroundColor: Colors.white,
+                backgroundColor: colors.surface,
               ),
             ),
           ),

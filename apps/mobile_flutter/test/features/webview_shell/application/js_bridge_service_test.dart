@@ -256,6 +256,49 @@ void main() {
     expect(validDial['ok'], isTrue);
     expect(validDial['action'], 'dial_opened');
 
+    final mapWithCoordinate = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': 'map',
+            'result': '25.03,121.56',
+          },
+        )
+      ],
+      context,
+    );
+    expect(mapWithCoordinate['ok'], isTrue);
+    expect(mapWithCoordinate['action'], 'map_opened');
+    final coordinateUrl = executor.openedUrls.last;
+    expect(coordinateUrl.path, '/maps/dir/');
+    expect(coordinateUrl.queryParameters['destination'], '25.03,121.56');
+    expect(coordinateUrl.queryParameters['travelmode'], 'driving');
+    expect(coordinateUrl.queryParameters['dir_action'], 'navigate');
+
+    final legacyMapWithJson = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': 'GM\u5c0e\u822a',
+            'result':
+                '{"adr":"\u53f0\u5317\u5e02\u4fe1\u7fa9\u5340\u677e\u58fd\u8def20\u865f","latlng":"25.0330,121.5654"}',
+          },
+        )
+      ],
+      context,
+    );
+    expect(legacyMapWithJson['ok'], isTrue);
+    expect(legacyMapWithJson['action'], 'map_opened');
+    final legacyMapUrl = executor.openedUrls.last;
+    expect(legacyMapUrl.path, '/maps/dir/');
+    expect(legacyMapUrl.queryParameters['origin'], '25.0330,121.5654');
+    expect(
+      legacyMapUrl.queryParameters['destination'],
+      '\u53f0\u5317\u5e02\u4fe1\u7fa9\u5340\u677e\u58fd\u8def20\u865f',
+    );
+
     final mapWithUrl = await service.handle(
       <dynamic>[
         _payload(
@@ -271,6 +314,27 @@ void main() {
     );
     expect(mapWithUrl['ok'], isTrue);
     expect(mapWithUrl['action'], 'map_opened');
+
+    final mapWithAddressOnly = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': '\u5c0e\u822a',
+            'result':
+                '\u65b0\u5317\u5e02\u6c38\u548c\u5340\u7af9\u6797\u8def70\u865f',
+          },
+        )
+      ],
+      context,
+    );
+    expect(mapWithAddressOnly['ok'], isTrue);
+    expect(mapWithAddressOnly['action'], 'map_opened');
+    final mapAddressUrl = executor.openedUrls.last;
+    expect(
+      mapAddressUrl.queryParameters['destination'],
+      '\u65b0\u5317\u5e02\u6c38\u548c\u5340\u7af9\u6797\u8def70\u865f',
+    );
   });
 
   testWidgets('APPEvent close and contract branches are covered',

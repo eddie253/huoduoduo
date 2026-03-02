@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -95,6 +95,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ValueChanged<String>? onFieldSubmitted,
     String? Function(String?)? validator,
   }) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final Color accent = colors.primary;
+
     return TextFormField(
       key: fieldKey,
       controller: controller,
@@ -106,14 +109,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.96),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        fillColor: colors.surface.withValues(alpha: 0.96),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         prefixIcon: Container(
           margin: const EdgeInsets.all(8),
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: const Color(0xFFFFEEE5),
+            color: accent.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(10),
           ),
           alignment: Alignment.center,
@@ -136,17 +140,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFFE1E4EA),
-            width: 1.4,
-          ),
+          borderSide: BorderSide(color: colors.outlineVariant, width: 1.4),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFFFC5000),
-            width: 2,
-          ),
+          borderSide: BorderSide(color: accent, width: 2),
         ),
       ),
       validator: validator,
@@ -160,6 +158,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     required VoidCallback? onPressed,
     bool loading = false,
   }) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+
     return FilledButton.icon(
       key: key,
       onPressed: onPressed,
@@ -173,8 +173,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       label: Text(text),
       style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
-        backgroundColor: const Color(0xFFFC5000),
-        foregroundColor: Colors.white,
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
         textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
@@ -188,14 +188,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     required IconData icon,
     required VoidCallback? onPressed,
   }) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+
     return OutlinedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 18),
       label: Text(text),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
-        foregroundColor: const Color(0xFF2D3640),
-        side: const BorderSide(color: Color(0xFFD1D8E0), width: 1.2),
+        foregroundColor: colors.onSurface,
+        side: BorderSide(color: colors.outlineVariant, width: 1.2),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
@@ -208,6 +210,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final isLoading = authState.isLoading;
+    final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -246,39 +249,40 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           '貨多多物流',
                           style: TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1F2933),
+                            color: colors.onSurface,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
+                        Text(
                           '請輸入使用者帳號及密碼',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF405265),
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 14),
                         Container(
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.86),
+                            color: colors.surface.withValues(alpha: 0.86),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.65),
+                              color:
+                                  colors.outlineVariant.withValues(alpha: 0.65),
                               width: 1.2,
                             ),
-                            boxShadow: const <BoxShadow>[
+                            boxShadow: <BoxShadow>[
                               BoxShadow(
-                                color: Color(0x2A000000),
+                                color: colors.shadow.withValues(alpha: 0.16),
                                 blurRadius: 16,
-                                offset: Offset(0, 8),
+                                offset: const Offset(0, 8),
                               ),
                             ],
                           ),
@@ -358,10 +362,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               const SizedBox(height: 8),
                               TextButton.icon(
                                 onPressed: _exitApp,
-                                icon: const Icon(Icons.logout_rounded, size: 18),
+                                icon:
+                                    const Icon(Icons.logout_rounded, size: 18),
                                 label: const Text('離開'),
                                 style: TextButton.styleFrom(
-                                  foregroundColor: const Color(0xFF475569),
+                                  foregroundColor: colors.onSurfaceVariant,
                                   textStyle: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,

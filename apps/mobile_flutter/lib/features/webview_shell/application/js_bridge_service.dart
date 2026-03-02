@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 
 import '../../../core/config/app_config.dart';
 import '../domain/bridge_action_models.dart';
@@ -19,6 +21,13 @@ class JsBridgeService {
     'www.google.com',
     'maps.google.com',
     'maps.app.goo.gl',
+  };
+
+  static const Set<String> _allowedExternalMapSchemes = <String>{
+    'geo',
+    'google.navigation',
+    'comgooglemaps',
+    'intent',
   };
 
   Future<Map<String, dynamic>> handle(
@@ -298,9 +307,7 @@ class JsBridgeService {
     String resultRaw,
     Map<String, dynamic> params,
   ) async {
-    final url = resultRaw.isEmpty
-        ? params['url']?.toString() ?? ''
-        : resultRaw;
+    final url = resultRaw.isEmpty ? params['url']?.toString() ?? '' : resultRaw;
     final uri = _parseHttpsUri(url, allowedHosts: _allowedWebHosts);
     if (uri == null) {
       return _error(
@@ -324,31 +331,133 @@ class JsBridgeService {
   }
 
   Uri? _resolveMapUri(String resultRaw, Map<String, dynamic> params) {
-    final fromResult = Uri.tryParse(resultRaw);
+    final trimmedResult = resultRaw.trim();
+    final fromResult = Uri.tryParse(trimmedResult);
     if (fromResult != null && fromResult.hasScheme) {
-      final secured = _parseHttpsUri(resultRaw, allowedHosts: _allowedMapHosts);
-      if (secured != null) {
-        return secured;
+      final scheme = fromResult.scheme.toLowerCase();
+      final host = fromResult.host.toLowerCase();
+      if ((scheme == 'https' || scheme == 'http') &&
+          _allowedMapHosts.contains(host)) {
+        if (scheme == 'https') {
+          return fromResult;
+        }
+        return fromResult.replace(scheme: 'https');
+      }
+      if (_allowedExternalMapSchemes.contains(scheme)) {
+        return fromResult;
       }
     }
 
-    final coordinateSource = resultRaw.isEmpty
-        ? '${params['latitude'] ?? ''},${params['longitude'] ?? ''}'
-        : resultRaw;
+    final Map<String, dynamic>? resultJson = _tryParseJsonObject(trimmedResult);
+    if (resultJson != null) {
+      final destination = _firstNonEmpty(
+        resultJson,
+        const <String>['adr', 'address', 'destination', 'daddr', 'query'],
+      );
+      final origin = _firstNonEmpty(
+        resultJson,
+        const <String>['latlng', 'origin', 'saddr'],
+      );
+      if (destination != null) {
+        return _buildGoogleNavigationUri(
+            destination: destination, origin: origin);
+      }
+      final coords = _firstNonEmpty(
+        resultJson,
+        const <String>['coordinate', 'coordinates', 'latlng'],
+      );
+      final fromCoordinates = _buildGoogleMapUriFromCoordinate(coords ?? '');
+      if (fromCoordinates != null) {
+        return fromCoordinates;
+      }
+    }
+
+    final fromResultCoordinates =
+        _buildGoogleMapUriFromCoordinate(trimmedResult);
+    if (fromResultCoordinates != null) {
+      return fromResultCoordinates;
+    }
+
+    if (trimmedResult.isNotEmpty) {
+      return _buildGoogleNavigationUri(destination: trimmedResult);
+    }
+
+    final coordinateSource =
+        '${params['latitude'] ?? ''},${params['longitude'] ?? ''}';
+    final fromParamCoordinates =
+        _buildGoogleMapUriFromCoordinate(coordinateSource);
+    if (fromParamCoordinates != null) {
+      return fromParamCoordinates;
+    }
+
+    final destination = _firstNonEmpty(
+      params,
+      const <String>['adr', 'address', 'destination', 'daddr', 'query'],
+    );
+    if (destination != null) {
+      final origin =
+          _firstNonEmpty(params, const <String>['latlng', 'origin', 'saddr']);
+      return _buildGoogleNavigationUri(
+          destination: destination, origin: origin);
+    }
+
+    return null;
+  }
+
+  Map<String, dynamic>? _tryParseJsonObject(String raw) {
+    if (raw.isEmpty || !raw.startsWith('{')) {
+      return null;
+    }
+    try {
+      final dynamic decoded = jsonDecode(raw);
+      if (decoded is Map) {
+        return decoded.cast<String, dynamic>();
+      }
+    } on FormatException {
+      return null;
+    }
+    return null;
+  }
+
+  String? _firstNonEmpty(Map<String, dynamic> data, List<String> keys) {
+    for (final key in keys) {
+      final value = data[key]?.toString().trim();
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  Uri? _buildGoogleMapUriFromCoordinate(String source) {
     final coordinatePattern = RegExp(
       r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$',
     );
-    final match = coordinatePattern.firstMatch(coordinateSource);
+    final match = coordinatePattern.firstMatch(source);
     if (match == null) {
       return null;
     }
 
     final latitude = match.group(1);
     final longitude = match.group(2);
-    return Uri.https('www.google.com', '/maps/search/', <String, String>{
+    return _buildGoogleNavigationUri(destination: '$latitude,$longitude');
+  }
+
+  Uri _buildGoogleNavigationUri({
+    required String destination,
+    String? origin,
+  }) {
+    final query = <String, String>{
       'api': '1',
-      'query': '$latitude,$longitude',
-    });
+      'destination': destination,
+      'travelmode': 'driving',
+      'dir_action': 'navigate',
+    };
+    final normalizedOrigin = origin?.trim();
+    if (normalizedOrigin != null && normalizedOrigin.isNotEmpty) {
+      query['origin'] = normalizedOrigin;
+    }
+    return Uri.https('www.google.com', '/maps/dir/', query);
   }
 
   Uri? _parseHttpsUri(String raw, {required Set<String> allowedHosts}) {

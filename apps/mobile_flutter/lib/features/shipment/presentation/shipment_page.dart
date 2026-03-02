@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -203,6 +203,8 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shipment Upload Queue'),
@@ -321,10 +323,26 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _statusChip('Pending', queue.pending.length, Colors.blue),
-                    _statusChip('Failed', queue.failed.length, Colors.orange),
-                    _statusChip('Uploaded', queue.uploaded.length, Colors.green),
-                    _statusChip('Dead Letter', queue.deadLetter.length, Colors.red),
+                    _statusChip(
+                      'Pending',
+                      queue.pending.length,
+                      colors.primary,
+                    ),
+                    _statusChip(
+                      'Failed',
+                      queue.failed.length,
+                      colors.tertiary,
+                    ),
+                    _statusChip(
+                      'Uploaded',
+                      queue.uploaded.length,
+                      colors.secondary,
+                    ),
+                    _statusChip(
+                      'Dead Letter',
+                      queue.deadLetter.length,
+                      colors.error,
+                    ),
                   ],
                 );
               },

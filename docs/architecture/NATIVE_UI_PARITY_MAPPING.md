@@ -1,30 +1,29 @@
-# Native UI Parity Mapping (Legacy -> Flutter) (PLAN14)
+# Native UI Parity Mapping (Legacy -> Flutter) (PLAN14 + PLAN15)
 
 ## Status Legend
 1. `done`
-2. `in_progress`
-3. `deferred`
-4. `out_of_scope`
+2. `deferred`
+3. `out_of_scope`
 
 ## Mapping
 
 | Legacy Screen ID | Flutter Route / Feature | Status | Gap Type | Notes |
 |---|---|---|---|---|
-| `NAT-HOME-TOOLBAR` | `/webview` + shell navigation | in_progress | UI/behavior | Flutter is webview-first; menu parity visuals still being refined. |
-| `NAT-MENU-RESERVATION` | `/webview` reservation pages | in_progress | UI | Main business flow is web content; native entry UX still aligning. |
-| `NAT-MENU-SHIPMENT` | `/shipment` + bridge routes | in_progress | behavior/data | Queue foundation exists; interaction parity still converging. |
-| `NAT-MENU-ARRIVAL` | `/shipment` + `/signature` + `/scanner` | in_progress | behavior | Arrival paths need more 1:1 behavior checks. |
-| `NAT-MENU-CURRENCY` | `/webview` + `/notifications` | in_progress | UI | Core actions remain web-hosted; native shell entry keeps improving. |
-| `NAT-WEBVIEW-SHELL` | `/webview` (`WebViewShellPage`) | done | - | bootstrap/cookie/allowlist already integrated. |
-| `NAT-SCANNER` | `/scanner` (`ScannerPage`) | in_progress | behavior | Scanner return path is wired; more device scenarios pending. |
-| `NAT-SIGNATURE` | `/signature` (`SignaturePage`) | in_progress | behavior | Signature canvas + PNG output is available. |
-| `NAT-MAP-GOOGLE` | `/maps` + `APPEvent(map)` | in_progress | behavior/permission | Google map path only in PLAN14. |
-| `NAT-MAP-EXTERNAL-URI` | `BridgeActionExecutor.launchExternal(...)` | done | - | External map URI handoff is wired. |
-| `NAT-DIALER` | `APPEvent(dial)` -> `tel:` | done | - | Dial event dispatch is wired. |
-| `NAT-OPEN-FILE` | `openfile/contract` allowlist + https | in_progress | security/behavior | Continue validating strict block on non-allowlist URLs. |
-| `NAT-UPLOAD-ERR-MSG` | `/shipment` queue state panel | in_progress | UI | Queue state panel replaces legacy error page behavior. |
-| `NAT-SETTING` | settings capability (to be expanded) | deferred | UI | Minimal shell exists; feature depth deferred. |
-| `NAT-LOGOUT-CONFIRM` | logout + session cleanup | done | - | token/cookie/storage/cache cleanup is in place. |
+| `NAT-HOME-TOOLBAR` | `/webview` + shell navigation | deferred | UI/behavior | Owner: Mobile UI, Target Wave: 16, Risk: low (navigation usable, visual parity pending). |
+| `NAT-MENU-RESERVATION` | `/webview` reservation pages | deferred | UI | Owner: Mobile UI, Target Wave: 16, Risk: medium (legacy menu icon/layout parity pending). |
+| `NAT-MENU-SHIPMENT` | `/shipment` + bridge routes | done | behavior/data | Queue upload/retry/dead-letter path is covered by tests and smoke flow. |
+| `NAT-MENU-ARRIVAL` | `/shipment` + `/signature` + `/scanner` | deferred | behavior | Owner: Mobile Native Feature Team, Target Wave: 16, Risk: medium (multi-device scanner/signature parity pending). |
+| `NAT-MENU-CURRENCY` | `/webview` + `/notifications` | deferred | UI | Owner: Mobile UI, Target Wave: 16, Risk: low (core entry works; legacy composition parity pending). |
+| `NAT-WEBVIEW-SHELL` | `/webview` (`WebViewShellPage`) | done | - | bootstrap/cookie/allowlist integrated; unauthorized redirect and block paths covered. |
+| `NAT-SCANNER` | `/scanner` (`ScannerPage`) | deferred | behavior | Owner: Mobile Native Feature Team, Target Wave: 16, Risk: medium (camera real-device variance). |
+| `NAT-SIGNATURE` | `/signature` (`SignaturePage`) | deferred | behavior | Owner: Mobile Native Feature Team, Target Wave: 16, Risk: medium (file output/device-specific interaction parity). |
+| `NAT-MAP-GOOGLE` | `/maps` + `APPEvent(map)` | deferred | behavior/permission | Owner: Mobile Native Feature Team, Target Wave: 16, Risk: medium (location permission UX on-device). |
+| `NAT-MAP-EXTERNAL-URI` | `BridgeActionExecutor.launchExternal(...)` | done | - | External map URI handoff is wired and unit-tested. |
+| `NAT-DIALER` | `APPEvent(dial)` -> `tel:` | done | - | Dial event dispatch is wired and validated in bridge tests. |
+| `NAT-OPEN-FILE` | `openfile/contract` allowlist + https | done | - | Strict allowlist + HTTPS path and error branches are covered. |
+| `NAT-UPLOAD-ERR-MSG` | `/shipment` queue state panel | deferred | UI | Owner: Mobile UI, Target Wave: 16, Risk: low (queue state shown; legacy visual parity pending). |
+| `NAT-SETTING` | settings capability (to be expanded) | deferred | UI | Owner: Mobile UI, Target Wave: 17, Risk: low (minimal shell exists). |
+| `NAT-LOGOUT-CONFIRM` | logout + session cleanup | done | - | token/cookie/storage/cache cleanup is in place and covered. |
 
 ## Explicit Out-of-Scope
 

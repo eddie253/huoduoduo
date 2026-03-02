@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class ScannerPage extends StatefulWidget {
@@ -34,6 +34,8 @@ class _ScannerPageState extends State<ScannerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Scanner (${widget.scanType})'),
@@ -50,7 +52,8 @@ class _ScannerPageState extends State<ScannerPage> {
             onDetect: (BarcodeCapture capture) {
               final value = capture.barcodes
                   .map((barcode) => barcode.rawValue ?? '')
-                  .firstWhere((item) => item.trim().isNotEmpty, orElse: () => '');
+                  .firstWhere((item) => item.trim().isNotEmpty,
+                      orElse: () => '');
               if (value.isNotEmpty) {
                 _completeWith(value);
               }
@@ -62,12 +65,12 @@ class _ScannerPageState extends State<ScannerPage> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
+                color: colors.inverseSurface.withValues(alpha: 0.72),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
+              child: Text(
                 'Point the camera to barcode or QR code',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: colors.onInverseSurface),
               ),
             ),
           ),

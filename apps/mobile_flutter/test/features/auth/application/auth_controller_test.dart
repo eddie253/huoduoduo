@@ -215,6 +215,42 @@ void main() {
       ),
     );
   });
+
+  test('login fails when secure storage write throws', () async {
+    final fakeRepo = _FakeAuthRepository(
+      loginHandler: (_) async => _sessionFixture(),
+    );
+    final fakeTokenStorage = _FakeTokenStorage()
+      ..saveError = Exception('secure storage unavailable');
+    final fakeCleanup = _FakeCleanupService();
+
+    final container = ProviderContainer(
+      overrides: <Override>[
+        authRepositoryProvider.overrideWithValue(fakeRepo),
+        tokenStorageProvider.overrideWithValue(fakeTokenStorage),
+        webviewSessionCleanupServiceProvider.overrideWithValue(fakeCleanup),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller = container.read(authControllerProvider.notifier);
+
+    await expectLater(
+      () => controller.login(
+        account: 'A114851669',
+        password: 'secret',
+        platform: 'android',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception error) => error.toString(),
+          'message',
+          contains('secure storage unavailable'),
+        ),
+      ),
+    );
+    expect(container.read(authControllerProvider).hasError, isTrue);
+  });
 }
 
 class _FakeAuthRepository implements AuthRepository {
@@ -251,12 +287,16 @@ class _FakeTokenStorage extends TokenStorage {
   String? accessToken;
   String? refreshToken;
   bool cleared = false;
+  Exception? saveError;
 
   @override
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
   }) async {
+    if (saveError != null) {
+      throw saveError!;
+    }
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
   }

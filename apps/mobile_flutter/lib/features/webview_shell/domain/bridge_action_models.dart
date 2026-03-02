@@ -1,4 +1,4 @@
-﻿class BridgeActionResult {
+class BridgeActionResult {
   const BridgeActionResult({
     required this.ok,
     required this.action,
@@ -31,13 +31,65 @@ enum AppEventKind {
 
   static AppEventKind fromRaw(String raw) {
     final normalized = raw.trim().toLowerCase();
-    for (final item in AppEventKind.values) {
-      if (item.value == normalized) {
-        return item;
-      }
+    if (normalized.isEmpty) {
+      return AppEventKind.unknown;
     }
+
+    if (_mapAliases.contains(normalized)) {
+      return AppEventKind.map;
+    }
+    if (_dialAliases.contains(normalized)) {
+      return AppEventKind.dial;
+    }
+    if (_closeAliases.contains(normalized)) {
+      return AppEventKind.close;
+    }
+    if (_contractAliases.contains(normalized)) {
+      return AppEventKind.contract;
+    }
+
     return AppEventKind.unknown;
   }
+
+  static const Set<String> _mapAliases = <String>{
+    'map',
+    'gm\u5c0e\u822a',
+    'gm\u5bfc\u822a',
+    'gm\u5916\u90e8',
+    '\u5c0e\u822a',
+    '\u5bfc\u822a',
+    '\u5730\u5716\u5b9a\u4f4d',
+    '\u5730\u56fe\u5b9a\u4f4d',
+    '\u5b9a\u4f4d\u55ae\u9ede\u898f\u5283',
+    '\u5b9a\u4f4d\u5355\u70b9\u89c4\u5212',
+    'navigation',
+    'route',
+  };
+
+  static const Set<String> _dialAliases = <String>{
+    'dial',
+    'phone',
+    'tel',
+    '\u64a5\u865f',
+    '\u62e8\u53f7',
+  };
+
+  static const Set<String> _closeAliases = <String>{
+    'close',
+    'back',
+    'pre_page',
+    '\u95dc\u9589',
+    '\u5173\u95ed',
+    '\u4e0a\u4e00\u9801',
+    '\u4e0a\u4e00\u9875',
+  };
+
+  static const Set<String> _contractAliases = <String>{
+    'contract',
+    'agreement',
+    '\u5408\u7d04',
+    '\u5408\u7ea6',
+  };
 }
 
 class ScannerResult {

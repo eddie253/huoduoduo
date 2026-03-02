@@ -1,19 +1,33 @@
 import 'package:flutter/material.dart';
-import 'router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DidiApp extends StatelessWidget {
+import 'router.dart';
+import 'theme/app_theme_controller.dart';
+
+class DidiApp extends ConsumerWidget {
   const DidiApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prefs = ref.watch(appThemeControllerProvider);
+    final seed = prefs.preset.seedColor;
+
     return MaterialApp.router(
       title: 'Didi Express',
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F766E)),
-        useMaterial3: true
-      )
+        colorScheme: ColorScheme.fromSeed(seedColor: seed),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: seed,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: prefs.darkMode ? ThemeMode.dark : ThemeMode.light,
     );
   }
 }

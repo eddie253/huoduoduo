@@ -1,0 +1,56 @@
+
+> huoduoduo-refactor-monorepo@0.1.0 bff:start:local
+> powershell -ExecutionPolicy Bypass -File .\scripts\start-local-bff.ps1
+
+[Redis] OK (PONG)
+[Build BFF Dist]
+[BFF] Starting on http://127.0.0.1:3000
+[BFF] Keep this terminal open.
+
+> bff_gateway@0.1.0 start
+> node dist/main.js
+
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mThrottlerModule dependencies initialized[39m[38;5;3m +11ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHealthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +11ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSecurityModule dependencies initialized[39m[38;5;3m +3ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSoapModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mShipmentModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mReservationModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mNotificationModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mWebviewModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/v1/health}:[39m[38;5;3m +17ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/health, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/v1/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/auth/refresh, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/auth/logout, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mWebviewController {/v1/bootstrap}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/bootstrap/webview, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/bootstrap/bulletin, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mShipmentController {/v1/shipments}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/shipments/:trackingNo, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/shipments/:trackingNo/delivery, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/shipments/:trackingNo/exception, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mReservationController {/v1/reservations}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/reservations, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/reservations, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/reservations/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mNotificationController {/v1/push}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/v1/push/register, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[RedisTokenStoreService] [39m[32mRedis token store connected.[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:30 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +1ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:37:33 [32m    LOG[39m [38;5;3m[HTTP] [39m[32mGET /v1/health 200 4ms[39m
+[32m[Nest] 42028  - [39m2026/03/02 下午2:38:45 [32m    LOG[39m [38;5;3m[HTTP] [39m[32mPOST /v1/auth/login 200 576ms[39m
+npm error Lifecycle script `start` failed with error:
+npm error code 4294967295
+npm error path C:\Users\EDDIE\Downloads\APP_didiexpress-main\APP_didiexpress-main\apps\bff_gateway
+npm error workspace bff_gateway@0.1.0
+npm error location C:\Users\EDDIE\Downloads\APP_didiexpress-main\APP_didiexpress-main\apps\bff_gateway
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c node dist/main.js

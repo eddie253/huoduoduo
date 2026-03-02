@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_models.dart';
 import '../application/js_bridge_service.dart';
+import '../domain/shell_navigation_state.dart';
 import '../domain/webview_cache_policy.dart';
-
-enum _ShellSection { reservation, order, signature, wallet }
 
 enum _MenuActionType {
   openWeb,
@@ -20,6 +20,7 @@ enum _MenuActionType {
   openShipment,
   openSignature,
   openNotifications,
+  openSettings,
   openMaps,
   logout,
   placeholder,
@@ -33,7 +34,7 @@ class _BottomTab {
     required this.activeIcon,
   });
 
-  final _ShellSection section;
+  final ShellSection section;
   final String label;
   final IconData icon;
   final IconData activeIcon;
@@ -107,12 +108,8 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
 
   static const Key shellScaffoldKey = Key('webview.shell.scaffold');
   static const Key topBackButtonKey = Key('webview.top.backButton');
+  static const Key topSettingsButtonKey = Key('webview.top.settingsButton');
   static const Key bottomBarKey = Key('webview.bottomBar');
-
-  static const Color _brand = Color(0xFFFC5000);
-  static const Color _inactive = Color(0xFF8A8D92);
-  static const Color _surface = Color(0xFFF3F4F6);
-  static const Color _gridBg = Color(0xFFE9EDF2);
 
   static const String _defaultAnnouncement = '無公告';
   static const String _errorAnnouncement = '載入失敗';
@@ -120,6 +117,20 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   static final InAppWebViewKeepAlive _keepAlive = InAppWebViewKeepAlive();
   static final WebUri _reservationFallback =
       WebUri('https://old.huoduoduo.com.tw/app/rvt/ge.aspx');
+  static const Set<String> _externalLaunchSchemes = <String>{
+    'tel',
+    'geo',
+    'google.navigation',
+    'comgooglemaps',
+    'intent',
+    'sms',
+    'mailto',
+  };
+  static const Set<String> _externalMapHosts = <String>{
+    'www.google.com',
+    'maps.google.com',
+    'maps.app.goo.gl',
+  };
 
   static const String _bridgeAdapterScript = '''
 (function () {
@@ -155,19 +166,14 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       const WebviewCachePolicyResolver();
 
   late final List<_BottomTab> _tabs;
-  late final Map<_ShellSection, List<_MenuTile>> _menuTiles;
+  late final Map<ShellSection, List<_MenuTile>> _menuTiles;
 
   InAppWebViewController? _controller;
-  URLRequest? _pendingRequest;
-  bool _inWeb = false;
-  bool _loadingWeb = false;
   bool _didErrorFallback = false;
   bool _cookiesBootstrapped = false;
 
-  _ShellSection _currentSection = _ShellSection.reservation;
+  ShellNavigationState _navState = ShellNavigationState.initial();
   String _announcement = _defaultAnnouncement;
-  String? _webTitle;
-  String? _errorText;
   Timer? _bulletinTimer;
 
   @override
@@ -188,39 +194,45 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     super.dispose();
   }
 
+  bool get _inWeb => _navState.inWeb;
+  bool get _loadingWeb => _navState.loadingWeb;
+  ShellSection get _currentSection => _navState.currentSection;
+  String? get _webTitle => _navState.webTitle;
+  String? get _errorText => _navState.errorText;
+
   List<_BottomTab> _buildTabs() => const <_BottomTab>[
         _BottomTab(
-          section: _ShellSection.reservation,
+          section: ShellSection.reservation,
           label: '預約',
           icon: Icons.calendar_month_outlined,
           activeIcon: Icons.calendar_month_rounded,
         ),
         _BottomTab(
-          section: _ShellSection.order,
+          section: ShellSection.order,
           label: '接單',
           icon: Icons.inventory_2_outlined,
           activeIcon: Icons.inventory_2_rounded,
         ),
         _BottomTab(
-          section: _ShellSection.signature,
+          section: ShellSection.signature,
           label: '簽收',
           icon: Icons.draw_outlined,
           activeIcon: Icons.draw_rounded,
         ),
         _BottomTab(
-          section: _ShellSection.wallet,
+          section: ShellSection.wallet,
           label: '錢包',
           icon: Icons.account_balance_wallet_outlined,
           activeIcon: Icons.account_balance_wallet_rounded,
         ),
       ];
 
-  Map<_ShellSection, List<_MenuTile>> _buildMenuTiles() {
+  Map<ShellSection, List<_MenuTile>> _buildMenuTiles() {
     WebUri appUri(String path) =>
         WebUri('https://old.huoduoduo.com.tw/app/$path');
 
-    return <_ShellSection, List<_MenuTile>>{
-      _ShellSection.reservation: <_MenuTile>[
+    return <ShellSection, List<_MenuTile>>{
+      ShellSection.reservation: <_MenuTile>[
         _MenuTile.web(
             label: '預約貨件',
             icon: Icons.event_available_rounded,
@@ -251,7 +263,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             uri: appUri('inq/dep.aspx')),
         const _MenuTile.placeholder(),
       ],
-      _ShellSection.order: <_MenuTile>[
+      ShellSection.order: <_MenuTile>[
         const _MenuTile.scanner(
             label: '接單', icon: Icons.qr_code_scanner_rounded, scanType: '接單'),
         const _MenuTile.scanner(
@@ -280,7 +292,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             actionType: _MenuActionType.openSignature),
         const _MenuTile.placeholder(),
       ],
-      _ShellSection.signature: <_MenuTile>[
+      ShellSection.signature: <_MenuTile>[
         const _MenuTile.scanner(
             label: '單筆簽收', icon: Icons.fact_check_rounded, scanType: '單筆簽收'),
         const _MenuTile.scanner(
@@ -310,7 +322,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             icon: Icons.cloud_sync_rounded,
             actionType: _MenuActionType.openNotifications),
       ],
-      _ShellSection.wallet: <_MenuTile>[
+      ShellSection.wallet: <_MenuTile>[
         _MenuTile.web(
             label: '提現',
             icon: Icons.payments_rounded,
@@ -338,7 +350,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
         const _MenuTile.simple(
             label: '設定',
             icon: Icons.settings_rounded,
-            actionType: _MenuActionType.openNotifications),
+            actionType: _MenuActionType.openSettings),
         const _MenuTile.simple(
             label: '登出',
             icon: Icons.logout_rounded,
@@ -388,6 +400,26 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       return null;
     }
     return uri;
+  }
+
+  Future<bool> _tryLaunchExternal(WebUri webUri) async {
+    final parsed = Uri.tryParse(webUri.toString());
+    if (parsed == null) {
+      return false;
+    }
+
+    final scheme = parsed.scheme.toLowerCase();
+    final host = parsed.host.toLowerCase();
+    final bool isMapPathOnGoogle = host == 'www.google.com' &&
+        parsed.path.toLowerCase().startsWith('/maps');
+    final bool shouldLaunch = _externalLaunchSchemes.contains(scheme) ||
+        ((scheme == 'https' || scheme == 'http') &&
+            (_externalMapHosts.contains(host) || isMapPathOnGoogle));
+    if (!shouldLaunch) {
+      return false;
+    }
+
+    return launchUrl(parsed, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _bootstrapCookies() async {
@@ -457,7 +489,9 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     if (normalized == null) {
       if (mounted) {
         setState(() {
-          _errorText = 'Blocked navigation to non-whitelisted domain.';
+          _navState = _navState.copyWith(
+            errorText: 'Blocked navigation to non-whitelisted domain.',
+          );
         });
       }
       return;
@@ -474,15 +508,15 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     }
 
     setState(() {
-      _inWeb = true;
-      _loadingWeb = true;
       _didErrorFallback = false;
-      _webTitle = title;
-      _errorText = null;
+      _navState = _navState.enteringWeb(
+        title: title,
+        request: request,
+        controllerReady: _controller != null,
+      );
     });
 
     if (_controller == null) {
-      _pendingRequest = request;
       return;
     }
     await _controller!.loadUrl(urlRequest: request);
@@ -539,6 +573,11 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
           await context.push('/notifications');
         }
         break;
+      case _MenuActionType.openSettings:
+        if (mounted) {
+          await context.push('/settings');
+        }
+        break;
       case _MenuActionType.openMaps:
         if (mounted) {
           await context.push('/maps');
@@ -561,10 +600,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       return;
     }
     setState(() {
-      _inWeb = false;
-      _loadingWeb = false;
-      _webTitle = null;
-      _errorText = null;
+      _navState = _navState.leavingWeb();
     });
   }
 
@@ -573,9 +609,10 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       await _handleWebBack();
       return;
     }
-    if (_currentSection != _ShellSection.reservation) {
+    if (_currentSection != ShellSection.reservation) {
       setState(() {
-        _currentSection = _ShellSection.reservation;
+        _navState =
+            _navState.copyWith(currentSection: ShellSection.reservation);
       });
       return;
     }
@@ -584,20 +621,20 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     }
   }
 
-  String _sectionTitle(_ShellSection section) {
+  String _sectionTitle(ShellSection section) {
     switch (section) {
-      case _ShellSection.reservation:
+      case ShellSection.reservation:
         return '預約';
-      case _ShellSection.order:
+      case ShellSection.order:
         return '接單';
-      case _ShellSection.signature:
+      case ShellSection.signature:
         return '簽收';
-      case _ShellSection.wallet:
+      case ShellSection.wallet:
         return '錢包';
     }
   }
 
-  List<_MenuTile> _slotsForSection(_ShellSection section) {
+  List<_MenuTile> _slotsForSection(ShellSection section) {
     final List<_MenuTile> source =
         List<_MenuTile>.from(_menuTiles[section] ?? const <_MenuTile>[]);
     if (source.length >= _menuSlotCount) {
@@ -611,12 +648,16 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   }
 
   Widget _buildTopBar() {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colors = theme.colorScheme;
+    final Color brand = colors.primary;
+
     final String title = (_inWeb && _webTitle != null && _webTitle!.isNotEmpty)
         ? _webTitle!
         : _sectionTitle(_currentSection);
 
     return Container(
-      color: _surface,
+      color: colors.surfaceContainerLowest,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -633,8 +674,11 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                       child: IconButton(
                         key: topBackButtonKey,
                         onPressed: _handleWebBack,
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: _brand, size: 20),
+                        icon: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: brand,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
@@ -645,8 +689,8 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: _brand,
+                      style: TextStyle(
+                        color: brand,
                         fontSize: 34,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.2,
@@ -656,15 +700,15 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                 ),
                 SizedBox(
                   width: 78,
-                  child: Opacity(
-                    opacity: _inWeb ? 1 : 0,
-                    child: IgnorePointer(
-                      ignoring: !_inWeb,
-                      child: IconButton(
-                        onPressed: () => _controller?.reload(),
-                        icon: const Icon(Icons.refresh_rounded,
-                            color: _brand, size: 22),
-                      ),
+                  child: IconButton(
+                    key: !_inWeb ? topSettingsButtonKey : null,
+                    onPressed: _inWeb
+                        ? () => _controller?.reload()
+                        : () => context.push('/settings'),
+                    icon: Icon(
+                      _inWeb ? Icons.refresh_rounded : Icons.settings_rounded,
+                      color: brand,
+                      size: 22,
                     ),
                   ),
                 ),
@@ -673,14 +717,14 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
           ),
           Container(
             height: 42,
-            color: Colors.black,
+            color: colors.inverseSurface,
             alignment: Alignment.center,
             child: Text(
               _announcement,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  color: Colors.white,
+              style: TextStyle(
+                  color: colors.onInverseSurface,
                   fontSize: 17,
                   fontWeight: FontWeight.w700),
             ),
@@ -691,10 +735,17 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   }
 
   Widget _buildMenuGrid() {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final Color brand = colors.primary;
+    final Color inactive = colors.onSurfaceVariant;
+
     final List<_MenuTile> slots = _slotsForSection(_currentSection);
 
     return Container(
-      color: _gridBg,
+      color: Color.alphaBlend(
+        colors.primary.withValues(alpha: 0.05),
+        colors.surface,
+      ),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints c) {
           const double spacing = 14;
@@ -718,9 +769,9 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             itemBuilder: (BuildContext context, int index) {
               final _MenuTile tile = slots[index];
               final bool enabled = tile.enabled;
-              final Color iconColor = enabled ? _brand : _inactive;
+              final Color iconColor = enabled ? brand : inactive;
               final Color textColor =
-                  enabled ? const Color(0xFF3D4A59) : const Color(0xFF9CA3AF);
+                  enabled ? colors.onSurface : colors.onSurfaceVariant;
 
               return Material(
                 color: Colors.transparent,
@@ -729,15 +780,16 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                   onTap: enabled ? () => _onTileTap(tile) : null,
                   child: Ink(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colors.surface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                          color: const Color(0xFFE4E9EF), width: 1.2),
-                      boxShadow: const <BoxShadow>[
+                          color: colors.outlineVariant.withValues(alpha: 0.7),
+                          width: 1.2),
+                      boxShadow: <BoxShadow>[
                         BoxShadow(
-                            color: Color(0x14000000),
+                            color: colors.shadow.withValues(alpha: 0.08),
                             blurRadius: 12,
-                            offset: Offset(0, 6)),
+                            offset: const Offset(0, 6)),
                       ],
                     ),
                     child: Padding(
@@ -773,6 +825,9 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   }
 
   Widget _buildWebViewLayer() {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final Color brand = colors.primary;
+
     return Stack(
       children: <Widget>[
         InAppWebView(
@@ -803,9 +858,13 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
               },
             );
 
-            final URLRequest? pending = _pendingRequest;
+            final URLRequest? pending = _navState.pendingRequest;
             if (pending != null) {
-              _pendingRequest = null;
+              if (mounted) {
+                setState(() {
+                  _navState = _navState.copyWith(clearPendingRequest: true);
+                });
+              }
               await controller.loadUrl(urlRequest: pending);
             }
           },
@@ -815,13 +874,20 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
               return NavigationActionPolicy.CANCEL;
             }
             final String scheme = uri.scheme.toLowerCase();
-            if (scheme == 'about' || scheme == 'data') {
+            if (scheme == 'about' ||
+                scheme == 'data' ||
+                scheme == 'javascript') {
               return NavigationActionPolicy.ALLOW;
             }
             if (!_isAllowedHost(uri.host)) {
+              if (await _tryLaunchExternal(uri)) {
+                return NavigationActionPolicy.CANCEL;
+              }
               if (mounted) {
                 setState(() {
-                  _errorText = 'Blocked navigation to non-whitelisted domain.';
+                  _navState = _navState.copyWith(
+                    errorText: 'Blocked navigation to non-whitelisted domain.',
+                  );
                 });
               }
               return NavigationActionPolicy.CANCEL;
@@ -840,7 +906,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
           onLoadStart: (controller, url) {
             if (mounted) {
               setState(() {
-                _loadingWeb = true;
+                _navState = _navState.copyWith(loadingWeb: true);
               });
             }
           },
@@ -858,30 +924,33 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             } catch (e) {
               if (mounted) {
                 setState(() {
-                  _errorText = 'Bridge injection failed: $e';
+                  _navState = _navState.copyWith(
+                      errorText: 'Bridge injection failed: $e');
                 });
               }
             }
             if (mounted) {
               setState(() {
-                _loadingWeb = false;
+                _navState = _navState.copyWith(loadingWeb: false);
               });
             }
           },
           onReceivedError: (controller, request, error) {
             if (mounted) {
               setState(() {
-                _loadingWeb = false;
-                _errorText = '${error.type}: ${error.description}';
+                _navState = _navState.copyWith(
+                  loadingWeb: false,
+                  errorText: '${error.type}: ${error.description}',
+                );
               });
             }
           },
         ),
         if (_loadingWeb)
-          const Positioned.fill(
+          Positioned.fill(
             child: ColoredBox(
-              color: Color(0x55FFFFFF),
-              child: Center(child: CircularProgressIndicator(color: _brand)),
+              color: colors.surface.withValues(alpha: 0.55),
+              child: Center(child: CircularProgressIndicator(color: brand)),
             ),
           ),
         if (_errorText != null)
@@ -891,8 +960,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               color: Colors.red.shade700,
-              child: Text(_errorText!,
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(_errorText!, style: TextStyle(color: colors.onError)),
             ),
           ),
       ],
@@ -900,27 +968,27 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   }
 
   Widget _buildBottomBar() {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    final Color brand = colors.primary;
+    final Color inactive = colors.onSurfaceVariant;
+
     return Container(
       key: bottomBarKey,
       height: 84,
-      decoration: const BoxDecoration(
-        color: _surface,
-        border: Border(top: BorderSide(color: Color(0xFFD9DADF))),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLowest,
+        border: Border(top: BorderSide(color: colors.outlineVariant)),
       ),
       child: Row(
         children: List<Widget>.generate(_tabs.length, (int index) {
           final _BottomTab tab = _tabs[index];
           final bool selected = tab.section == _currentSection;
-          final Color color = selected ? _brand : _inactive;
+          final Color color = selected ? brand : inactive;
           return Expanded(
             child: InkWell(
               onTap: () {
                 setState(() {
-                  _currentSection = tab.section;
-                  _inWeb = false;
-                  _loadingWeb = false;
-                  _webTitle = null;
-                  _errorText = null;
+                  _navState = _navState.selectSection(tab.section);
                 });
               },
               child: Padding(

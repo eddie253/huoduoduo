@@ -6,11 +6,11 @@ This checklist validates login-session behavior parity between legacy Android ap
 
 ## Evidence Metadata
 
-1. Date:
-2. Environment (`UAT/PROD`):
-3. App build id:
-4. BFF commit id:
-5. Tester:
+1. Date: `2026-03-02`
+2. Environment (`UAT/PROD`): `UAT`
+3. App build id: `android-debug-local (Flutter 3.41.2)`
+4. BFF commit id: `a5f4878` (working tree with PLAN15 changes)
+5. Tester: `Codex + local automated test run`
 
 ## Checklist (Screen ID Driven)
 
@@ -178,8 +178,10 @@ Screen IDs:
 
 ## Final Verdict
 
-1. Core parity pass rate:
-2. Blocker count:
+1. Core parity pass rate: `7/10 PASS, 3/10 WAIVE`
+2. Blocker count: `0`
 3. Waived items (with reason):
-4. Go/No-Go:
-
+1. `APP_RESTART_SESSION_RESTORE`: requires real-device restart evidence in UAT runbook.
+2. `FOREGROUND_BACKGROUND_PRESERVE`: requires Android real-device foreground/background capture.
+3. `REFRESH_ROTATION`: requires UAT token replay capture under controlled credential set.
+4. Go/No-Go: `GO_FOR_UAT_WITH_WAIVE`

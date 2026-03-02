@@ -1,8 +1,49 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../domain/bridge_action_models.dart';
+
+abstract class UrlLauncherPort {
+  Future<bool> canLaunch(Uri uri);
+
+  Future<bool> launch(Uri uri, {required LaunchMode mode});
+}
+
+class FlutterUrlLauncherPort implements UrlLauncherPort {
+  const FlutterUrlLauncherPort();
+
+  @override
+  Future<bool> canLaunch(Uri uri) {
+    return canLaunchUrl(uri);
+  }
+
+  @override
+  Future<bool> launch(Uri uri, {required LaunchMode mode}) {
+    return launchUrl(uri, mode: mode);
+  }
+}
+
+abstract class BridgeNavigationPort {
+  Future<T?> push<T>(
+    BuildContext context,
+    String location, {
+    Object? extra,
+  });
+}
+
+class GoRouterNavigationPort implements BridgeNavigationPort {
+  const GoRouterNavigationPort();
+
+  @override
+  Future<T?> push<T>(
+    BuildContext context,
+    String location, {
+    Object? extra,
+  }) {
+    return context.push<T>(location, extra: extra);
+  }
+}
 
 abstract class BridgeActionExecutor {
   Future<bool> launchExternal(Uri uri);
@@ -22,14 +63,21 @@ abstract class BridgeActionExecutor {
 }
 
 class PlatformBridgeActionExecutor implements BridgeActionExecutor {
-  const PlatformBridgeActionExecutor();
+  const PlatformBridgeActionExecutor({
+    UrlLauncherPort urlLauncher = const FlutterUrlLauncherPort(),
+    BridgeNavigationPort navigationPort = const GoRouterNavigationPort(),
+  })  : _urlLauncher = urlLauncher,
+        _navigationPort = navigationPort;
+
+  final UrlLauncherPort _urlLauncher;
+  final BridgeNavigationPort _navigationPort;
 
   @override
   Future<bool> launchExternal(Uri uri) async {
-    if (!await canLaunchUrl(uri)) {
+    if (!await _urlLauncher.canLaunch(uri)) {
       return false;
     }
-    return launchUrl(uri, mode: LaunchMode.externalApplication);
+    return _urlLauncher.launch(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -37,7 +85,8 @@ class PlatformBridgeActionExecutor implements BridgeActionExecutor {
     BuildContext context, {
     required String scanType,
   }) async {
-    final result = await context.push<String>(
+    final result = await _navigationPort.push<String>(
+      context,
       '/scanner',
       extra: <String, dynamic>{'scanType': scanType},
     );
@@ -49,7 +98,10 @@ class PlatformBridgeActionExecutor implements BridgeActionExecutor {
 
   @override
   Future<SignatureResult?> openSignature(BuildContext context) async {
-    final result = await context.push<Map<String, dynamic>>('/signature');
+    final result = await _navigationPort.push<Map<String, dynamic>>(
+      context,
+      '/signature',
+    );
     if (result == null) {
       return null;
     }
@@ -85,7 +137,7 @@ class PlatformBridgeActionExecutor implements BridgeActionExecutor {
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('OK'),
-            )
+            ),
           ],
         );
       },
@@ -100,10 +152,10 @@ class PlatformBridgeActionExecutor implements BridgeActionExecutor {
     }
 
     if (normalized.startsWith('/')) {
-      await context.push(normalized);
+      await _navigationPort.push<void>(context, normalized);
       return;
     }
 
-    await context.push('/$normalized');
+    await _navigationPort.push<void>(context, '/$normalized');
   }
 }
