@@ -4,25 +4,47 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:signature/signature.dart';
 
+typedef SignatureFileWriter = Future<void> Function(File file, List<int> bytes);
+
 class SignaturePage extends StatefulWidget {
-  const SignaturePage({super.key});
+  const SignaturePage({
+    super.key,
+    this.controller,
+    this.now,
+    this.writeBytes,
+  });
+
+  final SignatureController? controller;
+  final DateTime Function()? now;
+  final SignatureFileWriter? writeBytes;
 
   @override
   State<SignaturePage> createState() => _SignaturePageState();
 }
 
 class _SignaturePageState extends State<SignaturePage> {
-  final SignatureController _controller = SignatureController(
-    penStrokeWidth: 2,
-    penColor: Colors.black,
-    exportBackgroundColor: Colors.white,
-  );
+  late final SignatureController _controller;
+  late final bool _ownsController;
 
   bool _isSaving = false;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ??
+        SignatureController(
+          penStrokeWidth: 2,
+          penColor: Colors.black,
+          exportBackgroundColor: Colors.white,
+        );
+    _ownsController = widget.controller == null;
+  }
+
+  @override
   void dispose() {
-    _controller.dispose();
+    if (_ownsController) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -44,11 +66,17 @@ class _SignaturePageState extends State<SignaturePage> {
         throw const FormatException('Signature bytes are empty');
       }
 
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final timestamp =
+          (widget.now ?? DateTime.now).call().millisecondsSinceEpoch;
       final fileName = 'signature_$timestamp.png';
       final filePath = p.join(Directory.systemTemp.path, fileName);
       final output = File(filePath);
-      await output.writeAsBytes(bytes, flush: true);
+      final writer = widget.writeBytes;
+      if (writer != null) {
+        await writer(output, bytes);
+      } else {
+        await output.writeAsBytes(bytes, flush: true);
+      }
 
       if (!mounted) {
         return;

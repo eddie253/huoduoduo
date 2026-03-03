@@ -40,6 +40,8 @@ npm run mobile:test:coverage
 npm run mobile:coverage:check
 ```
 
+`npm run mobile:coverage:check` enforces Flutter line coverage >= 65.
+
 Coverage artifacts are generated in:
 
 - `apps/mobile_flutter/coverage/lcov.info` (raw)

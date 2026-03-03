@@ -6,13 +6,19 @@ import '../../../core/config/app_config.dart';
 import '../domain/bridge_action_models.dart';
 import '../domain/bridge_models.dart';
 import 'bridge_action_executor.dart';
+import 'map_navigation_preflight_service.dart';
 
 class JsBridgeService {
-  JsBridgeService({BridgeActionExecutor? actionExecutor})
-      : _actionExecutor =
-            actionExecutor ?? const PlatformBridgeActionExecutor();
+  JsBridgeService({
+    BridgeActionExecutor? actionExecutor,
+    MapNavigationPreflightPort? mapNavigationPreflight,
+  })  : _actionExecutor =
+            actionExecutor ?? const PlatformBridgeActionExecutor(),
+        _mapNavigationPreflight = mapNavigationPreflight ??
+            const DefaultMapNavigationPreflightService();
 
   final BridgeActionExecutor _actionExecutor;
+  final MapNavigationPreflightPort _mapNavigationPreflight;
 
   static final Set<String> _allowedWebHosts =
       AppConfig.allowedWebHosts.map((item) => item.toLowerCase()).toSet();
@@ -259,6 +265,17 @@ class JsBridgeService {
       );
     }
 
+    final preflight = await _mapNavigationPreflight.ensureReady();
+    if (!preflight.allowed) {
+      final preflightMessage = preflight.message?.trim();
+      return _error(
+        BridgeErrorCode.permissionDenied,
+        preflightMessage == null || preflightMessage.isEmpty
+            ? 'Navigation preflight failed.'
+            : preflightMessage,
+      );
+    }
+
     final opened = await _actionExecutor.launchExternal(mapUri);
     if (!opened) {
       return _error(
@@ -348,22 +365,25 @@ class JsBridgeService {
       }
     }
 
-    final Map<String, dynamic>? resultJson = _tryParseJsonObject(trimmedResult);
-    if (resultJson != null) {
+    final Map<String, dynamic>? resultPayload =
+        _tryParseMapPayloadObject(trimmedResult);
+    if (resultPayload != null) {
       final destination = _firstNonEmpty(
-        resultJson,
+        resultPayload,
         const <String>['adr', 'address', 'destination', 'daddr', 'query'],
       );
       final origin = _firstNonEmpty(
-        resultJson,
+        resultPayload,
         const <String>['latlng', 'origin', 'saddr'],
       );
       if (destination != null) {
         return _buildGoogleNavigationUri(
-            destination: destination, origin: origin);
+          destination: _sanitizeMapDestination(destination),
+          origin: origin,
+        );
       }
       final coords = _firstNonEmpty(
-        resultJson,
+        resultPayload,
         const <String>['coordinate', 'coordinates', 'latlng'],
       );
       final fromCoordinates = _buildGoogleMapUriFromCoordinate(coords ?? '');
@@ -379,7 +399,9 @@ class JsBridgeService {
     }
 
     if (trimmedResult.isNotEmpty) {
-      return _buildGoogleNavigationUri(destination: trimmedResult);
+      return _buildGoogleNavigationUri(
+        destination: _sanitizeMapDestination(trimmedResult),
+      );
     }
 
     final coordinateSource =
@@ -398,10 +420,20 @@ class JsBridgeService {
       final origin =
           _firstNonEmpty(params, const <String>['latlng', 'origin', 'saddr']);
       return _buildGoogleNavigationUri(
-          destination: destination, origin: origin);
+        destination: _sanitizeMapDestination(destination),
+        origin: origin,
+      );
     }
 
     return null;
+  }
+
+  Map<String, dynamic>? _tryParseMapPayloadObject(String raw) {
+    final json = _tryParseJsonObject(raw);
+    if (json != null) {
+      return json;
+    }
+    return _tryParseLegacyMapObject(raw);
   }
 
   Map<String, dynamic>? _tryParseJsonObject(String raw) {
@@ -417,6 +449,118 @@ class JsBridgeService {
       return null;
     }
     return null;
+  }
+
+  Map<String, dynamic>? _tryParseLegacyMapObject(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty || !trimmed.contains('=')) {
+      return null;
+    }
+
+    final body = _unwrapBracketPair(trimmed);
+    final keyPattern = RegExp(r'([A-Za-z_][A-Za-z0-9_]*)\s*=');
+    final keyMatches = keyPattern.allMatches(body).toList();
+    if (keyMatches.isEmpty) {
+      return null;
+    }
+
+    final parsed = <String, dynamic>{};
+    for (int i = 0; i < keyMatches.length; i++) {
+      final key = keyMatches[i].group(1)?.toLowerCase();
+      if (key == null || key.isEmpty) {
+        continue;
+      }
+
+      final int valueStart = keyMatches[i].end;
+      final int valueEnd =
+          i + 1 < keyMatches.length ? keyMatches[i + 1].start : body.length;
+      if (valueStart >= valueEnd) {
+        continue;
+      }
+
+      String value = body.substring(valueStart, valueEnd).trim();
+      if (value.endsWith(',')) {
+        value = value.substring(0, value.length - 1).trim();
+      }
+      value = _unwrapQuotedString(value);
+      if (value.isNotEmpty) {
+        parsed[key] = value;
+      }
+    }
+
+    return parsed.isEmpty ? null : parsed;
+  }
+
+  String _sanitizeMapDestination(String destinationRaw) {
+    final trimmed = destinationRaw.trim();
+    if (trimmed.isEmpty) {
+      return trimmed;
+    }
+
+    final legacy = _tryParseLegacyMapObject(trimmed);
+    if (legacy != null) {
+      final fromLegacy = _firstNonEmpty(
+        legacy,
+        const <String>['adr', 'address', 'destination', 'daddr', 'query'],
+      );
+      if (fromLegacy != null) {
+        return fromLegacy.trim();
+      }
+    }
+
+    final unwrapped = _unwrapBracketPair(trimmed);
+    final lower = unwrapped.toLowerCase();
+    for (final prefix in const <String>[
+      'adr=',
+      'address=',
+      'destination=',
+      'daddr=',
+      'query='
+    ]) {
+      if (lower.startsWith(prefix)) {
+        return _normalizeMapAddress(unwrapped.substring(prefix.length).trim());
+      }
+    }
+
+    return _normalizeMapAddress(unwrapped);
+  }
+
+  String _unwrapBracketPair(String raw) {
+    if (raw.length >= 2) {
+      final startsWithBrace = raw.startsWith('{') && raw.endsWith('}');
+      final startsWithBracket = raw.startsWith('[') && raw.endsWith(']');
+      if (startsWithBrace || startsWithBracket) {
+        return raw.substring(1, raw.length - 1).trim();
+      }
+    }
+    return raw;
+  }
+
+  String _unwrapQuotedString(String raw) {
+    if (raw.length >= 2) {
+      if ((raw.startsWith('"') && raw.endsWith('"')) ||
+          (raw.startsWith("'") && raw.endsWith("'"))) {
+        return raw.substring(1, raw.length - 1).trim();
+      }
+    }
+    return raw;
+  }
+
+  String _normalizeMapAddress(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return trimmed;
+    }
+
+    final withoutCountryZip = trimmed.replaceFirst(
+      RegExp(r'^\s*(台灣|台湾)\s*\d{3}\s*'),
+      '',
+    );
+    if (withoutCountryZip.trim().isNotEmpty && withoutCountryZip != trimmed) {
+      return withoutCountryZip.trim();
+    }
+
+    return trimmed;
   }
 
   String? _firstNonEmpty(Map<String, dynamic> data, List<String> keys) {

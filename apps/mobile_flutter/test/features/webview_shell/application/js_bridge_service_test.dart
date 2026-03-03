@@ -3,13 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mobile_flutter/features/webview_shell/application/bridge_action_executor.dart';
 import 'package:mobile_flutter/features/webview_shell/application/js_bridge_service.dart';
+import 'package:mobile_flutter/features/webview_shell/application/map_navigation_preflight_service.dart';
 import 'package:mobile_flutter/features/webview_shell/domain/bridge_action_models.dart';
 
 void main() {
   testWidgets('accepts all 8 bridge methods with executable behavior',
       (WidgetTester tester) async {
     final executor = _FakeBridgeActionExecutor();
-    final service = JsBridgeService(actionExecutor: executor);
+    final service = _createService(actionExecutor: executor);
     final context = await _pumpContext(tester);
 
     final payloads = <Map<String, dynamic>>[
@@ -43,7 +44,7 @@ void main() {
   testWidgets('supports legacy methods pre_page and openImage',
       (WidgetTester tester) async {
     final executor = _FakeBridgeActionExecutor();
-    final service = JsBridgeService(actionExecutor: executor);
+    final service = _createService(actionExecutor: executor);
     final context = await _pumpContext(tester);
 
     final prePageResult = await service.handle(
@@ -70,8 +71,7 @@ void main() {
 
   testWidgets('returns BRIDGE_INVALID_PAYLOAD for empty args',
       (WidgetTester tester) async {
-    final service =
-        JsBridgeService(actionExecutor: _FakeBridgeActionExecutor());
+    final service = _createService(actionExecutor: _FakeBridgeActionExecutor());
     final context = await _pumpContext(tester);
 
     final result = await service.handle(<dynamic>[], context);
@@ -84,8 +84,7 @@ void main() {
 
   testWidgets('returns BRIDGE_UNSUPPORTED_METHOD for unknown method',
       (WidgetTester tester) async {
-    final service =
-        JsBridgeService(actionExecutor: _FakeBridgeActionExecutor());
+    final service = _createService(actionExecutor: _FakeBridgeActionExecutor());
     final context = await _pumpContext(tester);
 
     final result = await service.handle(
@@ -102,8 +101,7 @@ void main() {
 
   testWidgets('returns BRIDGE_PERMISSION_DENIED for non-allowlisted openfile',
       (WidgetTester tester) async {
-    final service =
-        JsBridgeService(actionExecutor: _FakeBridgeActionExecutor());
+    final service = _createService(actionExecutor: _FakeBridgeActionExecutor());
     final context = await _pumpContext(tester);
 
     final result = await service.handle(
@@ -126,7 +124,7 @@ void main() {
   testWidgets('returns BRIDGE_RUNTIME_ERROR when executor throws',
       (WidgetTester tester) async {
     final executor = _FakeBridgeActionExecutor()..throwOnLaunch = true;
-    final service = JsBridgeService(actionExecutor: executor);
+    final service = _createService(actionExecutor: executor);
     final context = await _pumpContext(tester);
 
     final result = await service.handle(
@@ -148,8 +146,7 @@ void main() {
 
   testWidgets('redirect validates page and supports external URL',
       (WidgetTester tester) async {
-    final service =
-        JsBridgeService(actionExecutor: _FakeBridgeActionExecutor());
+    final service = _createService(actionExecutor: _FakeBridgeActionExecutor());
     final context = await _pumpContext(tester);
 
     final emptyPage = await service.handle(
@@ -180,7 +177,7 @@ void main() {
   testWidgets('returns runtime error when openfile launch returns false',
       (WidgetTester tester) async {
     final executor = _FakeBridgeActionExecutor()..launchResult = false;
-    final service = JsBridgeService(actionExecutor: executor);
+    final service = _createService(actionExecutor: executor);
     final context = await _pumpContext(tester);
 
     final result = await service.handle(
@@ -202,7 +199,7 @@ void main() {
     final executor = _FakeBridgeActionExecutor()
       ..scannerResult = null
       ..signatureResult = null;
-    final service = JsBridgeService(actionExecutor: executor);
+    final service = _createService(actionExecutor: executor);
     final context = await _pumpContext(tester);
 
     final scannerResult = await service.handle(
@@ -225,7 +222,7 @@ void main() {
   testWidgets('APPEvent map and dial validate parameters',
       (WidgetTester tester) async {
     final executor = _FakeBridgeActionExecutor();
-    final service = JsBridgeService(actionExecutor: executor);
+    final service = _createService(actionExecutor: executor);
     final context = await _pumpContext(tester);
 
     final invalidDial = await service.handle(
@@ -335,12 +332,34 @@ void main() {
       mapAddressUrl.queryParameters['destination'],
       '\u65b0\u5317\u5e02\u6c38\u548c\u5340\u7af9\u6797\u8def70\u865f',
     );
+
+    final mapWithLegacyMapString = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': 'map',
+            'result':
+                '{adr=\u53f0\u7063220\u65b0\u5317\u5e02\u677f\u6a4b\u5340,\u4e2d\u5c71\u8def\u4e00\u6bb5161\u865f,zip=220 }',
+          },
+        ),
+      ],
+      context,
+    );
+    expect(mapWithLegacyMapString['ok'], isTrue);
+    expect(mapWithLegacyMapString['action'], 'map_opened');
+    final legacyMapStringUrl = executor.openedUrls.last;
+    expect(legacyMapStringUrl.path, '/maps/dir/');
+    expect(
+      legacyMapStringUrl.queryParameters['destination'],
+      '\u65b0\u5317\u5e02\u677f\u6a4b\u5340,\u4e2d\u5c71\u8def\u4e00\u6bb5161\u865f',
+    );
   });
 
   testWidgets('APPEvent close and contract branches are covered',
       (WidgetTester tester) async {
     final executor = _FakeBridgeActionExecutor()..closeResult = false;
-    final service = JsBridgeService(actionExecutor: executor);
+    final service = _createService(actionExecutor: executor);
     final context = await _pumpContext(tester);
 
     final closeResult = await service.handle(
@@ -371,6 +390,137 @@ void main() {
     expect(contractResult['ok'], isTrue);
     expect(contractResult['action'], 'contract_opened');
   });
+
+  testWidgets('APPEvent map returns permission denied when preflight blocks',
+      (WidgetTester tester) async {
+    final service = _createService(
+      actionExecutor: _FakeBridgeActionExecutor(),
+      preflight: const _FakeMapNavigationPreflightPort(
+        result: MapNavigationPreflightResult.block(
+          reason: MapNavigationBlockReason.googleAccountMissing,
+          message: 'Google account is not signed in on this device.',
+        ),
+      ),
+    );
+    final context = await _pumpContext(tester);
+
+    final result = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': 'map',
+            'result': '25.03,121.56',
+          },
+        ),
+      ],
+      context,
+    );
+
+    expect(result['ok'], isFalse);
+    expect((result['error'] as Map<String, dynamic>)['code'],
+        'BRIDGE_PERMISSION_DENIED');
+  });
+
+  testWidgets(
+      'APPEvent map preflight denied uses fallback message when message is empty',
+      (WidgetTester tester) async {
+    final service = _createService(
+      actionExecutor: _FakeBridgeActionExecutor(),
+      preflight: const _FakeMapNavigationPreflightPort(
+        result: MapNavigationPreflightResult.block(
+          reason: MapNavigationBlockReason.googleAccountUnknown,
+          message: '',
+        ),
+      ),
+    );
+    final context = await _pumpContext(tester);
+
+    final result = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': 'map',
+            'result': '25.03,121.56',
+          },
+        ),
+      ],
+      context,
+    );
+
+    expect(result['ok'], isFalse);
+    expect(
+      (result['error'] as Map<String, dynamic>)['code'],
+      'BRIDGE_PERMISSION_DENIED',
+    );
+    expect(
+      (result['error'] as Map<String, dynamic>)['message'],
+      'Navigation preflight failed.',
+    );
+  });
+
+  testWidgets('APPEvent map returns runtime error when launcher fails',
+      (WidgetTester tester) async {
+    final executor = _FakeBridgeActionExecutor()..launchResult = false;
+    final service = _createService(
+      actionExecutor: executor,
+      preflight: const _FakeMapNavigationPreflightPort(),
+    );
+    final context = await _pumpContext(tester);
+
+    final result = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': 'map',
+            'result': '25.03,121.56',
+          },
+        ),
+      ],
+      context,
+    );
+
+    expect(result['ok'], isFalse);
+    expect(
+      (result['error'] as Map<String, dynamic>)['code'],
+      'BRIDGE_RUNTIME_ERROR',
+    );
+    expect(
+      (result['error'] as Map<String, dynamic>)['message'],
+      'Failed to open map application',
+    );
+  });
+
+  testWidgets('APPEvent map invalid payload returns consistent error',
+      (WidgetTester tester) async {
+    final service = _createService(actionExecutor: _FakeBridgeActionExecutor());
+    final context = await _pumpContext(tester);
+
+    final result = await service.handle(
+      <dynamic>[
+        _payload(
+          'APPEvent',
+          params: <String, dynamic>{
+            'kind': 'map',
+            'result': '',
+          },
+        ),
+      ],
+      context,
+    );
+
+    expect(result['ok'], isFalse);
+    expect(
+      (result['error'] as Map<String, dynamic>)['code'],
+      'BRIDGE_INVALID_PAYLOAD',
+    );
+    expect(
+      (result['error'] as Map<String, dynamic>)['message'],
+      'APPEvent map requires valid coordinates or map URL',
+    );
+  });
 }
 
 Future<BuildContext> _pumpContext(WidgetTester tester) async {
@@ -386,6 +536,17 @@ Future<BuildContext> _pumpContext(WidgetTester tester) async {
     ),
   );
   return context;
+}
+
+JsBridgeService _createService({
+  required BridgeActionExecutor actionExecutor,
+  MapNavigationPreflightPort preflight =
+      const _FakeMapNavigationPreflightPort(),
+}) {
+  return JsBridgeService(
+    actionExecutor: actionExecutor,
+    mapNavigationPreflight: preflight,
+  );
 }
 
 Map<String, dynamic> _payload(
@@ -461,5 +622,18 @@ class _FakeBridgeActionExecutor implements BridgeActionExecutor {
   @override
   Future<void> showExitDialog(BuildContext context, String message) async {
     dialogShown = true;
+  }
+}
+
+class _FakeMapNavigationPreflightPort implements MapNavigationPreflightPort {
+  const _FakeMapNavigationPreflightPort({
+    this.result = const MapNavigationPreflightResult.allow(),
+  });
+
+  final MapNavigationPreflightResult result;
+
+  @override
+  Future<MapNavigationPreflightResult> ensureReady() async {
+    return result;
   }
 }

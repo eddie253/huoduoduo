@@ -10,6 +10,20 @@ import '../features/shipment/presentation/shipment_page.dart';
 import '../features/signature/presentation/signature_page.dart';
 import '../features/webview_shell/presentation/webview_shell_page.dart';
 
+WebviewBootstrap? resolveWebviewBootstrap(Object? extra) {
+  if (extra is WebviewBootstrap) {
+    return extra;
+  }
+  return null;
+}
+
+String resolveScannerType(Object? extra) {
+  if (extra is Map<String, dynamic>) {
+    return extra['scanType']?.toString() ?? 'default';
+  }
+  return 'default';
+}
+
 final GoRouter appRouter =
     GoRouter(initialLocation: '/login', routes: <RouteBase>[
   GoRoute(
@@ -19,8 +33,8 @@ final GoRouter appRouter =
   GoRoute(
       path: '/webview',
       builder: (BuildContext context, GoRouterState state) {
-        final bootstrap = state.extra;
-        if (bootstrap is! WebviewBootstrap) {
+        final bootstrap = resolveWebviewBootstrap(state.extra);
+        if (bootstrap == null) {
           return const LoginPage();
         }
         return WebViewShellPage(bootstrap: bootstrap);
@@ -36,11 +50,7 @@ final GoRouter appRouter =
   GoRoute(
       path: '/scanner',
       builder: (BuildContext context, GoRouterState state) {
-        final extra = state.extra;
-        String scanType = 'default';
-        if (extra is Map<String, dynamic>) {
-          scanType = extra['scanType']?.toString() ?? scanType;
-        }
+        final scanType = resolveScannerType(state.extra);
         return ScannerPage(scanType: scanType);
       }),
   GoRoute(

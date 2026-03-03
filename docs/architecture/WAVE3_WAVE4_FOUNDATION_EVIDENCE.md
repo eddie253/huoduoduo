@@ -1,19 +1,21 @@
-# Wave 3 / Wave 4 Foundation Evidence (PLAN10 + PLAN11 + PLAN14 + PLAN15 + PLAN16)
+# Wave 3 / Wave 4 Foundation Evidence (PLAN10 + PLAN11 + PLAN14 + PLAN15 + PLAN16 + PLAN18 + PLAN19)
 
 ## Document Scope
 
-This evidence file tracks delivery status after PLAN10 implementation, PLAN11 login-session parity convergence, PLAN14 post-login native UI convergence, PLAN15 unfinished-item closure, and PLAN16 UI/navigation/theme convergence.
+This evidence file tracks delivery status after PLAN10 implementation, PLAN11 login-session parity convergence, PLAN14 post-login native UI convergence, PLAN15 unfinished-item closure, PLAN16 UI/navigation/theme convergence, PLAN18 Flutter test/coverage uplift, and PLAN19 scanner legacy-style parity.
 
 1. PLAN10: bridge/native capability foundation + queue hardening.
 2. PLAN11: login-session 1:1 behavior parity + modernized login UI (without contract change).
 3. PLAN14: post-login native UI inventory and parity mapping.
 4. PLAN15: P9-P14 remaining gap closure (coverage stability + high-risk test uplift + parity sign-off docs).
 5. PLAN16: bottom-tab back behavior parity + settings entry + theme presets/dark mode.
+6. PLAN18: Flutter unit-test uplift + map/navigation preflight branch completion + coverage gate raise to 65.
+7. PLAN19: scanner visual parity alignment to legacy style without behavior/route contract change.
 
 ## Evidence Metadata
 
-1. Updated at: `2026-03-02 14:05:00 +08:00`
-2. Commit baseline: `local working tree (PLAN16 implemented, uncommitted)`
+1. Updated at: `2026-03-03 05:28:00 +08:00`
+2. Commit baseline: `local working tree (PLAN18 + PLAN19 implemented, uncommitted)`
 3. Environment: local Windows + Android toolchain + UAT-capable BFF config
 4. Credential policy: all account/token values are masked in reports/docs
 
@@ -53,14 +55,41 @@ Note:
 
 Result summary from latest `npm run mobile:test:coverage` + `npm run mobile:coverage:check`:
 
-1. line coverage: `58.07%` (`953/1641`)
-2. threshold: `50%` (PASS)
+1. line coverage: `66.79%` (`1289/1930`)
+2. threshold: `65%` (PASS)
+3. `map_navigation_preflight_service.dart`: `100.00%` (`51/51`)
 
-PLAN15 uplift:
+PLAN18 uplift:
 
-1. Before uplift (pre-PLAN15 local baseline): `44.91%` (`631/1405`)
-2. After uplift: `58.07%` (`953/1641`)
-3. Net gain: `+13.16pp`
+1. Before uplift (PLAN18 baseline): `58.00%` (`953/1643`)
+2. After uplift: `66.75%` (`1285/1925`)
+3. Net gain: `+8.75pp`
+4. Added tests:
+   1. `notifications_page_test.dart`
+   2. `maps_page_test.dart`
+   3. `signature_page_test.dart`
+   4. `scanner_page_test.dart`
+   5. `webview_shell_navigation_helper_test.dart`
+   6. `router_test.dart`
+
+## PLAN19 Scanner Legacy Parity Evidence
+
+1. Scanner visual alignment:
+   1. top scanner header is locked to legacy orange (`#ff5f00`)
+   2. title remains `Scanner (scanType)` and is white/centered
+   3. close/back affordance is left-aligned in header
+   4. bottom tool row keeps four legacy-style icon slots
+2. Scanner behavior invariants remain unchanged:
+   1. close action pops current page
+   2. blank scan does not pop
+   3. first non-empty scan pops once and returns first payload
+3. Verification command:
+   1. `flutter test test/features/scanner/presentation/scanner_page_test.dart` -> PASS
+4. Coverage snapshot after PLAN19:
+   1. `npm run mobile:test:coverage` -> PASS
+   2. `npm run mobile:coverage:check` -> PASS
+   3. Flutter line coverage: `66.79%` (`1289/1930`)
+   4. `scanner_page.dart`: `77.08%` (`37/48`)
 
 ## PLAN16 Navigation / Theme Evidence
 
@@ -115,6 +144,10 @@ Expanded tests:
 1. `docs/plans/PLAN15.md`
 6. PLAN16 execution plan:
 1. `docs/plans/PLAN16.md`
+7. PLAN18 execution plan:
+1. `docs/plans/PLAN18.md`
+8. PLAN19 execution plan:
+1. `docs/plans/PLAN19.md`
 
 ## Scope Exclusion Confirmation
 

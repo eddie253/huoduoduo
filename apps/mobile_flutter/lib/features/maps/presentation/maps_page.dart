@@ -1,8 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../webview_shell/application/map_navigation_preflight_service.dart';
+
+typedef LaunchExternalPort = Future<bool> Function(Uri uri, LaunchMode mode);
+
 class MapsPage extends StatefulWidget {
-  const MapsPage({super.key});
+  const MapsPage({
+    super.key,
+    MapNavigationPreflightPort? mapPreflight,
+    LaunchExternalPort? launchExternal,
+  })  : _mapPreflight =
+            mapPreflight ?? const DefaultMapNavigationPreflightService(),
+        _launchExternal = launchExternal ?? _defaultLaunchExternal;
+
+  static Future<bool> _defaultLaunchExternal(Uri uri, LaunchMode mode) {
+    return launchUrl(uri, mode: mode);
+  }
+
+  final MapNavigationPreflightPort _mapPreflight;
+  final LaunchExternalPort _launchExternal;
 
   @override
   State<MapsPage> createState() => _MapsPageState();
@@ -43,7 +60,13 @@ class _MapsPageState extends State<MapsPage> {
       'dir_action': 'navigate',
     });
 
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    final preflight = await widget._mapPreflight.ensureReady();
+    if (!preflight.allowed) {
+      _showMessage(preflight.message ?? 'Navigation preflight failed.');
+      return;
+    }
+
+    if (!await widget._launchExternal(uri, LaunchMode.externalApplication)) {
       _showMessage('Failed to open map application.');
     }
   }
@@ -56,7 +79,7 @@ class _MapsPageState extends State<MapsPage> {
     }
 
     final uri = Uri(scheme: 'tel', path: phone);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    if (!await widget._launchExternal(uri, LaunchMode.externalApplication)) {
       _showMessage('Failed to open dialer.');
     }
   }

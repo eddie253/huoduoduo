@@ -23,8 +23,9 @@ This document defines testing placement and execution strategy for the huoduoduo
 2. Flutter verification baseline:
    1. `flutter analyze`
    2. `flutter test`
-   3. `flutter build apk --debug`
-   4. iOS compile gate in macOS CI: `flutter build ios --no-codesign`
+   3. `npm run mobile:test:coverage` + `npm run mobile:coverage:check` (line coverage >= 65)
+   4. `flutter build apk --debug`
+   5. iOS compile gate in macOS CI: `flutter build ios --no-codesign`
 
 ## CI Ownership
 1. `bff_gateway` job owns Node/Nest quality gates.

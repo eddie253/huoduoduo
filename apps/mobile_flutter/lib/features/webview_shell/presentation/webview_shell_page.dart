@@ -7,11 +7,12 @@ import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_models.dart';
 import '../application/js_bridge_service.dart';
+import '../application/map_navigation_preflight_service.dart';
+import '../application/webview_shell_navigation_helper.dart';
 import '../domain/shell_navigation_state.dart';
 import '../domain/webview_cache_policy.dart';
 
@@ -119,20 +120,6 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   static final InAppWebViewKeepAlive _keepAlive = InAppWebViewKeepAlive();
   static final WebUri _reservationFallback =
       WebUri('https://old.huoduoduo.com.tw/app/rvt/ge.aspx');
-  static const Set<String> _externalLaunchSchemes = <String>{
-    'tel',
-    'geo',
-    'google.navigation',
-    'comgooglemaps',
-    'intent',
-    'sms',
-    'mailto',
-  };
-  static const Set<String> _externalMapHosts = <String>{
-    'www.google.com',
-    'maps.google.com',
-    'maps.app.goo.gl',
-  };
 
   static const String _bridgeAdapterScript = '''
 (function () {
@@ -180,6 +167,10 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
 ''';
 
   final JsBridgeService _bridgeService = JsBridgeService();
+  final MapNavigationPreflightPort _mapNavigationPreflight =
+      const DefaultMapNavigationPreflightService();
+  final WebviewShellNavigationHelper _navigationHelper =
+      WebviewShellNavigationHelper();
   final WebviewCachePolicyResolver _cachePolicyResolver =
       const WebviewCachePolicyResolver();
 
@@ -441,22 +432,19 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   }
 
   bool _isAllowedHost(String? host) {
-    if (host == null || host.isEmpty) {
-      return false;
-    }
-    return AppConfig.allowedWebHosts
-        .map((e) => e.toLowerCase())
-        .contains(host.toLowerCase());
+    return _navigationHelper.isAllowedHost(host);
   }
 
   WebUri? _normalizeAllowedUri(WebUri uri) {
-    if (uri.scheme.toLowerCase() != 'https') {
+    final parsed = Uri.tryParse(uri.toString());
+    if (parsed == null) {
       return null;
     }
-    if (!_isAllowedHost(uri.host)) {
+    final normalized = _navigationHelper.normalizeAllowedHttpsUri(parsed);
+    if (normalized == null) {
       return null;
     }
-    return uri;
+    return WebUri(normalized.toString());
   }
 
   Future<bool> _tryLaunchExternal(WebUri webUri) async {
@@ -465,15 +453,23 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       return false;
     }
 
-    final scheme = parsed.scheme.toLowerCase();
-    final host = parsed.host.toLowerCase();
-    final bool isMapPathOnGoogle = host == 'www.google.com' &&
-        parsed.path.toLowerCase().startsWith('/maps');
-    final bool shouldLaunch = _externalLaunchSchemes.contains(scheme) ||
-        ((scheme == 'https' || scheme == 'http') &&
-            (_externalMapHosts.contains(host) || isMapPathOnGoogle));
-    if (!shouldLaunch) {
+    final decision = _navigationHelper.classifyExternalUri(parsed);
+    if (!decision.shouldLaunchExternally) {
       return false;
+    }
+
+    if (decision.requiresMapPreflight) {
+      final preflight = await _mapNavigationPreflight.ensureReady();
+      if (!preflight.allowed) {
+        if (mounted) {
+          setState(() {
+            _navState = _navState.copyWith(
+              errorText: _navigationHelper.resolvePreflightError(preflight),
+            );
+          });
+        }
+        return false;
+      }
     }
 
     return launchUrl(parsed, mode: LaunchMode.externalApplication);
@@ -559,7 +555,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       if (mounted) {
         setState(() {
           _navState = _navState.copyWith(
-            errorText: 'Blocked navigation to non-whitelisted domain.',
+            errorText: WebviewShellNavigationHelper.blockedNavigationMessage,
           );
         });
       }
@@ -961,7 +957,8 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
               if (mounted) {
                 setState(() {
                   _navState = _navState.copyWith(
-                    errorText: 'Blocked navigation to non-whitelisted domain.',
+                    errorText:
+                        WebviewShellNavigationHelper.blockedNavigationMessage,
                   );
                 });
               }

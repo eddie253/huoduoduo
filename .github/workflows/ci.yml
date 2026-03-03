@@ -72,7 +72,7 @@ jobs:
         run: flutter test --coverage
       - name: Check Flutter line coverage threshold
         working-directory: .
-        run: node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 50
+        run: node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 65
       - name: Build Android debug APK
         run: flutter build apk --debug
       - name: Collect mobile coverage artifacts
