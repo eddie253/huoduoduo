@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/domain/auth_models.dart';
+import '../features/arrival_upload_errors/presentation/arrival_upload_errors_page.dart';
 import '../features/auth/presentation/login_page.dart';
 import '../features/maps/presentation/maps_page.dart';
 import '../features/notifications/presentation/notifications_page.dart';
+import '../features/proxy_menu/presentation/proxy_menu_page.dart';
 import '../features/scanner/presentation/scanner_page.dart';
 import '../features/settings/presentation/settings_page.dart';
 import '../features/shipment/presentation/shipment_page.dart';
@@ -56,6 +58,15 @@ final GoRouter appRouter =
   GoRoute(
       path: '/maps',
       builder: (BuildContext context, GoRouterState state) => const MapsPage()),
+  GoRoute(
+      path: '/arrival-upload-errors',
+      builder: (BuildContext context, GoRouterState state) =>
+          const ArrivalUploadErrorsPage()),
+  GoRoute(
+      path: '/proxy-menu',
+      builder: (BuildContext context, GoRouterState state) =>
+          const ProxyMenuPage()),
+  // Keep route for internal diagnostics only. Legacy menu no longer maps to this.
   GoRoute(
       path: '/notifications',
       builder: (BuildContext context, GoRouterState state) =>

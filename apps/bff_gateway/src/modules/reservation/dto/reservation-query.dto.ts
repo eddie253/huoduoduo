@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class ReservationQueryDto {
   @IsOptional()
@@ -9,5 +9,6 @@ export class ReservationQueryDto {
 export class DeleteReservationQueryDto extends ReservationQueryDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(512)
   address!: string;
 }

@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { LegacySoapClient } from '../../adapters/soap/legacy-soap.client';
-import { AuthService, WebviewBootstrapDto } from '../auth/auth.service';
+import {
+  P1_CONTRACT_LIMITS,
+  ensureIsoDatetime,
+  truncateMax
+} from '../../core/contracts/p1-contract-policy';
+import { AuthService } from '../auth/auth.service';
+import { WebviewBootstrapDto } from '../auth/dto/auth-response.dto';
 
 export interface BulletinDto {
   message: string;
@@ -31,9 +37,13 @@ export class WebviewService {
     }
 
     return {
-      message: current.title,
+      message: truncateMax(current.title, P1_CONTRACT_LIMITS.bulletinMessage),
       hasAnnouncement: true,
-      updatedAt: current.date
+      updatedAt: ensureIsoDatetime(
+        'bootstrap.bulletin.updatedAt',
+        current.date,
+        P1_CONTRACT_LIMITS.datetime
+      )
     };
   }
 }

@@ -5,7 +5,7 @@ Provide deterministic and enforceable coverage gates for the monorepo.
 
 ## Coverage Engines
 1. BFF (`apps/bff_gateway`): Jest with `coverageProvider: v8`.
-2. Mobile (`apps/mobile_flutter`): `flutter test --coverage` (LCOV).
+2. Mobile (`apps/mobile_flutter`): `flutter test --coverage test lib` (LCOV).
 
 ## Coverage Thresholds
 ### BFF Global Thresholds
@@ -18,6 +18,7 @@ Provide deterministic and enforceable coverage gates for the monorepo.
 1. baseline gate: line coverage >= 65
 2. target (ratchet): line coverage >= 80
 3. threshold is enforced by `ops/ci/check-flutter-coverage.js`
+4. Flutter coverage parser excludes `*_test.dart` files from gate calculation.
 
 ## Report Outputs
 Coverage reports are normalized under:

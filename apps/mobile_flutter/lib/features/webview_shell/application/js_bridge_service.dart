@@ -278,6 +278,18 @@ class JsBridgeService {
 
     final opened = await _actionExecutor.launchExternal(mapUri);
     if (!opened) {
+      final Uri? fallbackMapUri = _buildWebFallbackMapUri(mapUri);
+      if (fallbackMapUri != null) {
+        final fallbackOpened = await _actionExecutor.launchExternal(
+          fallbackMapUri,
+        );
+        if (fallbackOpened) {
+          return _ok(
+            'map_opened',
+            data: <String, dynamic>{'url': fallbackMapUri.toString()},
+          );
+        }
+      }
       return _error(
         BridgeErrorCode.runtimeError,
         'Failed to open map application',
@@ -602,6 +614,44 @@ class JsBridgeService {
       query['origin'] = normalizedOrigin;
     }
     return Uri.https('www.google.com', '/maps/dir/', query);
+  }
+
+  Uri? _buildWebFallbackMapUri(Uri original) {
+    final scheme = original.scheme.toLowerCase();
+    if (scheme == 'https' || scheme == 'http') {
+      return null;
+    }
+
+    String? destination;
+    if (scheme == 'google.navigation') {
+      destination = original.queryParameters['q'];
+      if (destination == null || destination.trim().isEmpty) {
+        final path = original.path.trim();
+        if (path.startsWith('q=')) {
+          destination = path.substring(2).trim();
+        } else if (path.isNotEmpty) {
+          destination = path;
+        }
+      }
+    } else if (scheme == 'comgooglemaps' || scheme == 'geo') {
+      destination = original.queryParameters['q'] ??
+          original.queryParameters['daddr'] ??
+          original.queryParameters['destination'];
+    } else if (scheme == 'intent') {
+      destination = original.queryParameters['q'] ??
+          original.queryParameters['daddr'] ??
+          original.queryParameters['destination'];
+      destination ??=
+          original.path.trim().isEmpty ? null : original.path.trim();
+    }
+
+    final trimmedDestination = destination?.trim();
+    if (trimmedDestination == null || trimmedDestination.isEmpty) {
+      return null;
+    }
+    return _buildGoogleNavigationUri(
+      destination: _sanitizeMapDestination(trimmedDestination),
+    );
   }
 
   Uri? _parseHttpsUri(String raw, {required Set<String> allowedHosts}) {

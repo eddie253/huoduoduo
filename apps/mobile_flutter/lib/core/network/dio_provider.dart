@@ -15,7 +15,7 @@ final tokenStorageProvider = Provider<TokenStorage>((ref) {
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
       baseUrl: AppConfig.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 20),
       receiveTimeout: const Duration(seconds: 20),
       sendTimeout: const Duration(seconds: 20),
       headers: <String, String>{'Accept': 'application/json'}));

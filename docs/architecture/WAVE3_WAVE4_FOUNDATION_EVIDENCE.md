@@ -84,7 +84,7 @@ PLAN18 uplift:
    2. blank scan does not pop
    3. first non-empty scan pops once and returns first payload
 3. Verification command:
-   1. `flutter test test/features/scanner/presentation/scanner_page_test.dart` -> PASS
+   1. `flutter test lib/features/scanner/presentation/scanner_page_test.dart` -> PASS
 4. Coverage snapshot after PLAN19:
    1. `npm run mobile:test:coverage` -> PASS
    2. `npm run mobile:coverage:check` -> PASS
@@ -121,14 +121,14 @@ PLAN18 uplift:
 
 New tests:
 
-1. `apps/mobile_flutter/test/features/webview_shell/application/bridge_action_executor_test.dart`
-2. `apps/mobile_flutter/test/features/webview_shell/application/webview_session_cleanup_service_test.dart`
-3. `apps/mobile_flutter/test/features/shipment/data/local/media_local_provider_test.dart`
-4. `apps/mobile_flutter/test/features/shipment/presentation/shipment_page_test.dart`
+1. `apps/mobile_flutter/lib/features/webview_shell/application/bridge_action_executor_test.dart`
+2. `apps/mobile_flutter/lib/features/webview_shell/application/webview_session_cleanup_service_test.dart`
+3. `apps/mobile_flutter/lib/features/shipment/data/local/media_local_provider_test.dart`
+4. `apps/mobile_flutter/lib/features/shipment/presentation/shipment_page_test.dart`
 
 Expanded tests:
 
-1. `apps/mobile_flutter/test/features/auth/application/auth_controller_test.dart` (secure storage failure path)
+1. `apps/mobile_flutter/lib/features/auth/application/auth_controller_test.dart` (secure storage failure path)
 
 ## Architecture / Parity Outputs
 

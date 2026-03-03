@@ -148,6 +148,8 @@ class DefaultMapNavigationPreflightService
     GoogleAccountPort googleAccountPort =
         const MethodChannelGoogleAccountPort(),
     this.requireGoogleAccountOnAndroid = true,
+    this.blockWhenGoogleAccountUnverified = false,
+    this.blockWhenGoogleMapsUnavailable = false,
   })  : _locationAccessPort = locationAccessPort,
         _mapsAvailabilityPort = mapsAvailabilityPort,
         _googleAccountPort = googleAccountPort;
@@ -156,6 +158,8 @@ class DefaultMapNavigationPreflightService
   final GoogleMapsAvailabilityPort _mapsAvailabilityPort;
   final GoogleAccountPort _googleAccountPort;
   final bool requireGoogleAccountOnAndroid;
+  final bool blockWhenGoogleAccountUnverified;
+  final bool blockWhenGoogleMapsUnavailable;
 
   @override
   Future<MapNavigationPreflightResult> ensureReady() async {
@@ -176,7 +180,8 @@ class DefaultMapNavigationPreflightService
     if (!serviceStatus.isEnabled) {
       return const MapNavigationPreflightResult.block(
         reason: MapNavigationBlockReason.locationServiceDisabled,
-        message: 'Location service is disabled. Please turn on location first.',
+        message:
+            'Location is turned off. Please enable location service and try again.',
       );
     }
 
@@ -214,12 +219,16 @@ class DefaultMapNavigationPreflightService
     if (!(permissionStatus.isGranted || permissionStatus.isLimited)) {
       return const MapNavigationPreflightResult.block(
         reason: MapNavigationBlockReason.locationPermissionDenied,
-        message: 'Location permission is required for navigation.',
+        message:
+            'Location permission is required for navigation. Please allow location access in system settings.',
       );
     }
 
     final bool mapsAvailable = await _mapsAvailabilityPort.isAvailable();
     if (!mapsAvailable) {
+      if (!blockWhenGoogleMapsUnavailable) {
+        return const MapNavigationPreflightResult.allow();
+      }
       return const MapNavigationPreflightResult.block(
         reason: MapNavigationBlockReason.googleMapsUnavailable,
         message: 'Google Maps app is unavailable on this device.',
@@ -235,6 +244,9 @@ class DefaultMapNavigationPreflightService
 
     final GoogleAccountState accountState = await _googleAccountPort.state();
     if (accountState == GoogleAccountState.missing) {
+      if (!blockWhenGoogleAccountUnverified) {
+        return const MapNavigationPreflightResult.allow();
+      }
       return const MapNavigationPreflightResult.block(
         reason: MapNavigationBlockReason.googleAccountMissing,
         message:
@@ -242,6 +254,9 @@ class DefaultMapNavigationPreflightService
       );
     }
     if (accountState == GoogleAccountState.unknown) {
+      if (!blockWhenGoogleAccountUnverified) {
+        return const MapNavigationPreflightResult.allow();
+      }
       return const MapNavigationPreflightResult.block(
         reason: MapNavigationBlockReason.googleAccountUnknown,
         message:

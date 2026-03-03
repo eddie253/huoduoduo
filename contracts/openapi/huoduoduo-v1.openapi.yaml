@@ -1,8 +1,15 @@
 openapi: 3.1.0
 info:
   title: Huoduoduo Express BFF API
-  version: 0.2.2
+  version: 0.2.6
   description: Transitional REST API in front of legacy SOAP services (UAT baseline).
+  x-doc-id: HDD-OPENAPI-CONTRACT
+  x-owner: BFF Lead
+  x-last-updated: 2026-03-03
+  x-review-status: Draft for management review
+  x-language-pair:
+    zh-TW: docs/architecture/API_SPEC_OPENAPI_PLAN24.zh-TW.md
+    en: docs/architecture/API_SPEC_OPENAPI_PLAN24.en.md
 servers:
   - url: https://api.example.com/v1
     description: Production
@@ -30,11 +37,14 @@ paths:
                 properties:
                   status:
                     type: string
+                    maxLength: 32
                   service:
                     type: string
+                    maxLength: 64
                   timestamp:
                     type: string
                     format: date-time
+                    maxLength: 40
   /auth/login:
     post:
       tags: [Auth]
@@ -77,6 +87,7 @@ paths:
               properties:
                 refreshToken:
                   type: string
+                  maxLength: 1024
       responses:
         "200":
           description: Refresh success.
@@ -106,6 +117,7 @@ paths:
               properties:
                 refreshToken:
                   type: string
+                  maxLength: 1024
       responses:
         "200":
           description: Logout success.
@@ -125,6 +137,7 @@ paths:
                     type: boolean
                   subject:
                     type: string
+                    maxLength: 64
   /bootstrap/webview:
     get:
       tags: [Bootstrap]
@@ -197,6 +210,7 @@ paths:
                   registeredAt:
                     type: string
                     format: date-time
+                    maxLength: 40
   /shipments/{trackingNo}:
     get:
       tags: [Shipments]
@@ -209,6 +223,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 32
       responses:
         "200":
           description: Shipment detail payload.
@@ -239,6 +254,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 32
       requestBody:
         required: true
         content:
@@ -274,6 +290,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 32
       requestBody:
         required: true
         content:
@@ -351,8 +368,10 @@ paths:
                 properties:
                   reservationNo:
                     type: string
+                    maxLength: 64
                   mode:
                     type: string
+                    maxLength: 16
                     enum: [standard, bulk]
   /reservations/{id}:
     delete:
@@ -366,12 +385,14 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 64
         - $ref: '#/components/parameters/ReservationMode'
         - name: address
           in: query
           required: true
           schema:
             type: string
+            maxLength: 512
       responses:
         "200":
           description: Reservation deleted.
@@ -454,20 +475,26 @@ components:
       properties:
         code:
           type: string
+          maxLength: 64
         message:
           type: string
+          maxLength: 1024
     LoginRequest:
       type: object
       required: [account, password, deviceId, platform]
       properties:
         account:
           type: string
+          maxLength: 64
         password:
           type: string
+          maxLength: 128
         deviceId:
           type: string
+          maxLength: 64
         platform:
           type: string
+          maxLength: 16
           enum: [android, ios]
     RefreshResponse:
       type: object
@@ -475,16 +502,20 @@ components:
       properties:
         accessToken:
           type: string
+          maxLength: 4096
         refreshToken:
           type: string
+          maxLength: 1024
     LoginResponse:
       type: object
       required: [accessToken, refreshToken, user, webviewBootstrap]
       properties:
         accessToken:
           type: string
+          maxLength: 4096
         refreshToken:
           type: string
+          maxLength: 1024
         user:
           $ref: '#/components/schemas/UserProfile'
         webviewBootstrap:
@@ -495,12 +526,16 @@ components:
       properties:
         id:
           type: string
+          maxLength: 64
         contractNo:
           type: string
+          maxLength: 64
         name:
           type: string
+          maxLength: 128
         role:
           type: string
+          maxLength: 32
     WebviewBootstrap:
       type: object
       required: [baseUrl, registerUrl, resetPasswordUrl, cookies]
@@ -508,14 +543,18 @@ components:
         baseUrl:
           type: string
           format: uri
+          maxLength: 2048
         registerUrl:
           type: string
           format: uri
+          maxLength: 2048
         resetPasswordUrl:
           type: string
           format: uri
+          maxLength: 2048
         cookies:
           type: array
+          maxItems: 20
           items:
             $ref: '#/components/schemas/WebCookie'
     WebCookie:
@@ -524,12 +563,16 @@ components:
       properties:
         name:
           type: string
+          maxLength: 64
         value:
           type: string
+          maxLength: 4096
         domain:
           type: string
+          maxLength: 255
         path:
           type: string
+          maxLength: 255
         secure:
           type: boolean
         httpOnly:
@@ -540,45 +583,57 @@ components:
       properties:
         message:
           type: string
+          maxLength: 2000
         hasAnnouncement:
           type: boolean
         updatedAt:
           type: string
           nullable: true
+          maxLength: 40
     DeliveryRequest:
       type: object
       required: [imageBase64, imageFileName, latitude, longitude]
       properties:
         driverId:
           type: string
+          maxLength: 64
         imageBase64:
           type: string
         imageFileName:
           type: string
+          maxLength: 255
         signatureBase64:
           type: string
         latitude:
           type: string
+          maxLength: 32
         longitude:
           type: string
+          maxLength: 32
     ExceptionRequest:
       type: object
       required: [imageBase64, imageFileName, reasonCode, latitude, longitude]
       properties:
         driverId:
           type: string
+          maxLength: 64
         imageBase64:
           type: string
         imageFileName:
           type: string
+          maxLength: 255
         reasonCode:
           type: string
+          maxLength: 64
         reasonMessage:
           type: string
+          maxLength: 1024
         latitude:
           type: string
+          maxLength: 32
         longitude:
           type: string
+          maxLength: 32
     ShipmentResponse:
       type: object
       required:
@@ -594,64 +649,86 @@ components:
       properties:
         trackingNo:
           type: string
+          maxLength: 32
         recipient:
           type: string
+          maxLength: 128
         address:
           type: string
+          maxLength: 512
         phone:
           type: string
+          maxLength: 32
         mobile:
           type: string
+          maxLength: 32
         zipCode:
           type: string
+          maxLength: 16
         city:
           type: string
+          maxLength: 64
         district:
           type: string
+          maxLength: 64
         status:
           type: string
+          maxLength: 64
         signedAt:
           type: string
           nullable: true
+          maxLength: 40
         signedImageFileName:
           type: string
           nullable: true
+          maxLength: 255
         signedLocation:
           type: string
           nullable: true
+          maxLength: 64
     CreateReservationRequest:
       type: object
       required: [address, shipmentNos]
       properties:
         areaCode:
           type: string
+          maxLength: 64
         address:
           type: string
+          maxLength: 512
         shipmentNos:
           type: array
+          maxItems: 200
           items:
             type: string
+            maxLength: 64
         fee:
           type: number
         note:
           type: string
+          maxLength: 1024
     ReservationResponse:
       type: object
       required: [reservationNo, address, shipmentNos, mode]
       properties:
         reservationNo:
           type: string
+          maxLength: 64
         address:
           type: string
+          maxLength: 512
         fee:
           type: number
           nullable: true
         shipmentNos:
           type: array
+          maxItems: 200
           items:
             type: string
+            maxLength: 64
         mode:
           type: string
+          maxLength: 16
           enum: [standard, bulk]
     RegisterPushTokenRequest:
       type: object
@@ -659,11 +736,14 @@ components:
       properties:
         deviceId:
           type: string
+          maxLength: 64
         platform:
           type: string
+          maxLength: 16
           enum: [android, ios]
         fcmToken:
           type: string
+          maxLength: 4096
         appVersion:
           type: integer
           minimum: 0

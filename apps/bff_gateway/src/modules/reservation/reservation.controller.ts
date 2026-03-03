@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req } from
 import { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
 import { CreateReservationDto } from './dto/create-reservation.dto';
+import { ReservationParamDto } from './dto/reservation-param.dto';
 import { DeleteReservationQueryDto, ReservationQueryDto } from './dto/reservation-query.dto';
 import { ReservationResponseDto } from './dto/reservation-response.dto';
 import { ReservationService } from './reservation.service';
@@ -37,11 +38,11 @@ export class ReservationController {
   @Delete(':id')
   deleteReservation(
     @Req() request: Request,
-    @Param('id') id: string,
+    @Param() param: ReservationParamDto,
     @Query() query: DeleteReservationQueryDto
   ): Promise<{ ok: boolean }> {
     const claims = (request as Request & { user: AuthClaims }).user;
     const mode = query.mode ?? 'standard';
-    return this.reservationService.deleteReservation(mode, id, query.address, claims);
+    return this.reservationService.deleteReservation(mode, param.id, query.address, claims);
   }
 }

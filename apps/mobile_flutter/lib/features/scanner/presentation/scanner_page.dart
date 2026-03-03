@@ -9,14 +9,70 @@ typedef ScannerViewBuilder = Widget Function(
 const String scannerHintText = 'Point the camera to barcode or QR code';
 const Key scannerCloseButtonKey = Key('scanner_close_button');
 const Key scannerToolRowKey = Key('scanner_tool_row');
+const Key scannerFlashButtonKey = Key('scanner_flash_button');
+const Key scannerKeypadButtonKey = Key('scanner_keypad_button');
+const Key scannerSettingButtonKey = Key('scanner_setting_button');
 
 String scannerTitleFor(String scanType) => 'Scanner ($scanType)';
 
-String firstNonEmptyBarcodeValue(BarcodeCapture capture) {
+enum ScannerCodeMode {
+  all,
+  oneDimensional,
+  twoDimensional,
+}
+
+String scannerCodeModeLabel(ScannerCodeMode mode) {
+  switch (mode) {
+    case ScannerCodeMode.oneDimensional:
+      return '1D';
+    case ScannerCodeMode.twoDimensional:
+      return '2D';
+    case ScannerCodeMode.all:
+      return 'All';
+  }
+}
+
+const Set<BarcodeFormat> _twoDimensionalFormats = <BarcodeFormat>{
+  BarcodeFormat.qrCode,
+  BarcodeFormat.dataMatrix,
+  BarcodeFormat.pdf417,
+  BarcodeFormat.aztec,
+};
+
+bool isBarcodeAllowedForMode({
+  required BarcodeFormat format,
+  required ScannerCodeMode mode,
+}) {
+  if (mode == ScannerCodeMode.all ||
+      format == BarcodeFormat.unknown ||
+      format == BarcodeFormat.all) {
+    return true;
+  }
+  final bool isTwoDimensional = _twoDimensionalFormats.contains(format);
+  if (mode == ScannerCodeMode.twoDimensional) {
+    return isTwoDimensional;
+  }
+  return !isTwoDimensional;
+}
+
+String firstNonEmptyBarcodeValueForMode(
+  BarcodeCapture capture,
+  ScannerCodeMode mode,
+) {
   return capture.barcodes
+      .where(
+        (barcode) => isBarcodeAllowedForMode(
+          format: barcode.format,
+          mode: mode,
+        ),
+      )
       .map((barcode) => barcode.rawValue ?? '')
       .firstWhere((item) => item.trim().isNotEmpty, orElse: () => '')
       .trim();
+}
+
+String firstNonEmptyBarcodeValue(BarcodeCapture capture) {
+  return firstNonEmptyBarcodeValueForMode(capture, ScannerCodeMode.all);
 }
 
 class ScannerPage extends StatefulWidget {
@@ -43,6 +99,8 @@ class _ScannerPageState extends State<ScannerPage> {
   );
 
   bool _isCompleted = false;
+  bool _torchOn = false;
+  ScannerCodeMode _scanMode = ScannerCodeMode.all;
 
   @override
   void dispose() {
@@ -56,6 +114,111 @@ class _ScannerPageState extends State<ScannerPage> {
     }
     _isCompleted = true;
     Navigator.of(context).pop(value);
+  }
+
+  Future<void> _toggleTorch() async {
+    try {
+      await _controller.toggleTorch();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _torchOn = !_torchOn;
+      });
+    } catch (_) {
+      // Ignore torch errors on devices that do not support flashlight.
+    }
+  }
+
+  Future<void> _openManualInputPad() async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return const _ManualInputPad();
+      },
+    );
+    if (!mounted || result == null) {
+      return;
+    }
+    final trimmed = result.trim();
+    if (trimmed.isNotEmpty) {
+      _completeWith(trimmed);
+    }
+  }
+
+  Future<void> _openScanModeSettings() async {
+    ScannerCodeMode selectedMode = _scanMode;
+    final ScannerCodeMode? nextMode = await showDialog<ScannerCodeMode>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('掃描類型設定'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setDialogState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      ChoiceChip(
+                        label: const Text('一維 + 二維'),
+                        selected: selectedMode == ScannerCodeMode.all,
+                        onSelected: (_) {
+                          setDialogState(() {
+                            selectedMode = ScannerCodeMode.all;
+                          });
+                        },
+                      ),
+                      ChoiceChip(
+                        label: const Text('僅一維'),
+                        selected:
+                            selectedMode == ScannerCodeMode.oneDimensional,
+                        onSelected: (_) {
+                          setDialogState(() {
+                            selectedMode = ScannerCodeMode.oneDimensional;
+                          });
+                        },
+                      ),
+                      ChoiceChip(
+                        label: const Text('僅二維'),
+                        selected:
+                            selectedMode == ScannerCodeMode.twoDimensional,
+                        onSelected: (_) {
+                          setDialogState(() {
+                            selectedMode = ScannerCodeMode.twoDimensional;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(selectedMode),
+              child: const Text('套用'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || nextMode == null) {
+      return;
+    }
+    setState(() {
+      _scanMode = nextMode;
+    });
   }
 
   @override
@@ -119,16 +282,22 @@ class _ScannerPageState extends State<ScannerPage> {
             left: 20,
             right: 20,
             bottom: 120,
-            child: Text(
-              scannerHintText,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-              ),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  scannerHintText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+                SizedBox(height: 8),
+                _ModeBadge(),
+              ],
             ),
           ),
-          const Positioned(
+          Positioned(
             left: 0,
             right: 0,
             bottom: 20,
@@ -138,13 +307,25 @@ class _ScannerPageState extends State<ScannerPage> {
                 key: scannerToolRowKey,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  _LegacyToolIcon(icon: Icons.flashlight_on_outlined),
-                  SizedBox(width: 20),
-                  _LegacyToolIcon(icon: Icons.edit_outlined),
-                  SizedBox(width: 20),
-                  _LegacyToolIcon(icon: Icons.photo_library_outlined),
-                  SizedBox(width: 20),
-                  _LegacyToolIcon(icon: Icons.reply_outlined),
+                  _LegacyToolIconButton(
+                    buttonKey: scannerFlashButtonKey,
+                    icon: _torchOn
+                        ? Icons.flashlight_off_outlined
+                        : Icons.flashlight_on_outlined,
+                    onPressed: _toggleTorch,
+                  ),
+                  const SizedBox(width: 20),
+                  _LegacyToolIconButton(
+                    buttonKey: scannerKeypadButtonKey,
+                    icon: Icons.dialpad_outlined,
+                    onPressed: _openManualInputPad,
+                  ),
+                  const SizedBox(width: 20),
+                  _LegacyToolIconButton(
+                    buttonKey: scannerSettingButtonKey,
+                    icon: Icons.settings_outlined,
+                    onPressed: _openScanModeSettings,
+                  ),
                 ],
               ),
             ),
@@ -161,7 +342,7 @@ class _ScannerPageState extends State<ScannerPage> {
     return MobileScanner(
       controller: controller,
       onDetect: (BarcodeCapture capture) {
-        final value = firstNonEmptyBarcodeValue(capture);
+        final value = firstNonEmptyBarcodeValueForMode(capture, _scanMode);
         if (value.isNotEmpty) {
           onDetectedValue(value);
         }
@@ -170,21 +351,190 @@ class _ScannerPageState extends State<ScannerPage> {
   }
 }
 
-class _LegacyToolIcon extends StatelessWidget {
-  const _LegacyToolIcon({required this.icon});
-
-  final IconData icon;
+class _ModeBadge extends StatelessWidget {
+  const _ModeBadge();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: const BoxDecoration(
-        color: _ScannerPageState._legacyToolBackdropColor,
-        shape: BoxShape.circle,
+    final state = context.findAncestorStateOfType<_ScannerPageState>();
+    final mode = state?._scanMode ?? ScannerCodeMode.all;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(999),
       ),
-      child: Icon(icon, color: Colors.white, size: 28),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Text(
+          'Mode: ${scannerCodeModeLabel(mode)}',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegacyToolIconButton extends StatelessWidget {
+  const _LegacyToolIconButton({
+    required this.buttonKey,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final Key buttonKey;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      key: buttonKey,
+      borderRadius: BorderRadius.circular(999),
+      onTap: onPressed,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: const BoxDecoration(
+          color: _ScannerPageState._legacyToolBackdropColor,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 28),
+      ),
+    );
+  }
+}
+
+class _ManualInputPad extends StatefulWidget {
+  const _ManualInputPad();
+
+  @override
+  State<_ManualInputPad> createState() => _ManualInputPadState();
+}
+
+class _ManualInputPadState extends State<_ManualInputPad> {
+  String _value = '';
+
+  void _append(String value) {
+    setState(() {
+      _value += value;
+    });
+  }
+
+  void _backspace() {
+    if (_value.isEmpty) {
+      return;
+    }
+    setState(() {
+      _value = _value.substring(0, _value.length - 1);
+    });
+  }
+
+  void _clear() {
+    setState(() {
+      _value = '';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Text(
+              '手動輸入',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Text(
+                _value.isEmpty ? '請輸入條碼' : _value,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: _value.isEmpty
+                      ? theme.colorScheme.onSurfaceVariant
+                      : theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 3,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 1.9,
+              children: <Widget>[
+                for (final key in const <String>[
+                  '1',
+                  '2',
+                  '3',
+                  '4',
+                  '5',
+                  '6',
+                  '7',
+                  '8',
+                  '9',
+                  '.',
+                  '0',
+                ])
+                  FilledButton(
+                    onPressed: () => _append(key),
+                    child: Text(key),
+                  ),
+                FilledButton.tonal(
+                  onPressed: _backspace,
+                  child: const Icon(Icons.backspace_outlined),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _clear,
+                    child: const Text('清除'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('取消'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: _value.trim().isEmpty
+                        ? null
+                        : () => Navigator.of(context).pop(_value.trim()),
+                    child: const Text('送出'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

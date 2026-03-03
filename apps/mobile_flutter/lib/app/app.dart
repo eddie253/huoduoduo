@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/network/network_signal_alert_host.dart';
 import 'router.dart';
 import 'theme/app_theme_controller.dart';
 
@@ -16,6 +17,11 @@ class DidiApp extends ConsumerWidget {
       title: 'Didi Express',
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
+      builder: (BuildContext context, Widget? child) {
+        return NetworkSignalAlertHost(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: seed),
         useMaterial3: true,

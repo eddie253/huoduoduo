@@ -69,7 +69,7 @@ jobs:
       - name: Analyze
         run: flutter analyze
       - name: Test
-        run: flutter test --coverage
+        run: flutter test --coverage test lib
       - name: Check Flutter line coverage threshold
         working-directory: .
         run: node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 65

@@ -10,8 +10,9 @@ This document defines testing placement and execution strategy for the huoduoduo
 
 ### Required Layout
 1. `apps/bff_gateway/src/**/*.spec.ts`: BFF unit/integration tests.
-2. `apps/mobile_flutter/test/**`: Flutter unit/widget/feature tests.
-3. `tests/e2e/**`, `tests/contracts/**`, `tests/smoke/**`: cross-service tests.
+2. `apps/mobile_flutter/lib/**/*_test.dart`: Flutter unit/widget/feature tests (colocated with source).
+3. `apps/mobile_flutter/test/**`: Flutter package-level smoke tests and shared test helpers.
+4. `tests/e2e/**`, `tests/contracts/**`, `tests/smoke/**`: cross-service tests.
 
 ## Execution Rules
 1. BFF verification baseline:
@@ -22,7 +23,7 @@ This document defines testing placement and execution strategy for the huoduoduo
    5. build
 2. Flutter verification baseline:
    1. `flutter analyze`
-   2. `flutter test`
+   2. `flutter test test lib`
    3. `npm run mobile:test:coverage` + `npm run mobile:coverage:check` (line coverage >= 65)
    4. `flutter build apk --debug`
    5. iOS compile gate in macOS CI: `flutter build ios --no-codesign`

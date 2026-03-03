@@ -5,6 +5,10 @@
 2. Strategy: add high-yield page/widget tests, complete map preflight branch coverage, and extract minimal pure helper logic from `webview_shell_page.dart`.
 3. Gate: raise Flutter coverage threshold from `50` to `65` in local scripts and CI.
 
+## Post-Plan Alignment Note
+1. Test paths recorded in this plan reflect the implementation time (`apps/mobile_flutter/test/**`).
+2. Contract alignment after PLAN19 migrated Flutter feature tests to colocated paths (`apps/mobile_flutter/lib/**/*_test.dart`).
+
 ## Scope
 1. `apps/mobile_flutter` test uplift and minimal testability refactors only.
 2. Coverage gate updates in root scripts, CI workflow, and coverage policy docs.
@@ -66,6 +70,25 @@ Execution date: `2026-03-03`.
    3. `signature_page.dart`: `90.32% (56/62)`
    4. `scanner_page.dart`: `74.42% (32/43)`
    5. `webview_shell_navigation_helper.dart`: `96.88% (31/32)`
+
+## Closure Verification Addendum
+Execution window: `2026-03-03 18:10~18:13 +08:00`.
+
+1. `npm run mobile:analyze`: PASS.
+2. `npm run mobile:test`: PASS (`136` tests).
+3. `npm run mobile:test:coverage`: PASS.
+4. `npm run mobile:coverage:check`: PASS with `65.51% (1438/2195)`.
+5. `npm run coverage:verify`: PASS.
+6. Gate stabilization done in this closure:
+   1. Added analyzer exclusion for colocated test files: `apps/mobile_flutter/analysis_options.yaml` -> `lib/**/*_test.dart`.
+   2. Added network signal alert branch/widget tests:
+      `apps/mobile_flutter/lib/core/network/network_signal_alert_host_test.dart`.
+7. Evidence logs:
+   1. `reports/test/plan18_closure_20260303/mobile_analyze.log`
+   2. `reports/test/plan18_closure_20260303/mobile_test.log`
+   3. `reports/test/plan18_closure_20260303/mobile_test_coverage.log`
+   4. `reports/test/plan18_closure_20260303/mobile_coverage_check.log`
+   5. `reports/test/plan18_closure_20260303/coverage_verify.log`
 
 ## Risk Notes
 1. `webview_shell_page.dart` remains intentionally low (`1.79%`) due heavy platform-view/plugin runtime coupling.

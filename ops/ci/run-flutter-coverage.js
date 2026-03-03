@@ -4,8 +4,13 @@ const path = require('path');
 const repoRoot = path.resolve(__dirname, '..', '..');
 const mobileDir = path.join(repoRoot, 'apps', 'mobile_flutter');
 const extraArgs = process.argv.slice(2);
+const defaultTargets = ['test', 'lib'];
 
-const args = ['test', '--coverage', ...extraArgs];
+const args = [
+  'test',
+  '--coverage',
+  ...(extraArgs.length > 0 ? extraArgs : defaultTargets),
+];
 const result = spawnSync('flutter', args, {
   cwd: mobileDir,
   stdio: 'inherit',

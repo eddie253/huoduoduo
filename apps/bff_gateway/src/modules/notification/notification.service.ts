@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { LegacySoapClient } from '../../adapters/soap/legacy-soap.client';
+import {
+  P1_CONTRACT_LIMITS,
+  ensureIsoDatetime
+} from '../../core/contracts/p1-contract-policy';
 import { RegisterPushTokenDto } from './dto/register-push-token.dto';
 
 @Injectable()
@@ -17,9 +21,14 @@ export class NotificationService {
       kind,
       dto.appVersion ?? 0
     );
+    const registeredAt = ensureIsoDatetime(
+      'push.register.registeredAt',
+      new Date().toISOString(),
+      P1_CONTRACT_LIMITS.datetime
+    );
     return {
       ok: true,
-      registeredAt: new Date().toISOString()
+      registeredAt: registeredAt!
     };
   }
 }

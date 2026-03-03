@@ -13,6 +13,7 @@ import '../../auth/domain/auth_models.dart';
 import '../application/js_bridge_service.dart';
 import '../application/map_navigation_preflight_service.dart';
 import '../application/webview_shell_navigation_helper.dart';
+import '../domain/legacy_menu_mapping.dart';
 import '../domain/shell_navigation_state.dart';
 import '../domain/webview_cache_policy.dart';
 
@@ -21,7 +22,8 @@ enum _MenuActionType {
   openScanner,
   openShipment,
   openSignature,
-  openNotifications,
+  openArrivalUploadErrors,
+  openProxyMenu,
   openSettings,
   openMaps,
   logout,
@@ -82,7 +84,7 @@ class _MenuTile {
 
   const _MenuTile.placeholder()
       : this._(
-          label: '即將開放',
+          label: '?喳??',
           icon: Icons.local_shipping_outlined,
           actionType: _MenuActionType.placeholder,
           enabled: false,
@@ -114,8 +116,8 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   static const Key topSettingsButtonKey = Key('webview.top.settingsButton');
   static const Key bottomBarKey = Key('webview.bottomBar');
 
-  static const String _defaultAnnouncement = '無公告';
-  static const String _errorAnnouncement = '載入失敗';
+  static const String _defaultAnnouncement = '系統公告';
+  static const String _errorAnnouncement = '頛憭望?';
 
   static final InAppWebViewKeepAlive _keepAlive = InAppWebViewKeepAlive();
   static final WebUri _reservationFallback =
@@ -248,163 +250,115 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     );
   }
 
+  void _showBridgeErrorIfNeeded(Map<String, dynamic> response) {
+    if (!mounted || response['ok'] == true) {
+      return;
+    }
+    final dynamic error = response['error'];
+    if (error is! Map) {
+      return;
+    }
+    final String message = error['message']?.toString().trim() ?? '';
+    if (message.isEmpty) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   List<_BottomTab> _buildTabs() => const <_BottomTab>[
         _BottomTab(
           section: ShellSection.reservation,
-          label: '預約',
+          label: '??',
           icon: Icons.calendar_month_outlined,
           activeIcon: Icons.calendar_month_rounded,
         ),
         _BottomTab(
           section: ShellSection.order,
-          label: '接單',
+          label: '?亙',
           icon: Icons.inventory_2_outlined,
           activeIcon: Icons.inventory_2_rounded,
         ),
         _BottomTab(
           section: ShellSection.signature,
-          label: '簽收',
+          label: '蝪賣',
           icon: Icons.draw_outlined,
           activeIcon: Icons.draw_rounded,
         ),
         _BottomTab(
           section: ShellSection.wallet,
-          label: '錢包',
+          label: '?Ｗ?',
           icon: Icons.account_balance_wallet_outlined,
           activeIcon: Icons.account_balance_wallet_rounded,
         ),
       ];
-
   Map<ShellSection, List<_MenuTile>> _buildMenuTiles() {
-    WebUri appUri(String path) =>
-        WebUri('https://old.huoduoduo.com.tw/app/$path');
+    final mapping = buildLegacyMenuMapping();
+    return mapping.map((section, tiles) {
+      return MapEntry(
+        section,
+        tiles.map(_menuTileFromLegacyMapping).toList(growable: false),
+      );
+    });
+  }
 
-    return <ShellSection, List<_MenuTile>>{
-      ShellSection.reservation: <_MenuTile>[
-        _MenuTile.web(
-            label: '預約貨件',
-            icon: Icons.event_available_rounded,
-            uri: appUri('rvt/ge.aspx')),
-        _MenuTile.web(
-            label: '取消預約',
-            icon: Icons.event_busy_rounded,
-            uri: appUri('rvt/ge_c.aspx')),
-        _MenuTile.web(
-            label: '已到倉庫',
-            icon: Icons.warehouse_rounded,
-            uri: appUri('inq/strg.aspx')),
-        _MenuTile.web(
-            label: '大貨預約',
-            icon: Icons.local_shipping_rounded,
-            uri: appUri('rvt/bh.aspx')),
-        _MenuTile.web(
-            label: '大貨取消預約',
-            icon: Icons.inventory_2_rounded,
-            uri: appUri('rvt/bh_c.aspx')),
-        _MenuTile.web(
-            label: '預約縣市設定',
-            icon: Icons.location_city_rounded,
-            uri: appUri('rvt/df_area.aspx')),
-        _MenuTile.web(
-            label: '押金明細',
-            icon: Icons.savings_rounded,
-            uri: appUri('inq/dep.aspx')),
-        const _MenuTile.placeholder(),
-      ],
-      ShellSection.order: <_MenuTile>[
-        const _MenuTile.scanner(
-            label: '接單', icon: Icons.qr_code_scanner_rounded, scanType: '接單'),
-        const _MenuTile.scanner(
-            label: '接單取消',
-            icon: Icons.assignment_late_rounded,
-            scanType: '接單取消'),
-        _MenuTile.web(
-            label: '接單明細',
-            icon: Icons.description_rounded,
-            uri: appUri('inq/dtl.aspx')),
-        const _MenuTile.simple(
-            label: '路線導航',
-            icon: Icons.route_rounded,
-            actionType: _MenuActionType.openMaps),
-        const _MenuTile.simple(
-            label: '一鍵上傳',
-            icon: Icons.cloud_upload_rounded,
-            actionType: _MenuActionType.openShipment),
-        const _MenuTile.simple(
-            label: '即時通知',
-            icon: Icons.notifications_active_rounded,
-            actionType: _MenuActionType.openNotifications),
-        const _MenuTile.simple(
-            label: '快速簽名',
-            icon: Icons.border_color_rounded,
-            actionType: _MenuActionType.openSignature),
-        const _MenuTile.placeholder(),
-      ],
-      ShellSection.signature: <_MenuTile>[
-        const _MenuTile.scanner(
-            label: '單筆簽收', icon: Icons.fact_check_rounded, scanType: '單筆簽收'),
-        const _MenuTile.scanner(
-            label: '多筆簽收', icon: Icons.assignment_rounded, scanType: '多筆簽收'),
-        const _MenuTile.simple(
-            label: '一鍵上傳',
-            icon: Icons.cloud_upload_rounded,
-            actionType: _MenuActionType.openShipment),
-        const _MenuTile.scanner(
-            label: '送達異常',
-            icon: Icons.local_shipping_outlined,
-            scanType: '送達異常'),
-        const _MenuTile.scanner(
-            label: '多筆送達異常',
-            icon: Icons.playlist_remove_rounded,
-            scanType: '多筆送達異常'),
-        const _MenuTile.scanner(
-            label: '取消送達',
-            icon: Icons.cancel_schedule_send_rounded,
-            scanType: '取消送達'),
-        _MenuTile.web(
-            label: '送達明細',
-            icon: Icons.list_alt_rounded,
-            uri: appUri('inq/arv.aspx')),
-        const _MenuTile.simple(
-            label: '錯誤重傳',
-            icon: Icons.cloud_sync_rounded,
-            actionType: _MenuActionType.openNotifications),
-      ],
-      ShellSection.wallet: <_MenuTile>[
-        _MenuTile.web(
-            label: '提現',
-            icon: Icons.payments_rounded,
-            uri: appUri('currency/wda.aspx')),
-        _MenuTile.web(
-            label: '帳號管理',
-            icon: Icons.badge_rounded,
-            uri: appUri('currency/bifm.aspx')),
-        _MenuTile.web(
-            label: '銀行帳號',
-            icon: Icons.credit_card_rounded,
-            uri: appUri('currency/bank.aspx')),
-        _MenuTile.web(
-            label: '帳戶日明細',
-            icon: Icons.stacked_bar_chart_rounded,
-            uri: appUri('currency/day_cy.aspx')),
-        _MenuTile.web(
-            label: '帳戶月明細',
-            icon: Icons.bar_chart_rounded,
-            uri: appUri('currency/month_cy.aspx')),
-        const _MenuTile.simple(
-            label: '代理',
-            icon: Icons.groups_rounded,
-            actionType: _MenuActionType.openNotifications),
-        const _MenuTile.simple(
-            label: '設定',
-            icon: Icons.settings_rounded,
-            actionType: _MenuActionType.openSettings),
-        const _MenuTile.simple(
-            label: '登出',
-            icon: Icons.logout_rounded,
-            actionType: _MenuActionType.logout),
-      ],
-    };
+  _MenuTile _menuTileFromLegacyMapping(LegacyMenuTileMapping tile) {
+    switch (tile.actionType) {
+      case LegacyMenuActionType.openWeb:
+        final uri = WebUri(legacyAppUri(tile.webPath!).toString());
+        return _MenuTile.web(label: tile.label, icon: tile.icon, uri: uri);
+      case LegacyMenuActionType.openScanner:
+        return _MenuTile.scanner(
+          label: tile.label,
+          icon: tile.icon,
+          scanType: tile.scanType ?? 'default',
+        );
+      case LegacyMenuActionType.openShipment:
+        return _MenuTile.simple(
+          label: tile.label,
+          icon: tile.icon,
+          actionType: _MenuActionType.openShipment,
+        );
+      case LegacyMenuActionType.openSignature:
+        return _MenuTile.simple(
+          label: tile.label,
+          icon: tile.icon,
+          actionType: _MenuActionType.openSignature,
+        );
+      case LegacyMenuActionType.openSettings:
+        return _MenuTile.simple(
+          label: tile.label,
+          icon: tile.icon,
+          actionType: _MenuActionType.openSettings,
+        );
+      case LegacyMenuActionType.openMaps:
+        return _MenuTile.simple(
+          label: tile.label,
+          icon: tile.icon,
+          actionType: _MenuActionType.openMaps,
+        );
+      case LegacyMenuActionType.openArrivalUploadErrors:
+        return _MenuTile.simple(
+          label: tile.label,
+          icon: tile.icon,
+          actionType: _MenuActionType.openArrivalUploadErrors,
+        );
+      case LegacyMenuActionType.openProxyMenu:
+        return _MenuTile.simple(
+          label: tile.label,
+          icon: tile.icon,
+          actionType: _MenuActionType.openProxyMenu,
+        );
+      case LegacyMenuActionType.logout:
+        return _MenuTile.simple(
+          label: tile.label,
+          icon: tile.icon,
+          actionType: _MenuActionType.logout,
+        );
+      case LegacyMenuActionType.placeholder:
+        return const _MenuTile.placeholder();
+    }
   }
 
   Future<void> _fetchAnnouncement() async {
@@ -595,6 +549,22 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
         .push('/scanner', extra: <String, dynamic>{'scanType': scanType});
   }
 
+  Future<void> _openProxyMenu() async {
+    if (!mounted) {
+      return;
+    }
+    final selectedPath = await context.push<String>('/proxy-menu');
+    if (!mounted || selectedPath == null || selectedPath.trim().isEmpty) {
+      return;
+    }
+
+    final path = selectedPath.trim();
+    final uri = path.startsWith('http')
+        ? WebUri(path)
+        : WebUri(legacyAppUri(path).toString());
+    await _openWebPage(title: '代理', uri: uri);
+  }
+
   Future<void> _logout() async {
     try {
       await ref.read(authControllerProvider.notifier).logout();
@@ -604,7 +574,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('登出失敗：$e')));
+            .showSnackBar(const SnackBar(content: Text('?餃憭望?嚗?e')));
       }
     }
   }
@@ -633,9 +603,14 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
           await context.push('/signature');
         }
         break;
-      case _MenuActionType.openNotifications:
+      case _MenuActionType.openArrivalUploadErrors:
         if (mounted) {
-          await context.push('/notifications');
+          await context.push('/arrival-upload-errors');
+        }
+        break;
+      case _MenuActionType.openProxyMenu:
+        if (mounted) {
+          await _openProxyMenu();
         }
         break;
       case _MenuActionType.openSettings:
@@ -689,13 +664,13 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   String _sectionTitle(ShellSection section) {
     switch (section) {
       case ShellSection.reservation:
-        return '預約';
+        return '??';
       case ShellSection.order:
-        return '接單';
+        return '?亙';
       case ShellSection.signature:
-        return '簽收';
+        return '蝪賣';
       case ShellSection.wallet:
-        return '錢包';
+        return '?Ｗ?';
     }
   }
 
@@ -925,6 +900,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                 }
                 final response = await _bridgeService.handle(args, context);
                 _logBridgeOutgoing(response);
+                _showBridgeErrorIfNeeded(response);
                 return response;
               },
             );
@@ -1000,7 +976,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                 url.host.toLowerCase() == 'app.elf.com.tw' &&
                 url.path.toLowerCase() == '/error.aspx') {
               _didErrorFallback = true;
-              await _openWebPage(title: '預約貨件', uri: _reservationFallback);
+              await _openWebPage(title: '??鞎其辣', uri: _reservationFallback);
               return;
             }
             try {

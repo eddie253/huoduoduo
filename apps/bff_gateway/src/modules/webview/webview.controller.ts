@@ -2,7 +2,7 @@ import { Controller, Get, Req, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
 import { NoStoreResponse } from '../../security/no-store-response.decorator';
-import { WebviewBootstrapDto } from '../auth/auth.service';
+import { WebviewBootstrapDto } from '../auth/dto/auth-response.dto';
 import { BulletinDto, WebviewService } from './webview.service';
 
 @NoStoreResponse()

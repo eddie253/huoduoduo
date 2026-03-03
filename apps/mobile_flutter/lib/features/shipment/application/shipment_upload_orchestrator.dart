@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -172,6 +172,66 @@ class ShipmentUploadOrchestrator {
       uploaded: uploaded,
       failed: failed,
       deadLetter: deadLetter,
+    );
+  }
+
+  Future<ShipmentUploadResult> retryFailedUploadById(
+    int queueId, {
+    int maxRetryCount = defaultMaxRetryCount,
+  }) async {
+    final item = await _mediaLocalRepository.getById(queueId);
+    if (item == null) {
+      throw StateError('Queue item not found: $queueId');
+    }
+
+    final retryable = item.status == MediaQueueStatus.failed ||
+        item.status == MediaQueueStatus.deadLetter;
+    if (!retryable) {
+      return ShipmentUploadResult(
+        queueId: item.id,
+        status: item.status,
+        errorCode: item.lastErrorCode,
+      );
+    }
+
+    if (item.retryCount >= maxRetryCount) {
+      await _mediaLocalRepository.markDeadLetter(
+        item.id,
+        errorCode: item.lastErrorCode ?? 'MAX_RETRY_EXCEEDED',
+      );
+      return ShipmentUploadResult(
+        queueId: item.id,
+        status: MediaQueueStatus.deadLetter,
+        errorCode: item.lastErrorCode ?? 'MAX_RETRY_EXCEEDED',
+      );
+    }
+
+    final success = await _attemptUpload(item);
+    if (success) {
+      await _mediaLocalRepository.markUploaded(item.id);
+      return ShipmentUploadResult(
+        queueId: item.id,
+        status: MediaQueueStatus.uploaded,
+      );
+    }
+
+    final refreshed = await _mediaLocalRepository.getById(item.id);
+    if (refreshed != null && refreshed.retryCount >= maxRetryCount) {
+      await _mediaLocalRepository.markDeadLetter(
+        refreshed.id,
+        errorCode: refreshed.lastErrorCode ?? 'MAX_RETRY_EXCEEDED',
+      );
+      return ShipmentUploadResult(
+        queueId: refreshed.id,
+        status: MediaQueueStatus.deadLetter,
+        errorCode: refreshed.lastErrorCode ?? 'MAX_RETRY_EXCEEDED',
+      );
+    }
+
+    return ShipmentUploadResult(
+      queueId: item.id,
+      status: MediaQueueStatus.failed,
+      errorCode: refreshed?.lastErrorCode,
     );
   }
 

@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumberString, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class DeliveryRequestDto {
   @IsOptional()
   @IsString()
+  @MaxLength(64)
   driverId?: string;
 
   @IsString()
@@ -11,6 +12,7 @@ export class DeliveryRequestDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(255)
   imageFileName!: string;
 
   @IsString()
@@ -18,8 +20,10 @@ export class DeliveryRequestDto {
   signatureBase64?: string;
 
   @IsNumberString()
+  @MaxLength(32)
   latitude!: string;
 
   @IsNumberString()
+  @MaxLength(32)
   longitude!: string;
 }

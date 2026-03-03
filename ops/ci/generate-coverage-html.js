@@ -37,8 +37,13 @@ function parseLcovByFile(lcovRaw) {
   for (const raw of lcovRaw.split(/\r?\n/)) {
     const line = raw.trim();
     if (line.startsWith('SF:')) {
+      const sourceFile = line.slice(3).replace(/\\/g, '/');
+      if (sourceFile.endsWith('_test.dart')) {
+        current = null;
+        continue;
+      }
       current = {
-        file: line.slice(3),
+        file: sourceFile,
         total: 0,
         hit: 0,
       };

@@ -7,7 +7,7 @@
 
 ## Scope
 1. `apps/mobile_flutter/lib/features/scanner/presentation/scanner_page.dart` visual and interaction parity.
-2. Scanner-related tests under `apps/mobile_flutter/test/features/scanner/`.
+2. Scanner-related tests under `apps/mobile_flutter/lib/features/scanner/` (colocated).
 3. Plan and evidence documentation updates for PLAN19.
 
 ## Out Of Scope
@@ -32,7 +32,7 @@
    1. top header color `#ff5f00`
    2. white title text and left back affordance
    3. visible white hint text
-   4. bottom tool row with four icon slots (flash/input/album/return)
+   4. bottom tool row with three icon slots (flash/keypad/settings)
 3. Flutter scanner invariants before edit:
    1. `/scanner` route contract unchanged (`scanType` in, scanned value out)
    2. close action pops page
@@ -103,13 +103,13 @@
 1. `scanner_page.dart` now uses legacy-style structure:
    1. orange top bar (`#ff5f00`) with white title and left back action
    2. white hint text kept unchanged: `Point the camera to barcode or QR code`
-   3. bottom four-slot legacy-like tool row
+   3. bottom three-slot tool row (flashlight/keypad/settings)
 2. Behavior invariants are preserved:
    1. blank scan is ignored
    2. first valid scan pops once and returns payload
    3. close action pops immediately
 3. Test status:
-   1. `flutter test test/features/scanner/presentation/scanner_page_test.dart` -> PASS
+   1. `flutter test lib/features/scanner/presentation/scanner_page_test.dart` -> PASS
    2. `npm run mobile:test:coverage` -> PASS (`66.79%`, `1289/1930`)
    3. `npm run mobile:coverage:check` -> PASS (threshold `65`)
 4. Coverage snapshot after PLAN19:

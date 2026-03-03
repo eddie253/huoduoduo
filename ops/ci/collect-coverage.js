@@ -53,8 +53,21 @@ function parseMobileLcov(lcovPath) {
   const raw = fs.readFileSync(lcovPath, 'utf8');
   let total = 0;
   let hit = 0;
+  let includeCurrentFile = false;
 
   for (const line of raw.split(/\r?\n/)) {
+    if (line.startsWith('SF:')) {
+      const sourceFile = line.slice(3).replace(/\\/g, '/');
+      includeCurrentFile = !sourceFile.endsWith('_test.dart');
+      continue;
+    }
+
+    if (line === 'end_of_record') {
+      includeCurrentFile = false;
+      continue;
+    }
+
+    if (!includeCurrentFile) continue;
     if (!line.startsWith('DA:')) continue;
     const payload = line.slice(3).split(',');
     if (payload.length < 2) continue;
