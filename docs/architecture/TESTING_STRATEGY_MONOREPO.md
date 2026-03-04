@@ -1,5 +1,17 @@
 ﻿# Monorepo Testing Strategy
 
+Doc ID: HDD-DOCS-ARCHITECTURE-TESTING-STRATEGY-MONOREPO
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 ## Scope
 This document defines testing placement and execution strategy for the huoduoduo monorepo.
 
@@ -38,3 +50,4 @@ This document defines testing placement and execution strategy for the huoduoduo
 1. UAT and architecture evidence are stored under `docs/architecture/`.
 2. Runtime test outputs are generated under local `reports/` and exported as CI artifacts.
 3. Sensitive local test docs remain in `docs_local/` and are not committed.
+

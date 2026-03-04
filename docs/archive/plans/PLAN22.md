@@ -1,11 +1,17 @@
-# PLAN22: Legacy Android Feature Parity Closure
+﻿# PLAN22: Legacy Android Feature Parity Closure
 
 Doc ID: HDD-DOC-PLANS-PLAN22
 Version: v1.0
 Owner: Project Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Archived
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Goal
 Close remaining legacy Android feature mapping gaps in Flutter without expanding product scope.
@@ -60,3 +66,4 @@ Close remaining legacy Android feature mapping gaps in Flutter without expanding
 - Original Date: N/A
 - Retention: 保留 24 個月或直到有新版正式文件取代。
 - Reactivation Trigger: 當稽核、回歸調查或法遵要求需追溯歷史決策時啟用。
+

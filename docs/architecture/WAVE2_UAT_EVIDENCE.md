@@ -1,4 +1,16 @@
-# Wave 2 UAT Evidence
+﻿# Wave 2 UAT Evidence
+
+Doc ID: HDD-DOCS-ARCHITECTURE-WAVE2-UAT-EVIDENCE
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Metadata
 
@@ -129,3 +141,4 @@
 - iOS host files are present in `apps/mobile_flutter/ios`.
 - `flutter build ios --no-codesign` is not executable on this Windows workstation.
 - iOS compile and real-device smoke remain pending on Mac runner / macOS workstation.
+

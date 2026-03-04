@@ -3,11 +3,17 @@
 Doc ID: `HDD-PLAN24-PHASED-GOV`
 Version: `v1.4`
 Owner: `Architecture Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
-1. CN: `docs/architecture/PLAN24_PHASED_API_GOVERNANCE_SPEC.zh-TW.md`
-2. EN: `docs/architecture/PLAN24_PHASED_API_GOVERNANCE_SPEC.en.md`
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
+
+1. CN: `docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.zh-TW.md`
+2. EN: `docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.en.md`
 
 Date: 2026-03-03 (Asia/Taipei)
 Purpose: finalize documentation and governance baseline before implementation.
@@ -30,7 +36,7 @@ Purpose: finalize documentation and governance baseline before implementation.
 3. `contracts/legacy/error-code-mapping-v1.md`
 4. `docs/architecture/LEGACY_APP_API_SPEC_FINAL.zh-TW.md`
 5. `docs/architecture/LEGACY_API_42_STATUS_MATRIX_20260303.zh-TW.md`
-6. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.md`
+6. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.zh-TW.md`
 
 ### 2.2 P0 response-length baseline (general)
 | Field Type | Contract Rule |
@@ -153,7 +159,7 @@ Status: `implemented (2026-03-04)`
 ### 6.1 P4 reference files
 1. `contracts/openapi/huoduoduo-v1.openapi.yaml`
 2. `contracts/legacy/error-code-mapping-v1.md`
-3. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.md`
+3. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.zh-TW.md`
 4. `ops/ci/check-route-diff.js`
 5. `ops/ci/check-error-code-map.js`
 
@@ -167,7 +173,7 @@ Status: `implemented (2026-03-04)`
 |  | `timestamp` | `maxLength: 40` |
 
 ## 7. Pre-implementation deliverables
-1. `PLAN24_PHASED_API_GOVERNANCE_SPEC.zh-TW.md` (this spec pair)
+1. `API_GOVERNANCE_PHASED_SPEC_PLAN24.zh-TW.md` (this spec pair)
 2. `LEGACY_APP_API_SPEC_FINAL.zh-TW.md` / `.en.md`
 3. `LEGACY_API_42_STATUS_MATRIX_20260303.zh-TW.md` / `.en.md`
 4. `API_DOCUMENT_INVENTORY_PLAN24.zh-TW.md` / `.en.md`
@@ -177,3 +183,24 @@ Status: `implemented (2026-03-04)`
 1. Are these length rules accepted as formal OpenAPI contract?
 2. Are `waived` items explicitly kept on WebView path (no new BFF API)?
 3. Should `implemented but unused` items be wired by Flutter in next phase?
+
+## Acceptance Checklist
+
+- [ ] AC-01: Governance header is complete
+  - Command: Get-Content "docs/archive/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.en.md" -Encoding UTF8 -TotalCount 40
+  - Expected Result: six governance fields are visible.
+  - Failure Action: add missing governance fields and rerun.
+
+- [ ] AC-02: Command rerun capability
+  - Command: docker compose -f ops/docker/docker-compose.yml config
+  - Expected Result: no error.
+  - Failure Action: use PowerShell fallback (Get-Content, Select-String) to verify file state.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

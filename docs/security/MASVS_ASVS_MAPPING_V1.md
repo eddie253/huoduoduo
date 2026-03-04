@@ -1,4 +1,16 @@
-# MASVS / ASVS Control Mapping (v1 Baseline)
+﻿# MASVS / ASVS Control Mapping (v1 Baseline)
+
+Doc ID: HDD-DOCS-SECURITY-MASVS-ASVS-MAPPING-V1
+Version: v1.0
+Owner: Security Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## MASVS-L2
 
@@ -33,3 +45,4 @@
 2. Add runtime security telemetry export and SIEM forwarding.
 3. Add mobile RASP/hardening checks for release builds.
 4. Add certificate pinning and release hardening verification for Android and iOS builds.
+

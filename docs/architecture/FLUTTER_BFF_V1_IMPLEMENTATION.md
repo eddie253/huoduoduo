@@ -1,4 +1,16 @@
-# Flutter + BFF v1 Implementation Baseline
+﻿# Flutter + BFF v1 Implementation Baseline
+
+Doc ID: HDD-DOCS-ARCHITECTURE-FLUTTER-BFF-V1-IMPLEMENTATION
+Version: v1.0
+Owner: BFF Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Scope
 
@@ -24,3 +36,4 @@ This document captures what is implemented in this repository for the migration 
 1. Integrate scanner/signature/maps native plugins in production mode.
 2. Add full parity end-to-end tests against legacy Android UAT flows.
 3. Promote secret management from ENV to managed vault provider.
+

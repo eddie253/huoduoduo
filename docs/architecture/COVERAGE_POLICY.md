@@ -1,5 +1,17 @@
 ﻿# Coverage Policy
 
+Doc ID: HDD-DOCS-ARCHITECTURE-COVERAGE-POLICY
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 ## Objective
 Provide deterministic and enforceable coverage gates for the monorepo.
 
@@ -45,3 +57,16 @@ Coverage reports are normalized under:
 2. Any temporary threshold downgrade requires documented expiry and owner.
 3. Thresholds are ratcheted upward wave-by-wave; downgrades are not allowed without risk sign-off.
 4. Coverage percentage is a gate, not a quality substitute; core parity flows still require smoke/UAT evidence.
+
+## Acceptance Checklist
+
+- [ ] AC-01: Governance header is complete
+  - Command: Get-Content "docs/architecture/COVERAGE_POLICY.md" -Encoding UTF8 -TotalCount 40
+  - Expected Result: six governance fields are visible.
+  - Failure Action: add missing governance fields and rerun.
+
+- [ ] AC-02: Command rerun capability
+  - Command: docker compose -f ops/docker/docker-compose.yml config
+  - Expected Result: no error.
+  - Failure Action: use PowerShell fallback (Get-Content, Select-String) to verify file state.
+

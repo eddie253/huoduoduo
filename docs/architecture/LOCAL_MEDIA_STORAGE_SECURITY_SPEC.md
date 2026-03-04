@@ -1,4 +1,16 @@
-# Local Media Storage Security Spec (Wave 4)
+﻿# Local Media Storage Security Spec (Wave 4)
+
+Doc ID: HDD-DOCS-ARCHITECTURE-LOCAL-MEDIA-STORAGE-SECURITY-SPEC
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Purpose
 

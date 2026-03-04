@@ -1,11 +1,17 @@
-# Workspace Settings 保護規範（.vscode/settings.json）
+﻿# Workspace Settings 保護規範（.vscode/settings.json）
 
 Doc ID: HDD-GOV-WORKSPACE-SETTINGS-PROTECTION
 Version: v1.0
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## 1. Purpose
 
@@ -101,3 +107,4 @@ CN/EN Pair Link: N/A
 ## 9. Change Log
 
 1. `v1.0` - 初版，建立 `.vscode/settings.json` 強制保護機制。
+

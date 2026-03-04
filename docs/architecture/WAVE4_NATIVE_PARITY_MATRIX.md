@@ -1,4 +1,16 @@
-# Wave 4 Native Capability + Parity Matrix
+﻿# Wave 4 Native Capability + Parity Matrix
+
+Doc ID: HDD-DOCS-ARCHITECTURE-WAVE4-NATIVE-PARITY-MATRIX
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Target
 
@@ -62,3 +74,4 @@ Status values:
 ## PLAN14 Exclusion
 
 1. `maphwo.MapsActivity` is explicitly `out_of_scope` and excluded from parity blocker criteria.
+

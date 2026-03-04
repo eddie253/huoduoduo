@@ -1,14 +1,20 @@
-# PLAN24-42 API Refactor Master
+﻿# PLAN24-42 API Refactor Master
 
 Doc ID: HDD-DOC-ARCHITECTURE-PLAN24-42API-PLAN24-42API-MASTER-EN
 Version: v1.0
 Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/plan24_42api/PLAN24_42API_MASTER.zh-TW.md
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/API_MASTER_PLAN24_42.zh-TW.md
 
-1. CN: `docs/architecture/plan24_42api/PLAN24_42API_MASTER.zh-TW.md`
-2. EN: `docs/architecture/plan24_42api/PLAN24_42API_MASTER.en.md`
+
+
+
+
+
+
+1. CN: `docs/architecture/plan24_42api/API_MASTER_PLAN24_42.zh-TW.md`
+2. EN: `docs/architecture/plan24_42api/API_MASTER_PLAN24_42.en.md`
 
 ## 1. Goal
 1. Deliver governance-grade refactor for all 42 legacy APIs with contract-first convergence.
@@ -54,4 +60,12 @@ CN/EN Pair Link: docs/architecture/plan24_42api/PLAN24_42API_MASTER.zh-TW.md
 6. P9 implements two Conditional-Go methods: `DeleteRegID` and `GetVersion`.
 7. 42 API split documentation (CN/EN pair).
 8. Validation gates and report packages under `reports/test/plan24_p4_20260304/`, `reports/test/plan24_p5_20260304/`, `reports/test/plan24_p6_20260304/`, `reports/test/plan24_p7_20260304/`, `reports/test/plan24_p8_20260304/`, and `reports/test/plan24_p9_20260304/`.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
 

@@ -3,9 +3,15 @@
 Doc ID: `HDD-PLAN24-API-INVENTORY`
 Version: `v1.4`
 Owner: `Architecture Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 1. CN: `docs/architecture/API_DOCUMENT_INVENTORY_PLAN24.zh-TW.md`
 2. EN: `docs/architecture/API_DOCUMENT_INVENTORY_PLAN24.en.md`
 
@@ -63,3 +69,12 @@ Date: 2026-03-03 (Asia/Taipei)
 1. Use Chinese docs for management sign-off and English docs for cross-team communication.
 2. Keep CN/EN pairs on the same version whenever one side changes.
 3. Run contract gate commands from checklist before P1 implementation starts.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

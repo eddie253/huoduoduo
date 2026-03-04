@@ -1,5 +1,17 @@
 ﻿# PLAN11：登入會面 1:1 行為對齊 + 現代化 UI（不改契約）
 
+Doc ID: HDD-DOCS-ARCHIVE-PLANS-PLAN11
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 ## 1. 摘要
 
 1. 目標：把 Flutter 登入流程做到「行為比照舊版 1:1」，同時把 UI 現代化。
@@ -127,3 +139,12 @@
 2. 既有 token/cookie 策略維持不變。
 3. 本輪以 Android 先驗，iOS 在 Mac 補驗。
 4. `.env`/憑證仍維持本機與 CI secret，不進版控。
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

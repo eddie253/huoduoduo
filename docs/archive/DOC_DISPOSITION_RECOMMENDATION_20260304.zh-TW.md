@@ -1,11 +1,17 @@
-# 文件建議處置表（保留/封存/刪除候選）
+﻿# 文件建議處置表（保留/封存/刪除候選）
 
 Doc ID: HDD-DOC-DISPOSITION-20260304
 Version: v1.0
 Owner: Architecture Lead
-Last Updated: 2026-03-04
-Review Status: Draft
+Last Updated: 2026-03-05
+Review Status: Archived
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Summary
 
@@ -43,12 +49,12 @@ CN/EN Pair Link: N/A
 | docs/architecture/plan24_42api/DOMAIN_RESERVATION.zh-TW.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/DOMAIN_RESERVATION.zh-TW.md |
 | docs/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.en.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.en.md |
 | docs/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.zh-TW.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.zh-TW.md |
-| docs/architecture/plan24_42api/PLAN24_42API_MASTER.en.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/PLAN24_42API_MASTER.en.md |
-| docs/architecture/plan24_42api/PLAN24_42API_MASTER.zh-TW.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/PLAN24_42API_MASTER.zh-TW.md |
+| docs/architecture/plan24_42api/API_MASTER_PLAN24_42.en.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/API_MASTER_PLAN24_42.en.md |
+| docs/architecture/plan24_42api/API_MASTER_PLAN24_42.zh-TW.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/API_MASTER_PLAN24_42.zh-TW.md |
 | docs/architecture/plan24_42api/TRACEABILITY_42_MATRIX_EXECUTION.en.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/TRACEABILITY_42_MATRIX_EXECUTION.en.md |
 | docs/architecture/plan24_42api/TRACEABILITY_42_MATRIX_EXECUTION.zh-TW.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/plan24_42api/TRACEABILITY_42_MATRIX_EXECUTION.zh-TW.md |
-| docs/architecture/PLAN24_PHASED_API_GOVERNANCE_SPEC.en.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/PLAN24_PHASED_API_GOVERNANCE_SPEC.en.md |
-| docs/architecture/PLAN8_PLAN12_UNIFIED_BASELINE.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/PLAN8_PLAN12_UNIFIED_BASELINE.md |
+| docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.en.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.en.md |
+| docs/architecture/UNIFIED_BASELINE_PLAN8_PLAN12.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/architecture/UNIFIED_BASELINE_PLAN8_PLAN12.md |
 | docs/plans/PLAN1.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN1.md |
 | docs/plans/PLAN10.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN10.md |
 | docs/plans/PLAN11.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN11.md |
@@ -57,7 +63,7 @@ CN/EN Pair Link: N/A
 | docs/plans/PLAN15.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN15.md |
 | docs/plans/PLAN16.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN16.md |
 | docs/plans/PLAN17.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN17.md |
-| docs/plans/PLAN18.-1.md | delete_candidate | 疑似重複或命名錯誤（PLAN18.-1），建議列為刪除候選 | docs/archive/delete-candidates/plans/PLAN18.-1.md |
+| docs/plans/PLAN18-REV1.md | delete_candidate | 疑似重複或命名錯誤（PLAN18.-1），建議列為刪除候選 | docs/archive/delete-candidates/plans/PLAN18-REV1.md |
 | docs/plans/PLAN18.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN18.md |
 | docs/plans/PLAN19.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN19.md |
 | docs/plans/PLAN2.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN2.md |
@@ -76,7 +82,7 @@ CN/EN Pair Link: N/A
 | docs/plans/PLAN7.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN7.md |
 | docs/plans/PLAN8.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN8.md |
 | docs/plans/PLAN9.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN9.md |
-| docs/plans/PLAN-ARCH-GOV-V2.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/PLAN-ARCH-GOV-V2.md |
+| docs/plans/ARCH_GOV_V2_PLAN.md | archive | 未被任何文件引用，且屬歷史/旁支文件，建議封存 | docs/archive/plans/ARCH_GOV_V2_PLAN.md |
 | docs/security/MASVS_ASVS_MAPPING_V1.md | keep | 關鍵治理/安全/架構決策文件，雖未被引用仍建議保留 | N/A |
 
 ## Acceptance Checklist
@@ -94,3 +100,12 @@ CN/EN Pair Link: N/A
 ## Change Log
 
 1. v1.0 - 初版建議處置與自動封存。
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

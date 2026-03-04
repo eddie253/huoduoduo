@@ -1,11 +1,13 @@
-﻿# Archived Document: PLAN5
+﻿# Archived Document: PLAN-ARCH-GOV-V2
 
-Doc ID: HDD-DOCS-ARCHIVE-PLANS-PLAN5
+Doc ID: HDD-DOCS-ARCHIVE-PLANS-PLAN-ARCH-GOV-V2
 Version: v1.0
 Owner: Architecture Lead
 Last Updated: 2026-03-05
 Review Status: Archived
 CN/EN Pair Link: N/A
+
+
 
 
 ## Purpose

@@ -1,4 +1,16 @@
-# PLAN18: Flutter Unit Test Uplift and Coverage Gate 65%
+﻿# PLAN18: Flutter Unit Test Uplift and Coverage Gate 65%
+
+Doc ID: HDD-DOCS-PLANS-PLAN18
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Summary
 1. Goal: raise Flutter line coverage from `58.00% (953/1643)` to `>=65%` without changing business behavior.
@@ -97,3 +109,4 @@ Execution window: `2026-03-03 18:10~18:13 +08:00`.
 ## Conclusion
 1. PLAN18 completion criteria for Flutter quality gates are met with threshold raised to `65`.
 2. No business behavior contract changes were introduced.
+

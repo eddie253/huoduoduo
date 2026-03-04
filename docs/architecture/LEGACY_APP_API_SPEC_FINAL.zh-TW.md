@@ -1,11 +1,17 @@
-# 舊版 APP API 規格書（完成版）
+﻿# 舊版 APP API 規格書（完成版）
 
 Doc ID: `HDD-LEGACY-API-SPEC`
 Version: `v1.1`
 Owner: `Architecture Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
+Last Updated: 2026-03-05
+Review Status: In Review
+CN/EN Pair Link: docs/architecture/LEGACY_APP_API_SPEC_FINAL.en.md
+
+
+
+
+
+
 1. CN: `docs/architecture/LEGACY_APP_API_SPEC_FINAL.zh-TW.md`
 2. EN: `docs/architecture/LEGACY_APP_API_SPEC_FINAL.en.md`
 
@@ -156,3 +162,4 @@ Base：
 3. `app/src/main/java/didi/app/express/AppWebView.java`
 4. `app/src/main/java/didi/app/express/Menu_GridView*.java`
 5. `app/src/main/java/controls/CheckData.java`
+

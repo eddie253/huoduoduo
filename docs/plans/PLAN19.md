@@ -1,4 +1,16 @@
-# PLAN19: Scanner UI Legacy Parity Lockdown
+﻿# PLAN19: Scanner UI Legacy Parity Lockdown
+
+Doc ID: HDD-DOCS-PLANS-PLAN19
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Summary
 1. Goal: keep scanner UI and interaction aligned with legacy style while preserving the current refactor safety and testability.
@@ -115,3 +127,4 @@
 4. Coverage snapshot after PLAN19:
    1. Flutter overall line coverage: `66.79% (1289/1930)`
    2. `scanner_page.dart` line coverage: `77.08% (37/48)`
+

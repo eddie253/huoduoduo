@@ -1,11 +1,17 @@
-# DOMAIN: Currency / Proxy / System
+﻿# DOMAIN: Currency / Proxy / System
 
 Doc ID: HDD-DOC-ARCHITECTURE-PLAN24-42API-DOMAIN-CURRENCY-PROXY-SYSTEM-EN
 Version: v1.0
 Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_CURRENCY_PROXY_SYSTEM.zh-TW.md
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/DOMAIN_CURRENCY_PROXY_SYSTEM.zh-TW.md
+
+
+
+
+
+
 
 1. CN: `docs/architecture/plan24_42api/DOMAIN_CURRENCY_PROXY_SYSTEM.zh-TW.md`
 2. EN: `docs/architecture/plan24_42api/DOMAIN_CURRENCY_PROXY_SYSTEM.en.md`
@@ -50,4 +56,12 @@ CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_CURRENCY_PROXY_SYSTEM.zh-
 1. No new aggregation/business-statistic logic; only equivalent legacy mapping.
 2. Write APIs (`UpdateBank`, `ApplyWithDrawal`) must not go live before security checks are approved.
 3. `GetSystemDate` remains deferred until a hard dependency on API-time endpoint is proven.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
 

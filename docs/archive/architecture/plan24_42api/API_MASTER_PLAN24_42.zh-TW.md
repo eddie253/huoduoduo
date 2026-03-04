@@ -1,11 +1,13 @@
-﻿# Archived Document: PLAN5
+﻿# Archived Document: PLAN24_42API_MASTER.zh-TW
 
-Doc ID: HDD-DOCS-ARCHIVE-PLANS-PLAN5
+Doc ID: HDD-DOCS-ARCHIVE-ARCHITECTURE-PLAN24-42API-PLAN24-42API-MASTER-ZH-TW
 Version: v1.0
-Owner: Architecture Lead
+Owner: BFF Lead
 Last Updated: 2026-03-05
 Review Status: Archived
-CN/EN Pair Link: N/A
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/API_MASTER_PLAN24_42.en.md
+
+
 
 
 ## Purpose

@@ -1,4 +1,16 @@
-# PLAN9：Wave 3 收斂 + Wave 4 基礎落地
+﻿# PLAN9：Wave 3 收斂 + Wave 4 基礎落地
+
+Doc ID: HDD-DOCS-ARCHIVE-PLANS-PLAN9
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Summary
 
@@ -53,3 +65,12 @@
 2. Secrets stay in `.env` and CI secret stores; never commit real credentials.
 3. Local-only docs are moved under `docs_local/` and excluded from git tracking.
 4. iOS no-codesign compile remains in macOS CI or manual gate.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

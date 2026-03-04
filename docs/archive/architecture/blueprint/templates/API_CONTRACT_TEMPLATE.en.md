@@ -1,11 +1,17 @@
-# API Contract Template
+﻿# API Contract Template
 
 Doc ID: HDD-DOC-ARCHITECTURE-BLUEPRINT-TEMPLATES-API-CONTRACT-TEMPLATE-EN
 Version: v1.0
 Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/blueprint/templates/API_CONTRACT_TEMPLATE.zh-TW.md
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## 1. Purpose
 
@@ -65,3 +71,12 @@ CN/EN Pair Link: docs/architecture/blueprint/templates/API_CONTRACT_TEMPLATE.zh-
   - Command: Get-Content docs/architecture/blueprint/templates/API_CONTRACT_TEMPLATE.en.md -TotalCount 20
   - Expected Result: 可成功讀取文件內容。
   - Failure Action: 修正路徑或檔案編碼後重跑。
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

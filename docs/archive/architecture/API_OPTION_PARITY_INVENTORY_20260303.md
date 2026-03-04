@@ -1,4 +1,16 @@
-# API Option / Condition Inventory (Legacy APK vs New Flutter+BFF)
+﻿# API Option / Condition Inventory (Legacy APK vs New Flutter+BFF)
+
+Doc ID: HDD-DOCS-ARCHIVE-ARCHITECTURE-API-OPTION-PARITY-INVENTORY-20260303
+Version: v1.0
+Owner: BFF Lead
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 Date: 2026-03-03 (Asia/Taipei)
 
@@ -176,3 +188,12 @@ Date: 2026-03-03 (Asia/Taipei)
    1. Add shipment extended endpoints only if scanner/signature/native workflow still requires them (`AddOrder_elf`, `BackOrder`, `Alr_Order`, `ClearArrival`, `CheckedArrivalErr`).
 3. P2:
    1. Align request-body semantics: remove unused fields or actually forward (`reasonCode`, `areaCode`, `note`, `signatureBase64`, `driverId`).
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

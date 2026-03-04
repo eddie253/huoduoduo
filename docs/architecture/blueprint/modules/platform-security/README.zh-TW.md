@@ -1,27 +1,29 @@
-# Module: platform-security
+﻿# Module: platform-security
 
-Doc ID: HDD-DOC-ARCHITECTURE-BLUEPRINT-MODULES-PLATFORM-SECURITY-README-ZH-TW
+Doc ID: HDD-DOCS-ARCHITECTURE-BLUEPRINT-MODULES-PLATFORM-SECURITY-README-ZH-TW
 Version: v1.0
-Owner: Project Lead
-Last Updated: 2026-03-04
+Owner: Architecture Lead
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
 
+
 ## Purpose
 
-1. ?歹??????????賜孕??
+1. Readability rebuilt version for encoding remediation.
+2. This file documents module scope and ownership only.
 
-## Owner
+## Responsibilities
 
-1. Security Lead
+1. Describe module responsibilities and dependencies.
+2. Contract details are maintained in CONTRACT.zh-TW.md.
 
-## Files
+## Deliverables
 
 1. README.zh-TW.md
 2. CONTRACT.zh-TW.md
 
-## Dependency Note
+## Change Log
 
-1. Any cross-module dependency must be reflected in docs/architecture/blueprint/MODULE_BOUNDARY_MATRIX.zh-TW.md.
-
+1. v1.0 (2026-03-05) - Rebuilt as readable UTF-8 content.
 

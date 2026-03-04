@@ -1,4 +1,16 @@
-# ADR-0001: Strangler Parallel Adoption for Flutter Migration
+﻿# ADR-0001: Strangler Parallel Adoption for Flutter Migration
+
+Doc ID: HDD-DOCS-ADR-0001-STRANGLER-PARALLEL-ADOPTION
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Status
 

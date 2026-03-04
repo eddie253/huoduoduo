@@ -1,4 +1,16 @@
-# E2E Smoke Runbook (Android + iOS)
+﻿# E2E Smoke Runbook (Android + iOS)
+
+Doc ID: HDD-DOCS-ARCHITECTURE-E2E-SMOKE-RUNBOOK
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Preconditions
 
@@ -67,3 +79,4 @@ Record in wave evidence doc:
 3. commands executed
 4. masked request/response summary
 5. failure classification and reproduction steps
+

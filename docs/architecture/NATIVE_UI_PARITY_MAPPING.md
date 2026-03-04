@@ -1,4 +1,16 @@
-# Native UI Parity Mapping (Legacy -> Flutter) (PLAN14 + PLAN15)
+﻿# Native UI Parity Mapping (Legacy -> Flutter) (PLAN14 + PLAN15)
+
+Doc ID: HDD-DOCS-ARCHITECTURE-NATIVE-UI-PARITY-MAPPING
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Status Legend
 1. `done`
@@ -31,3 +43,4 @@
 | Legacy Screen ID | Flutter Route / Feature | Status | Reason |
 |---|---|---|---|
 | `maphwo.MapsActivity` | N/A | out_of_scope | Excluded by PLAN14 decision to avoid dual map-engine parity risk. |
+

@@ -3,9 +3,15 @@
 Doc ID: `HDD-LEGACY-42-MATRIX`
 Version: `v1.1`
 Owner: `Architecture Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 1. CN: `docs/architecture/LEGACY_API_42_STATUS_MATRIX_20260303.zh-TW.md`
 2. EN: `docs/architecture/LEGACY_API_42_STATUS_MATRIX_20260303.en.md`
 
@@ -73,3 +79,12 @@ Date: 2026-03-03 (Asia/Taipei)
 1. Method universe is the 42 SOAP methods from legacy Android `network/*.java`.
 2. Every row contains `status/reason/owner/target milestone` as required by P0 governance.
 3. `waived` rows include explicit re-entry conditions for future re-evaluation.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

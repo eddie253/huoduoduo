@@ -1,11 +1,17 @@
-# GOVERNANCE_EXECUTION_STANDARD.zh-TW
+﻿# GOVERNANCE_EXECUTION_STANDARD.zh-TW
 
 Doc ID: HDD-GOV-EXECUTION-STANDARD
 Version: v1.1
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -52,3 +58,4 @@ CN/EN Pair Link: N/A
 ## Change Log
 
 1. v1.1 - 新增連結格式政策：永遠輸出純路徑，禁止 vscode-resource/file+ URL。
+

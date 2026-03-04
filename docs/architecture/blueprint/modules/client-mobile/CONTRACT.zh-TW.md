@@ -1,11 +1,17 @@
-# 模組契約：client-mobile
+﻿# 模組契約：client-mobile
 
 Doc ID: HDD-MODULE-CLIENT-MOBILE-CONTRACT
 Version: v1.0
 Owner: Module Owner
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -47,3 +53,4 @@ CN/EN Pair Link: N/A
   - Command: rg -n "Out of Scope" docs/architecture/blueprint/modules/client-mobile/CONTRACT.zh-TW.md
   - Expected Result: 命中且內容非空。
   - Failure Action: 補齊邊界描述。
+

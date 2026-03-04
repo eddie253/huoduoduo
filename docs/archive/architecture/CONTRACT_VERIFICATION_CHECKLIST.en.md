@@ -3,9 +3,15 @@
 Doc ID: `HDD-CONTRACT-VERIFY-CHECKLIST`
 Version: `v1.4`
 Owner: `QA Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 1. CN: `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.zh-TW.md`
 2. EN: `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.en.md`
 
@@ -86,3 +92,24 @@ Reference:
 1. [ ] `npm run bff:route-diff`
 2. [ ] `npm run bff:error-code-map`
 3. [ ] `npm run bff:test -- --runInBand`
+
+## Acceptance Checklist
+
+- [ ] AC-01: Governance header is complete
+  - Command: Get-Content "docs/archive/architecture/CONTRACT_VERIFICATION_CHECKLIST.en.md" -Encoding UTF8 -TotalCount 40
+  - Expected Result: six governance fields are visible.
+  - Failure Action: add missing governance fields and rerun.
+
+- [ ] AC-02: Command rerun capability
+  - Command: docker compose -f ops/docker/docker-compose.yml config
+  - Expected Result: no error.
+  - Failure Action: use PowerShell fallback (Get-Content, Select-String) to verify file state.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

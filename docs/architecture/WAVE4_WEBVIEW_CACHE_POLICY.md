@@ -1,4 +1,16 @@
-# Wave 4 WebView Cache Policy
+﻿# Wave 4 WebView Cache Policy
+
+Doc ID: HDD-DOCS-ARCHITECTURE-WAVE4-WEBVIEW-CACHE-POLICY
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Goal
 
@@ -86,3 +98,16 @@ If route classification is unknown, default to transaction-safe (`no-cache`).
 1. Implement in Android first.
 2. Mirror in iOS host when Mac pipeline is active.
 3. Record evidence in next wave evidence doc with request/response header snapshot.
+
+## Acceptance Checklist
+
+- [ ] AC-01: Governance header is complete
+  - Command: Get-Content "docs/architecture/WAVE4_WEBVIEW_CACHE_POLICY.md" -Encoding UTF8 -TotalCount 40
+  - Expected Result: six governance fields are visible.
+  - Failure Action: add missing governance fields and rerun.
+
+- [ ] AC-02: Command rerun capability
+  - Command: docker compose -f ops/docker/docker-compose.yml config
+  - Expected Result: no error.
+  - Failure Action: use PowerShell fallback (Get-Content, Select-String) to verify file state.
+

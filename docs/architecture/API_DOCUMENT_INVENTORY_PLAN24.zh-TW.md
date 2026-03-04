@@ -3,9 +3,15 @@
 Doc ID: `HDD-PLAN24-API-INVENTORY`
 Version: `v1.4`
 Owner: `Architecture Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
+Last Updated: 2026-03-05
+Review Status: In Review
+CN/EN Pair Link: docs/architecture/API_DOCUMENT_INVENTORY_PLAN24.en.md
+
+
+
+
+
+
 1. CN: `docs/architecture/API_DOCUMENT_INVENTORY_PLAN24.zh-TW.md`
 2. EN: `docs/architecture/API_DOCUMENT_INVENTORY_PLAN24.en.md`
 
@@ -57,3 +63,4 @@ CN/EN Pair Link:
 1. 主管審閱以中文文件為主，英文做對照與跨團隊同步。
 2. 任一文件變更時，中英版需同版次同步更新。
 3. P1 開工前，先依 `CONTRACT_VERIFICATION_CHECKLIST` 再跑一次 gate 並附 log。
+

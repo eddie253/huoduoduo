@@ -1,11 +1,17 @@
-# PLAN24 後端平台 Go/No-Go 決策（JNPF vs 自研）
+﻿# PLAN24 後端平台 Go/No-Go 決策（JNPF vs 自研）
 
 Doc ID: HDD-PLAN24-BACKEND-DECISION
 Version: v1.0
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -27,3 +33,4 @@ CN/EN Pair Link: N/A
   - Command: rg -n "Decision|Go / No-Go" docs/architecture/BACKEND_PLATFORM_GO_NO_GO_DECISION_PLAN24.zh-TW.md
   - Expected Result: 命中關鍵章節。
   - Failure Action: 補齊判準。
+

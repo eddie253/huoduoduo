@@ -3,9 +3,15 @@
 Doc ID: `HDD-OPENAPI-GUIDE`
 Version: `v1.3`
 Owner: `BFF Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
+Last Updated: 2026-03-05
+Review Status: In Review
+CN/EN Pair Link: docs/architecture/API_SPEC_OPENAPI_PLAN24.en.md
+
+
+
+
+
+
 1. CN: `docs/architecture/API_SPEC_OPENAPI_PLAN24.zh-TW.md`
 2. EN: `docs/architecture/API_SPEC_OPENAPI_PLAN24.en.md`
 
@@ -39,7 +45,8 @@ CN/EN Pair Link:
 | reservation shipmentNos | `maxItems: 200` |
 
 ## 5. 相關文件
-1. `docs/architecture/PLAN24_PHASED_API_GOVERNANCE_SPEC.zh-TW.md`
+1. `docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.zh-TW.md`
 2. `contracts/legacy/soap-mapping-v1.zh-TW.md`
 3. `contracts/legacy/error-code-mapping-v1.zh-TW.md`
 4. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.zh-TW.md`
+

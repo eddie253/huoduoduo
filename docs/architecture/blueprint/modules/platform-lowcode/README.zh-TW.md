@@ -1,11 +1,17 @@
-# 模組說明：platform-lowcode
+﻿# 模組說明：platform-lowcode
 
 Doc ID: HDD-MODULE-PLATFORM-LOWCODE-README
 Version: v1.0
 Owner: Module Owner
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -26,3 +32,4 @@ CN/EN Pair Link: N/A
   - Command: Get-ChildItem docs/architecture/blueprint/modules/platform-lowcode/CONTRACT.zh-TW.md
   - Expected Result: 檔案存在。
   - Failure Action: 修正路徑與命名。
+

@@ -1,11 +1,17 @@
-# Docs Archive
+﻿# Docs Archive
 
 Doc ID: HDD-DOC-ARCHIVE-README
 Version: v1.0
 Owner: Architecture Lead
-Last Updated: 2026-03-04
-Review Status: Draft
+Last Updated: 2026-03-05
+Review Status: Archived
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -21,3 +27,22 @@ CN/EN Pair Link: N/A
 
 1. 封存文件可查閱，不可直接當作最新規範。
 2. 刪除候選先放 delete-candidates/，經人工確認後再永久刪除。
+
+## Canonical Mapping
+
+1. `docs/archive/delete-candidates/plans/PLAN18-REV1.md` -> canonical active file: `docs/plans/PLAN18.md`
+2. `docs/archive/architecture/*` -> canonical active path: `docs/architecture/*` (if exists)
+
+## Naming And Compliance
+
+1. Archive files keep governance header with `Review Status: Archived`.
+2. Archive files use `Governance Waiver` instead of forcing full execution checklist.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

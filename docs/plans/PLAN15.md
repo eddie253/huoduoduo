@@ -1,4 +1,16 @@
-# PLAN15：P9-P14 遺漏項收斂（只含未完成）
+﻿# PLAN15：P9-P14 遺漏項收斂（只含未完成）
+
+Doc ID: HDD-DOCS-PLANS-PLAN15
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Summary
 
@@ -87,7 +99,7 @@
    1. `Updated at`、`Commit baseline`、最新 command 實測結果。
    2. 替換舊 coverage 數字為新實測值（含 before/after）。
    3. 新增明確 `PLAN15` 區段（補齊 PL13 收尾）。
-2. 更新 `docs/architecture/PLAN8_PLAN12_UNIFIED_BASELINE.md`：
+2. 更新 `docs/architecture/UNIFIED_BASELINE_PLAN8_PLAN12.md`：
    1. 在「必做待辦」移除已關閉項，只保留仍未完成項。
    2. 補連結至 `docs/plans/PLAN15.md`。
 
@@ -138,3 +150,4 @@
 2. `maphwo` 持續 `out_of_scope`，不作 blocker。
 3. 覆蓋率門檻維持：BFF `60/75/60/60`、Flutter `>=50`。
 4. 所有帳密/token/個資一律遮罩，不進版控。
+

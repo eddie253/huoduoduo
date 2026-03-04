@@ -1,4 +1,16 @@
-# PLAN8-PLAN12 收斂總表（Unified Execution Baseline）
+﻿# PLAN8-PLAN12 收斂總表（Unified Execution Baseline）
+
+Doc ID: HDD-DOCS-ARCHITECTURE-PLAN8-PLAN12-UNIFIED-BASELINE
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## 1. 目的
 本文件整併 PLAN8~PLAN12 決策，並同步 PLAN15/PLAN16 之後的最新落地狀態，作為單一執行基準。
@@ -84,3 +96,16 @@
 ## 9. 固定政策
 1. `maphwo.MapsActivity` 固定為 `out_of_scope`，不列入 parity blocker。
 2. 若需暫時降 coverage 門檻，必須有 owner、到期日、風險簽核。
+
+## Acceptance Checklist
+
+- [ ] AC-01: Governance header is complete
+  - Command: Get-Content "docs/architecture/UNIFIED_BASELINE_PLAN8_PLAN12.md" -Encoding UTF8 -TotalCount 40
+  - Expected Result: six governance fields are visible.
+  - Failure Action: add missing governance fields and rerun.
+
+- [ ] AC-02: Command rerun capability
+  - Command: docker compose -f ops/docker/docker-compose.yml config
+  - Expected Result: no error.
+  - Failure Action: use PowerShell fallback (Get-Content, Select-String) to verify file state.
+

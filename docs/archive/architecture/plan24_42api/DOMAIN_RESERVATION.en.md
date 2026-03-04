@@ -1,11 +1,17 @@
-# DOMAIN: Reservation
+﻿# DOMAIN: Reservation
 
 Doc ID: HDD-DOC-ARCHITECTURE-PLAN24-42API-DOMAIN-RESERVATION-EN
 Version: v1.0
 Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_RESERVATION.zh-TW.md
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/DOMAIN_RESERVATION.zh-TW.md
+
+
+
+
+
+
 
 1. CN: `docs/architecture/plan24_42api/DOMAIN_RESERVATION.zh-TW.md`
 2. EN: `docs/architecture/plan24_42api/DOMAIN_RESERVATION.en.md`
@@ -35,4 +41,12 @@ CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_RESERVATION.zh-TW.md
 ## 4. Next Actions
 1. Keep read-only reservation web-support APIs contract-stable.
 2. Any flow-state behavior change must be moved to deferred and decided in P8.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
 

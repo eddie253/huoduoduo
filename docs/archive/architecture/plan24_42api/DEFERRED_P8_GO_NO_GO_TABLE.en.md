@@ -1,11 +1,17 @@
-# P8 Deferred APIs Go/No-Go Decision Table
+﻿# P8 Deferred APIs Go/No-Go Decision Table
 
 Doc ID: HDD-DOC-ARCHITECTURE-PLAN24-42API-DEFERRED-P8-GO-NO-GO-TABLE-EN
 Version: v1.0
 Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/plan24_42api/DEFERRED_P8_GO_NO_GO_TABLE.zh-TW.md
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/DEFERRED_P8_GO_NO_GO_TABLE.zh-TW.md
+
+
+
+
+
+
 
 1. CN: `docs/architecture/plan24_42api/DEFERRED_P8_GO_NO_GO_TABLE.zh-TW.md`
 2. EN: `docs/architecture/plan24_42api/DEFERRED_P8_GO_NO_GO_TABLE.en.md`
@@ -50,4 +56,12 @@ CN/EN Pair Link: docs/architecture/plan24_42api/DEFERRED_P8_GO_NO_GO_TABLE.zh-TW
 1. `DeleteRegID` is implemented in P9 as `POST /v1/push/unregister`.
 2. `GetVersion` is implemented in P9 as `GET /v1/system/version?name=...`.
 3. Remaining deferred methods continue under `No-Go` governance until triggers are met.
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
 

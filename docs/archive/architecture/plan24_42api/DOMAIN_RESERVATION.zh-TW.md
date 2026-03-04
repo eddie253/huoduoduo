@@ -1,31 +1,31 @@
-# DOMAIN?謅Ｗ蕭eservation
+﻿# Archived Document: DOMAIN_RESERVATION.zh-TW
 
-Doc ID: HDD-DOC-ARCHITECTURE-PLAN24-42API-DOMAIN-RESERVATION-ZH-TW
+Doc ID: HDD-DOCS-ARCHIVE-ARCHITECTURE-PLAN24-42API-DOMAIN-RESERVATION-ZH-TW
 Version: v1.0
-Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_RESERVATION.en.md
+Owner: BFF Lead
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/DOMAIN_RESERVATION.en.md
 
-1. CN: `docs/architecture/plan24_42api/DOMAIN_RESERVATION.zh-TW.md`
-2. EN: `docs/architecture/plan24_42api/DOMAIN_RESERVATION.en.md`
 
-## 1. ???????
-1. implemented??1. `GetARVed` -> `GET /v1/reservations?mode=standard`
-2. `UpdateARV` -> `POST /v1/reservations?mode=standard`
-3. `RemoveARV` -> `DELETE /v1/reservations/{id}?mode=standard&address=...`
-4. `GetBARVed` -> `GET /v1/reservations?mode=bulk`
-5. `UpdateBARV` -> `POST /v1/reservations?mode=bulk`
-6. `RemoveBARV` -> `DELETE /v1/reservations/{id}?mode=bulk&address=...`
-2. P7 ??implemented?謅??eb-support ??凋???謅???`GetARV_ZIP`?頩內etARV`?頩內etAreaCode`?頩內etArrived`?頩內etBARV`
+## Purpose
 
-## 2. ??Ⅹ?????1. P3 ?賹??????踝?????response enforcement + request DTO hardening?謅????2. Reservation ??凋??????/??????踝????`maxLength/maxItems` ?頦????3. P7???軸 ???????凋???API ?雓???謅???ㄞ???
-## 3. ?賹????
-1. `reservationNo <= 64`
-2. `address <= 512`
-3. `shipmentNos[] each <= 64`
-4. `shipmentNos maxItems <= 200`
-5. `mode in [standard, bulk]`
+1. Readability rebuilt version for encoding remediation.
+2. Kept for audit traceability and historical reference.
 
-## 4. ?蝬踐ㄟ???ㄝ?
-1. P7 ??????桃???雓????API?謅?ㄜ??????????????2. ??凋???????豲???????????? deferred ?豲必??P8 ?謕????
+## Canonical Path
+
+1. N/A
+
+## Governance Waiver
+
+- Reason: historical file retained under archive_waiver after readability rebuild.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+
+## Change Log
+
+1. v1.0 (2026-03-05) - Rebuilt as readable UTF-8 content.
+

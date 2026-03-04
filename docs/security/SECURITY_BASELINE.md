@@ -1,11 +1,17 @@
-# SECURITY_BASELINE
+﻿# SECURITY_BASELINE
 
 Doc ID: HDD-SEC-BASELINE
 Version: v1.0
 Owner: Security Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose & Scope
 
@@ -24,3 +30,4 @@ CN/EN Pair Link: N/A
   - Command: rg -n "Secrets|RBAC|Audit|SAST|SCA|SBOM" docs/security/SECURITY_BASELINE.md
   - Expected Result: 全部命中。
   - Failure Action: 補齊對應章節。
+

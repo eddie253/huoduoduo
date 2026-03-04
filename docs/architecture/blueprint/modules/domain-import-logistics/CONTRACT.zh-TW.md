@@ -1,11 +1,17 @@
-# 模組契約：domain-import-logistics
+﻿# 模組契約：domain-import-logistics
 
 Doc ID: HDD-MODULE-DOMAIN-IMPORT-LOGISTICS-CONTRACT
 Version: v1.0
 Owner: Module Owner
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -47,3 +53,4 @@ CN/EN Pair Link: N/A
   - Command: rg -n "Out of Scope" docs/architecture/blueprint/modules/domain-import-logistics/CONTRACT.zh-TW.md
   - Expected Result: 命中且內容非空。
   - Failure Action: 補齊邊界描述。
+

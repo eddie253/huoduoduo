@@ -1,11 +1,17 @@
-# DEV_TOOLCHAIN_BASELINE
+﻿# DEV_TOOLCHAIN_BASELINE
 
 Doc ID: HDD-DOC-DEV-TOOLCHAIN-BASELINE
 Version: v1.1
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: In Review
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -89,3 +95,4 @@ CN/EN Pair Link: N/A
 ## Change Log
 
 1. v1.1 - 補齊團隊必裝工具、Windows 安裝命令、驗證命令，並加入 `ripgrep (rg)` 基線。
+

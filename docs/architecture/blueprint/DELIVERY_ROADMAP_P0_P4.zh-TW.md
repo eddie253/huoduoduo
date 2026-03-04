@@ -1,11 +1,17 @@
-# DELIVERY_ROADMAP_P0_P4.zh-TW
+﻿# DELIVERY_ROADMAP_P0_P4.zh-TW
 
 Doc ID: HDD-DOC-DELIVERY-ROADMAP-P0-P4-ZH-TW
 Version: v1.0
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -22,3 +28,4 @@ CN/EN Pair Link: N/A
   - Command: Get-Content docs/architecture/blueprint/DELIVERY_ROADMAP_P0_P4.zh-TW.md -Encoding utf8 -TotalCount 20
   - Expected Result: 中文可讀。
   - Failure Action: 重新以 UTF-8 寫入。
+

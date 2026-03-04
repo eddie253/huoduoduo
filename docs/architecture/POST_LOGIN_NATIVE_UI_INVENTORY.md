@@ -1,4 +1,16 @@
-# Post Login Native UI Inventory (PLAN14)
+﻿# Post Login Native UI Inventory (PLAN14)
+
+Doc ID: HDD-DOCS-ARCHITECTURE-POST-LOGIN-NATIVE-UI-INVENTORY
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Scope
 This inventory includes native UI surfaces reachable after successful login in the legacy Android app.
@@ -38,3 +50,4 @@ Out of scope in PLAN14:
 | Legacy Surface | Status | Reason |
 |---|---|---|
 | `maphwo.MapsActivity` | `out_of_scope` | PLAN14 keeps one map engine (`mapgoogle`) plus external map URI only, to reduce parity and regression noise. |
+

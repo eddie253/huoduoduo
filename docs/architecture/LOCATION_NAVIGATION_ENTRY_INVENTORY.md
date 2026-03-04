@@ -1,4 +1,16 @@
-# Location / Navigation Entry Inventory
+﻿# Location / Navigation Entry Inventory
+
+Doc ID: HDD-DOCS-ARCHITECTURE-LOCATION-NAVIGATION-ENTRY-INVENTORY
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Purpose
 
@@ -59,3 +71,4 @@ All Google Maps navigation paths should pass through:
 1. If any preflight step fails, block map launch and return explicit message.
 2. Keep all map preflight decisions in one service; avoid duplicate ad-hoc checks in UI pages.
 3. If Android Google account state cannot be verified, treat as blocked and ask user to sign in first.
+

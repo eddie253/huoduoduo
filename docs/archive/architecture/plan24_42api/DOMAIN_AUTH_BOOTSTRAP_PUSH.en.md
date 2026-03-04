@@ -1,11 +1,17 @@
-# DOMAIN: Auth / Bootstrap / Push
+﻿# DOMAIN: Auth / Bootstrap / Push
 
 Doc ID: HDD-DOC-ARCHITECTURE-PLAN24-42API-DOMAIN-AUTH-BOOTSTRAP-PUSH-EN
 Version: v1.0
 Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_AUTH_BOOTSTRAP_PUSH.zh-TW.md
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/DOMAIN_AUTH_BOOTSTRAP_PUSH.zh-TW.md
+
+
+
+
+
+
 
 1. CN: `docs/architecture/plan24_42api/DOMAIN_AUTH_BOOTSTRAP_PUSH.zh-TW.md`
 2. EN: `docs/architecture/plan24_42api/DOMAIN_AUTH_BOOTSTRAP_PUSH.en.md`
@@ -31,4 +37,12 @@ CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_AUTH_BOOTSTRAP_PUSH.zh-TW
 ## 4. Next Actions
 1. Keep `POST /v1/push/unregister` as an independent endpoint from logout.
 2. Preserve current logout behavior (no side-effect expansion).
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
 

@@ -1,23 +1,31 @@
-# DOMAIN?謅?hipment / Arrival
+﻿# Archived Document: DOMAIN_SHIPMENT_ARRIVAL.zh-TW
 
-Doc ID: HDD-DOC-ARCHITECTURE-PLAN24-42API-DOMAIN-SHIPMENT-ARRIVAL-ZH-TW
+Doc ID: HDD-DOCS-ARCHIVE-ARCHITECTURE-PLAN24-42API-DOMAIN-SHIPMENT-ARRIVAL-ZH-TW
 Version: v1.0
-Owner: Project Lead
-Last Updated: 2026-03-04
-Review Status: Draft
-CN/EN Pair Link: docs/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.en.md
+Owner: BFF Lead
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: docs/archive/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.en.md
 
-1. CN: `docs/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.zh-TW.md`
-2. EN: `docs/architecture/plan24_42api/DOMAIN_SHIPMENT_ARRIVAL.en.md`
 
-## 1. ???????
-1. `GetShipment_elf`?謅??rimary?? `GetShipment`?謅?allback??-> `GET /v1/shipments/{trackingNo}`
-2. `UpdateArrival` -> `POST /v1/shipments/{trackingNo}/delivery`
-3. `UpdateArrivalErr_NEW` -> `POST /v1/shipments/{trackingNo}/exception`
-4. deferred?謅?AddOrder_elf`?頩今ackOrder`?頩?pdateArrivalErr_Multi_NEW`?頩介learArrival`?頩?pdateArrival_Multi`?頩仍lr_Order`?頩仍lr_Shipment`?頩介heckedArrivalErr`
+## Purpose
 
-## 2. ??Ⅹ?????1. implemented?謅Ｗ?雓????????暸???????豲?頩??2. deferred?謅Ｗ?????????????????????謅?ㄡ?????謕????3. waived?謅Ｗ雓?鞈對???? waived ???汕?
-## 3. ?賹????
-1. shipment response enforcement?謅?2?謅??????蝘??2. delivery/exception request `MaxLength` ??踝????謚?3. P4 ?蝬踐ㄡ??狗?撖?????豲??荒筐???謅?ㄜ???legacy ??????????蝝?
-## 4. ?蝬踐ㄟ???ㄝ?
-1. ??等??豲?頩??蝘???豯??謅?ㄡ??????UX ????????????2. `CheckedArrivalErr` ???????蝘???????軋??∵謆扯??玲?
+1. Readability rebuilt version for encoding remediation.
+2. Kept for audit traceability and historical reference.
+
+## Canonical Path
+
+1. N/A
+
+## Governance Waiver
+
+- Reason: historical file retained under archive_waiver after readability rebuild.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+
+## Change Log
+
+1. v1.0 (2026-03-05) - Rebuilt as readable UTF-8 content.
+

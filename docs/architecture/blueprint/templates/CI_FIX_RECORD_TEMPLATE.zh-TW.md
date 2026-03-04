@@ -1,11 +1,17 @@
-# CI_FIX_RECORD_TEMPLATE
+﻿# CI_FIX_RECORD_TEMPLATE
 
 Doc ID: HDD-TPL-CI-FIX-RECORD
 Version: v1.0
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Approved
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -84,3 +90,4 @@ CN/EN Pair Link: N/A
 ## Change Log
 
 1. v1.0 - 初版模板，定義 CI 修復記錄必要欄位與驗收。
+

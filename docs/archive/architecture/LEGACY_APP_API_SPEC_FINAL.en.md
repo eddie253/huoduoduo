@@ -1,11 +1,17 @@
-# Legacy App API Specification (Final)
+﻿# Legacy App API Specification (Final)
 
-Doc ID: `HDD-LEGACY-API-SPEC`  
-Version: `v1.1`  
-Owner: `Architecture Lead`  
-Last Updated: `2026-03-03`  
-Review Status: `Draft for management review`  
-CN/EN Pair Link:
+Doc ID: `HDD-LEGACY-API-SPEC`
+Version: `v1.1`
+Owner: `Architecture Lead`
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 1. CN: `docs/architecture/LEGACY_APP_API_SPEC_FINAL.zh-TW.md`
 2. EN: `docs/architecture/LEGACY_APP_API_SPEC_FINAL.en.md`
 
@@ -141,3 +147,12 @@ Main routes:
 3. `app/src/main/java/didi/app/express/AppWebView.java`
 4. `app/src/main/java/didi/app/express/Menu_GridView*.java`
 5. `app/src/main/java/controls/CheckData.java`
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

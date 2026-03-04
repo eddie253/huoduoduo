@@ -1,4 +1,16 @@
-# Login Session Parity Checklist (PLAN11 + PLAN14)
+﻿# Login Session Parity Checklist (PLAN11 + PLAN14)
+
+Doc ID: HDD-DOCS-ARCHITECTURE-LOGIN-SESSION-PARITY-CHECKLIST
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Scope
 
@@ -185,3 +197,16 @@ Screen IDs:
 2. `FOREGROUND_BACKGROUND_PRESERVE`: requires Android real-device foreground/background capture.
 3. `REFRESH_ROTATION`: requires UAT token replay capture under controlled credential set.
 4. Go/No-Go: `GO_FOR_UAT_WITH_WAIVE`
+
+## Acceptance Checklist
+
+- [ ] AC-01: Governance header is complete
+  - Command: Get-Content "docs/architecture/LOGIN_SESSION_PARITY_CHECKLIST.md" -Encoding UTF8 -TotalCount 40
+  - Expected Result: six governance fields are visible.
+  - Failure Action: add missing governance fields and rerun.
+
+- [ ] AC-02: Command rerun capability
+  - Command: docker compose -f ops/docker/docker-compose.yml config
+  - Expected Result: no error.
+  - Failure Action: use PowerShell fallback (Get-Content, Select-String) to verify file state.
+

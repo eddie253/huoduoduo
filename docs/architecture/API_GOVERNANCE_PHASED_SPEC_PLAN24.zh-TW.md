@@ -3,11 +3,17 @@
 Doc ID: `HDD-PLAN24-PHASED-GOV`
 Version: `v1.4`
 Owner: `Architecture Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
-1. CN: `docs/architecture/PLAN24_PHASED_API_GOVERNANCE_SPEC.zh-TW.md`
-2. EN: `docs/architecture/PLAN24_PHASED_API_GOVERNANCE_SPEC.en.md`
+Last Updated: 2026-03-05
+Review Status: In Review
+CN/EN Pair Link: docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.en.md
+
+
+
+
+
+
+1. CN: `docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.zh-TW.md`
+2. EN: `docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.en.md`
 
 日期：2026-03-03（Asia/Taipei）
 用途：先完成文件交付與治理對齊，再進入實作。
@@ -30,7 +36,7 @@ CN/EN Pair Link:
 3. `contracts/legacy/error-code-mapping-v1.md`
 4. `docs/architecture/LEGACY_APP_API_SPEC_FINAL.zh-TW.md`
 5. `docs/architecture/LEGACY_API_42_STATUS_MATRIX_20260303.zh-TW.md`
-6. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.md`
+6. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.zh-TW.md`
 
 ### 2.2 P0 後端回傳欄位長度（通用治理）
 | 欄位型別 | 長度規範 |
@@ -153,7 +159,7 @@ CN/EN Pair Link:
 ### 6.1 P4 對照文件
 1. `contracts/openapi/huoduoduo-v1.openapi.yaml`
 2. `contracts/legacy/error-code-mapping-v1.md`
-3. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.md`
+3. `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.zh-TW.md`
 4. `ops/ci/check-route-diff.js`
 5. `ops/ci/check-error-code-map.js`
 
@@ -167,7 +173,7 @@ CN/EN Pair Link:
 |  | `timestamp` | `maxLength: 40` |
 
 ## 7. 開工前交付物
-1. `PLAN24_PHASED_API_GOVERNANCE_SPEC.zh-TW.md`（本文件）
+1. `API_GOVERNANCE_PHASED_SPEC_PLAN24.zh-TW.md`（本文件）
 2. `LEGACY_APP_API_SPEC_FINAL.zh-TW.md` / `.en.md`
 3. `LEGACY_API_42_STATUS_MATRIX_20260303.zh-TW.md` / `.en.md`
 4. `API_DOCUMENT_INVENTORY_PLAN24.zh-TW.md` / `.en.md`
@@ -177,3 +183,16 @@ CN/EN Pair Link:
 1. 是否同意長度規格作為正式 OpenAPI contract？
 2. `waived` 項是否維持 webview 承接、不做 BFF 新 API？
 3. `implemented but unused` 是否在下一輪要求 Flutter 接線？
+
+## Acceptance Checklist
+
+- [ ] AC-01: Governance header is complete
+  - Command: Get-Content "docs/architecture/API_GOVERNANCE_PHASED_SPEC_PLAN24.zh-TW.md" -Encoding UTF8 -TotalCount 40
+  - Expected Result: six governance fields are visible.
+  - Failure Action: add missing governance fields and rerun.
+
+- [ ] AC-02: Command rerun capability
+  - Command: docker compose -f ops/docker/docker-compose.yml config
+  - Expected Result: no error.
+  - Failure Action: use PowerShell fallback (Get-Content, Select-String) to verify file state.
+

@@ -1,4 +1,16 @@
-# Wave 3 Execution Spec
+﻿# Wave 3 Execution Spec
+
+Doc ID: HDD-DOCS-ARCHITECTURE-WAVE3-EXECUTION-SPEC
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Goal
 
@@ -54,3 +66,4 @@ Complete "contract-verifiable + risk-controllable" delivery for current monorepo
 2. Bridge verification tests.
 3. CI gate hardening.
 4. Evidence and documentation update.
+

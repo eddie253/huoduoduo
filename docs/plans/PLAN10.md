@@ -1,5 +1,17 @@
 ﻿# PLAN10: Wave 4 Core Capability Completion + Real-device Parity Gate
 
+Doc ID: HDD-DOCS-PLANS-PLAN10
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
+
 ## Summary
 
 1. Complete Wave 4 core native capability wiring on Flutter.
@@ -32,3 +44,4 @@
 3. shipment operation with queue transitions
 4. logout session cleanup
 5. iOS compile/smoke remains Mac gate.
+

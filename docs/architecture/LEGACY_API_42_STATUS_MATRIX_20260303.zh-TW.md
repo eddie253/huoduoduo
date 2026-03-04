@@ -3,9 +3,15 @@
 Doc ID: `HDD-LEGACY-42-MATRIX`
 Version: `v1.1`
 Owner: `Architecture Lead`
-Last Updated: `2026-03-03`
-Review Status: `Draft for management review`
-CN/EN Pair Link:
+Last Updated: 2026-03-05
+Review Status: In Review
+CN/EN Pair Link: docs/architecture/LEGACY_API_42_STATUS_MATRIX_20260303.en.md
+
+
+
+
+
+
 1. CN: `docs/architecture/LEGACY_API_42_STATUS_MATRIX_20260303.zh-TW.md`
 2. EN: `docs/architecture/LEGACY_API_42_STATUS_MATRIX_20260303.en.md`
 
@@ -73,3 +79,4 @@ CN/EN Pair Link:
 1. 本矩陣母體為舊 Android `network/*.java` 掃描出的 42 個 SOAP method。
 2. 所有列均已具備 `status/reason/owner/target milestone`，符合 P0 治理要求。
 3. `waived` 項有明確回收條件；條件成立前保持 webview 路徑。
+

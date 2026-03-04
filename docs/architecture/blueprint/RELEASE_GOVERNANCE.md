@@ -1,11 +1,17 @@
-# RELEASE_GOVERNANCE
+﻿# RELEASE_GOVERNANCE
 
 Doc ID: HDD-DOC-RELEASE-GOVERNANCE
 Version: v1.1
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: In Review
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -52,3 +58,4 @@ CN/EN Pair Link: N/A
 ## Change Log
 
 1. v1.1 - 新增 CI 修復紀錄政策與證據路徑。
+

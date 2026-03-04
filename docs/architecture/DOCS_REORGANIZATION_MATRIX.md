@@ -1,4 +1,16 @@
-# Docs Reorganization Matrix
+﻿# Docs Reorganization Matrix
+
+Doc ID: HDD-DOCS-ARCHITECTURE-DOCS-REORGANIZATION-MATRIX
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Draft
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Purpose
 
@@ -16,7 +28,7 @@ This file is the single checklist for deciding which docs are:
 | `docs/architecture/WAVE2_UAT_EVIDENCE.md` | UAT execution evidence | QA / Backend |
 | `docs/architecture/LEGACY_BASELINE_FREEZE.md` | Legacy read-only policy | Architecture |
 | `docs/architecture/WAVE3_EXECUTION_SPEC.md` | Wave 3 execution source | Architecture |
-| `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.md` | Contract gate checklist | Backend/Mobile |
+| `docs/architecture/CONTRACT_VERIFICATION_CHECKLIST.zh-TW.md` | Contract gate checklist | Backend/Mobile |
 | `docs/architecture/WAVE4_NATIVE_PARITY_MATRIX.md` | Wave 4 parity tracker | Mobile |
 | `docs/architecture/E2E_SMOKE_RUNBOOK.md` | End-to-end smoke SOP | QA |
 | `docs/security/MASVS_ASVS_MAPPING_V1.md` | Security control mapping | Security |
@@ -51,3 +63,4 @@ A doc should be moved out of active set when:
 
 1. Review at each wave close (Wave 3, Wave 4, ...).
 2. Keep only docs that are executable or audit-relevant.
+

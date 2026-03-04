@@ -1,4 +1,16 @@
-# PLAN16：底部分頁返回一致性 + 頂部設定入口 + 6 色主題與暗黑模式
+﻿# PLAN16：底部分頁返回一致性 + 頂部設定入口 + 6 色主題與暗黑模式
+
+Doc ID: HDD-DOCS-ARCHIVE-PLANS-PLAN16
+Version: v1.0
+Owner: Architecture Lead
+Last Updated: 2026-03-05
+Review Status: Archived
+CN/EN Pair Link: N/A
+
+
+
+
+
 
 ## Summary
 
@@ -51,3 +63,12 @@
 
 1. 入口策略：頂部右上角與錢包「設定」卡片共用同一設定頁。
 2. 目前保留 `maphwo.MapsActivity` 為 `out_of_scope`（沿用既有政策）。
+
+## Governance Waiver
+
+- Reason: historical document retained for traceability under archive_waiver policy.
+- Owner: Architecture Lead
+- Original Date: N/A
+- Retention: long-term archive retention.
+- Reactivation Trigger: audit or historical trace request.
+

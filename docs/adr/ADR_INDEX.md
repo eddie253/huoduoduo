@@ -1,11 +1,17 @@
-# ADR_INDEX
+﻿# ADR_INDEX
 
 Doc ID: HDD-ADR-INDEX
 Version: v1.0
 Owner: Architecture Lead
-Last Updated: 2026-03-04
+Last Updated: 2026-03-05
 Review Status: Draft
 CN/EN Pair Link: N/A
+
+
+
+
+
+
 
 ## Purpose
 
@@ -30,3 +36,4 @@ CN/EN Pair Link: N/A
   - Command: rg -n "ADR-0001|Accepted" docs/adr/ADR_INDEX.md
   - Expected Result: 可命中。
   - Failure Action: 補 ADR 表格。
+
