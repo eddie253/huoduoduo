@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationSupportZipQueryDto } from './dto/reservation-support-query.dto';

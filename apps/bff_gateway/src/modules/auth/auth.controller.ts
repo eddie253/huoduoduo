@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { P1_CONTRACT_LIMITS, ensureMax } from '../../core/contracts/p1-contract-policy';
 import { LoginRequestDto } from './dto/login-request.dto';

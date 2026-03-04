@@ -1,5 +1,5 @@
 import { Controller, Get, Req, UnauthorizedException } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
 import { NoStoreResponse } from '../../security/no-store-response.decorator';
 import { WebviewBootstrapDto } from '../auth/dto/auth-response.dto';

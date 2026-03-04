@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, Param, Post, Req } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { AuthClaims } from '../../security/auth-claims';
 import { DeliveryRequestDto } from './dto/delivery-request.dto';
 import { ExceptionRequestDto } from './dto/exception-request.dto';
