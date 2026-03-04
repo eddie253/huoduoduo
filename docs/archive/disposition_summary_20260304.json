@@ -1,0 +1,11 @@
+﻿{
+    "timestamp":  "2026-03-04T00:00:00+08:00",
+    "timezone":  "Asia/Taipei",
+    "suspects_total":  56,
+    "keep":  4,
+    "archive":  51,
+    "delete_candidate":  1,
+    "archive_moved":  51,
+    "delete_staged":  1,
+    "skipped_missing":  0
+}

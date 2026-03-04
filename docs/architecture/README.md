@@ -20,6 +20,7 @@
 ## Governance
 
 1. `DOCS_REORGANIZATION_MATRIX.md`
+2. `WORKSPACE_SETTINGS_PROTECTION.zh-TW.md`
 
 ## Usage rule
 

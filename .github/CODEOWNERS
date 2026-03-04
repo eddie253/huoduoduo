@@ -1,0 +1,6 @@
+# Workspace settings protection
+/.vscode/settings.json @eddie253
+
+# Guardrail policy files
+/.github/workflows/ci.yml @eddie253
+/ops/ci/check-workspace-settings-guard.sh @eddie253

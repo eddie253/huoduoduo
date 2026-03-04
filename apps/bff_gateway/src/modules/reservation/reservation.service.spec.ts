@@ -86,4 +86,57 @@ describe('ReservationService contract enforcement', () => {
       statusCode: 502
     });
   });
+
+  it('returns reservation support rows when fields are within limits', async () => {
+    const legacySoapClient = {
+      getReservationAvailable: jest.fn(async () => [
+        {
+          code: 'RS001',
+          name: 'Reservable Item',
+          status: 'open',
+          service: 'reservation',
+          role: null,
+          message: null,
+          reservationNo: null,
+          trackingNo: 'T001',
+          zip: '100',
+          areaCode: 'A1',
+          address: 'Addr',
+          date: '2026-03-04'
+        }
+      ])
+    } as unknown as LegacySoapClient;
+
+    const service = new ReservationService(legacySoapClient);
+    const result = await service.getAvailable('100', claims);
+    expect(result.items.length).toBe(1);
+    expect(result.items[0].code).toBe('RS001');
+  });
+
+  it('rejects over-length reservation support structural fields', async () => {
+    const legacySoapClient = {
+      getReservationZipAreas: jest.fn(async () => [
+        {
+          code: `C${'1'.repeat(64)}`,
+          name: 'ZIP',
+          status: null,
+          service: null,
+          role: null,
+          message: null,
+          reservationNo: null,
+          trackingNo: null,
+          zip: null,
+          areaCode: null,
+          address: null,
+          date: null
+        }
+      ])
+    } as unknown as LegacySoapClient;
+
+    const service = new ReservationService(legacySoapClient);
+    await expect(service.getZipAreas()).rejects.toMatchObject<Partial<LegacySoapError>>({
+      code: 'LEGACY_BAD_RESPONSE',
+      statusCode: 502
+    });
+  });
 });

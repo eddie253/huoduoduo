@@ -6,9 +6,14 @@ import {
   enforceReservationCreateContract,
   enforceReservationListContract
 } from '../../core/contracts/p3-contract-policy';
+import {
+  P7_CONTRACT_LIMITS,
+  enforceReservationSupportListContract
+} from '../../core/contracts/p7-contract-policy';
 import { AuthClaims } from '../../security/auth-claims';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationResponseDto } from './dto/reservation-response.dto';
+import { ReservationSupportListResponseDto } from './dto/reservation-support-response.dto';
 
 @Injectable()
 export class ReservationService {
@@ -79,5 +84,66 @@ export class ReservationService {
 
     await this.legacySoapClient.deleteReservation(mode, normalizedId, normalizedAddress, normalizedContractNo);
     return { ok: true };
+  }
+
+  async getZipAreas(): Promise<ReservationSupportListResponseDto> {
+    const rows = await this.legacySoapClient.getReservationZipAreas();
+    return {
+      items: enforceReservationSupportListContract(rows, 'reservations.zip-areas.response')
+    };
+  }
+
+  async getAvailable(zip: string, claims: AuthClaims): Promise<ReservationSupportListResponseDto> {
+    const normalizedZip = ensureMax('reservations.available.request.zip', zip, P7_CONTRACT_LIMITS.zip);
+    const normalizedContractNo = ensureMax(
+      'reservations.available.request.contractNo',
+      claims.contractNo,
+      P1_CONTRACT_LIMITS.contractNo
+    );
+    const rows = await this.legacySoapClient.getReservationAvailable(normalizedZip, normalizedContractNo);
+    return {
+      items: enforceReservationSupportListContract(rows, 'reservations.available.response')
+    };
+  }
+
+  async getAvailableBulk(zip: string, claims: AuthClaims): Promise<ReservationSupportListResponseDto> {
+    const normalizedZip = ensureMax(
+      'reservations.available.bulk.request.zip',
+      zip,
+      P7_CONTRACT_LIMITS.zip
+    );
+    const normalizedContractNo = ensureMax(
+      'reservations.available.bulk.request.contractNo',
+      claims.contractNo,
+      P1_CONTRACT_LIMITS.contractNo
+    );
+    const rows = await this.legacySoapClient.getReservationAvailableBulk(normalizedZip, normalizedContractNo);
+    return {
+      items: enforceReservationSupportListContract(rows, 'reservations.available.bulk.response')
+    };
+  }
+
+  async getAreaCodes(claims: AuthClaims): Promise<ReservationSupportListResponseDto> {
+    const normalizedContractNo = ensureMax(
+      'reservations.area-codes.request.contractNo',
+      claims.contractNo,
+      P1_CONTRACT_LIMITS.contractNo
+    );
+    const rows = await this.legacySoapClient.getReservationAreaCodes(normalizedContractNo);
+    return {
+      items: enforceReservationSupportListContract(rows, 'reservations.area-codes.response')
+    };
+  }
+
+  async getArrived(claims: AuthClaims): Promise<ReservationSupportListResponseDto> {
+    const normalizedContractNo = ensureMax(
+      'reservations.arrived.request.contractNo',
+      claims.contractNo,
+      P1_CONTRACT_LIMITS.contractNo
+    );
+    const rows = await this.legacySoapClient.getReservationArrived(normalizedContractNo);
+    return {
+      items: enforceReservationSupportListContract(rows, 'reservations.arrived.response')
+    };
   }
 }

@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
   title: Huoduoduo Express BFF API
-  version: 0.2.6
+  version: 0.2.10
   description: Transitional REST API in front of legacy SOAP services (UAT baseline).
   x-doc-id: HDD-OPENAPI-CONTRACT
   x-owner: BFF Lead
-  x-last-updated: 2026-03-03
+  x-last-updated: 2026-03-04
   x-review-status: Draft for management review
   x-language-pair:
     zh-TW: docs/architecture/API_SPEC_OPENAPI_PLAN24.zh-TW.md
@@ -22,6 +22,9 @@ tags:
   - name: Push
   - name: Shipments
   - name: Reservations
+  - name: Proxy
+  - name: Currency
+  - name: System
 paths:
   /health:
     get:
@@ -211,6 +214,59 @@ paths:
                     type: string
                     format: date-time
                     maxLength: 40
+  /push/unregister:
+    post:
+      tags: [Push]
+      security:
+        - bearerAuth: []
+      summary: Unregister device push token from legacy backend.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnregisterPushTokenRequest'
+      responses:
+        "200":
+          description: Unregister accepted.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  unregisteredAt:
+                    type: string
+                    format: date-time
+                    maxLength: 40
+  /system/version:
+    get:
+      tags: [System]
+      summary: Get latest application version code from legacy system.
+      parameters:
+        - $ref: '#/components/parameters/SystemVersionName'
+      responses:
+        "200":
+          description: Latest application version code.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemVersionResponse'
   /shipments/{trackingNo}:
     get:
       tags: [Shipments]
@@ -373,6 +429,110 @@ paths:
                     type: string
                     maxLength: 16
                     enum: [standard, bulk]
+  /reservations/zip-areas:
+    get:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: Get reservable ZIP/area list.
+      responses:
+        "200":
+          description: Reservable ZIP/area list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationSupportListResponse'
+  /reservations/available:
+    get:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: Get reservable shipment list (standard) by ZIP.
+      parameters:
+        - $ref: '#/components/parameters/ReservationSupportZip'
+      responses:
+        "200":
+          description: Reservable standard shipment list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationSupportListResponse'
+  /reservations/available/bulk:
+    get:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: Get reservable shipment list (bulk) by ZIP.
+      parameters:
+        - $ref: '#/components/parameters/ReservationSupportZip'
+      responses:
+        "200":
+          description: Reservable bulk shipment list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationSupportListResponse'
+  /reservations/area-codes:
+    get:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: Get reservation area-code list.
+      responses:
+        "200":
+          description: Reservation area-code list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationSupportListResponse'
+  /reservations/arrived:
+    get:
+      tags: [Reservations]
+      security:
+        - bearerAuth: []
+      summary: Get arrived-to-warehouse shipment list.
+      responses:
+        "200":
+          description: Arrived shipment list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationSupportListResponse'
   /reservations/{id}:
     delete:
       tags: [Reservations]
@@ -410,6 +570,231 @@ paths:
                 properties:
                   ok:
                     type: boolean
+  /proxy/mates:
+    get:
+      tags: [Proxy]
+      security:
+        - bearerAuth: []
+      summary: Get proxy mates by area.
+      parameters:
+        - $ref: '#/components/parameters/ProxyArea'
+      responses:
+        "200":
+          description: Proxy mate list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProxyMateListResponse'
+  /proxy/kpi/search:
+    get:
+      tags: [Proxy]
+      security:
+        - bearerAuth: []
+      summary: Search proxy KPI by year, month and area.
+      parameters:
+        - $ref: '#/components/parameters/ProxyYear'
+        - $ref: '#/components/parameters/ProxyMonth'
+        - $ref: '#/components/parameters/ProxyArea'
+      responses:
+        "200":
+          description: Proxy KPI search list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProxyKpiListResponse'
+  /proxy/kpi:
+    get:
+      tags: [Proxy]
+      security:
+        - bearerAuth: []
+      summary: Get proxy KPI by year, month and area.
+      parameters:
+        - $ref: '#/components/parameters/ProxyYear'
+        - $ref: '#/components/parameters/ProxyMonth'
+        - $ref: '#/components/parameters/ProxyArea'
+      responses:
+        "200":
+          description: Proxy KPI list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProxyKpiListResponse'
+  /proxy/kpi/daily:
+    get:
+      tags: [Proxy]
+      security:
+        - bearerAuth: []
+      summary: Get daily proxy KPI by date and area.
+      parameters:
+        - $ref: '#/components/parameters/ProxyDate'
+        - $ref: '#/components/parameters/ProxyArea'
+      responses:
+        "200":
+          description: Proxy daily KPI list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProxyKpiListResponse'
+  /currency/daily:
+    get:
+      tags: [Currency]
+      security:
+        - bearerAuth: []
+      summary: Get daily currency statement.
+      parameters:
+        - $ref: '#/components/parameters/CurrencyDate'
+      responses:
+        "200":
+          description: Daily currency list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyListResponse'
+  /currency/monthly:
+    get:
+      tags: [Currency]
+      security:
+        - bearerAuth: []
+      summary: Get monthly currency statement.
+      parameters:
+        - $ref: '#/components/parameters/CurrencyDate'
+      responses:
+        "200":
+          description: Monthly currency list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyListResponse'
+  /currency/balance:
+    get:
+      tags: [Currency]
+      security:
+        - bearerAuth: []
+      summary: Get current driver balance.
+      responses:
+        "200":
+          description: Balance list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyListResponse'
+  /currency/deposit/head:
+    get:
+      tags: [Currency]
+      security:
+        - bearerAuth: []
+      summary: Get deposit summary list by date range.
+      parameters:
+        - $ref: '#/components/parameters/CurrencyStartDate'
+        - $ref: '#/components/parameters/CurrencyEndDate'
+      responses:
+        "200":
+          description: Deposit summary list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyListResponse'
+  /currency/deposit/body:
+    get:
+      tags: [Currency]
+      security:
+        - bearerAuth: []
+      summary: Get deposit detail list by tracking number and address.
+      parameters:
+        - $ref: '#/components/parameters/CurrencyTnum'
+        - $ref: '#/components/parameters/CurrencyAddress'
+      responses:
+        "200":
+          description: Deposit detail list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyListResponse'
+  /currency/shipment:
+    get:
+      tags: [Currency]
+      security:
+        - bearerAuth: []
+      summary: Get shipment currency list by order number.
+      parameters:
+        - $ref: '#/components/parameters/CurrencyOrderNum'
+      responses:
+        "200":
+          description: Shipment currency list.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlNoStore'
+            Pragma:
+              $ref: '#/components/headers/PragmaNoCache'
+            Expires:
+              $ref: '#/components/headers/ExpiresZero'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrencyListResponse'
 components:
   headers:
     CacheControlNoStore:
@@ -441,6 +826,93 @@ components:
         type: string
         enum: [standard, bulk]
         default: standard
+    ReservationSupportZip:
+      name: zip
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    ProxyArea:
+      name: area
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    ProxyYear:
+      name: year
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 4
+        pattern: '^\d{4}$'
+    ProxyMonth:
+      name: month
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 2
+        pattern: '^\d{1,2}$'
+    ProxyDate:
+      name: date
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 10
+        pattern: '^\d{4}-\d{2}-\d{2}$'
+    CurrencyDate:
+      name: date
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 40
+    CurrencyStartDate:
+      name: startDate
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 40
+    CurrencyEndDate:
+      name: endDate
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 40
+    CurrencyTnum:
+      name: tnum
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    CurrencyAddress:
+      name: address
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 512
+    CurrencyOrderNum:
+      name: orderNum
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 64
+    SystemVersionName:
+      name: name
+      in: query
+      required: true
+      schema:
+        type: string
+        maxLength: 64
   responses:
     LegacyBusinessError:
       description: Legacy backend business error.
@@ -730,6 +1202,64 @@ components:
           type: string
           maxLength: 16
           enum: [standard, bulk]
+    ReservationSupportListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReservationSupportItem'
+    ReservationSupportItem:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 128
+        status:
+          type: string
+          nullable: true
+          maxLength: 64
+        service:
+          type: string
+          nullable: true
+          maxLength: 128
+        role:
+          type: string
+          nullable: true
+          maxLength: 64
+        message:
+          type: string
+          nullable: true
+          maxLength: 1024
+        reservationNo:
+          type: string
+          nullable: true
+          maxLength: 64
+        trackingNo:
+          type: string
+          nullable: true
+          maxLength: 64
+        zip:
+          type: string
+          nullable: true
+          maxLength: 64
+        areaCode:
+          type: string
+          nullable: true
+          maxLength: 64
+        address:
+          type: string
+          nullable: true
+          maxLength: 512
+        date:
+          type: string
+          nullable: true
+          maxLength: 40
     RegisterPushTokenRequest:
       type: object
       required: [deviceId, platform, fcmToken]
@@ -747,3 +1277,156 @@ components:
         appVersion:
           type: integer
           minimum: 0
+    UnregisterPushTokenRequest:
+      type: object
+      required: [fcmToken]
+      properties:
+        fcmToken:
+          type: string
+          maxLength: 4096
+    SystemVersionResponse:
+      type: object
+      required: [name, versionCode]
+      properties:
+        name:
+          type: string
+          maxLength: 64
+        versionCode:
+          type: integer
+          minimum: 0
+    ProxyMateListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProxyMateItem'
+    ProxyKpiListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProxyKpiItem'
+    ProxyMateItem:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 128
+        area:
+          type: string
+          nullable: true
+          maxLength: 64
+        status:
+          type: string
+          nullable: true
+          maxLength: 64
+        service:
+          type: string
+          nullable: true
+          maxLength: 128
+        role:
+          type: string
+          nullable: true
+          maxLength: 64
+        message:
+          type: string
+          nullable: true
+          maxLength: 1024
+        updatedAt:
+          type: string
+          nullable: true
+          maxLength: 40
+    ProxyKpiItem:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 128
+        status:
+          type: string
+          nullable: true
+          maxLength: 64
+        service:
+          type: string
+          nullable: true
+          maxLength: 128
+        role:
+          type: string
+          nullable: true
+          maxLength: 64
+        message:
+          type: string
+          nullable: true
+          maxLength: 1024
+        updatedAt:
+          type: string
+          nullable: true
+          maxLength: 40
+    CurrencyListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrencyItem'
+    CurrencyItem:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 128
+        status:
+          type: string
+          nullable: true
+          maxLength: 64
+        service:
+          type: string
+          nullable: true
+          maxLength: 128
+        role:
+          type: string
+          nullable: true
+          maxLength: 64
+        message:
+          type: string
+          nullable: true
+          maxLength: 1024
+        currency:
+          type: string
+          nullable: true
+          maxLength: 16
+        orderNo:
+          type: string
+          nullable: true
+          maxLength: 64
+        address:
+          type: string
+          nullable: true
+          maxLength: 512
+        date:
+          type: string
+          nullable: true
+          maxLength: 40
+        amount:
+          type: number
+          nullable: true
+        balance:
+          type: number
+          nullable: true

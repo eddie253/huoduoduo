@@ -51,6 +51,57 @@ export interface BulletinRecord {
   date: string | null;
 }
 
+export interface ProxyMateRecord {
+  code: string;
+  name: string;
+  area: string | null;
+  status: string | null;
+  service: string | null;
+  role: string | null;
+  message: string | null;
+  updatedAt: string | null;
+}
+
+export interface ProxyKpiRecord {
+  code: string;
+  name: string;
+  status: string | null;
+  service: string | null;
+  role: string | null;
+  message: string | null;
+  updatedAt: string | null;
+}
+
+export interface CurrencyRecord {
+  code: string;
+  name: string;
+  status: string | null;
+  service: string | null;
+  role: string | null;
+  message: string | null;
+  currency: string | null;
+  orderNo: string | null;
+  address: string | null;
+  date: string | null;
+  amount: number | null;
+  balance: number | null;
+}
+
+export interface ReservationSupportRecord {
+  code: string;
+  name: string;
+  status: string | null;
+  service: string | null;
+  role: string | null;
+  message: string | null;
+  reservationNo: string | null;
+  trackingNo: string | null;
+  zip: string | null;
+  areaCode: string | null;
+  address: string | null;
+  date: string | null;
+}
+
 @Injectable()
 export class LegacySoapClient {
   constructor(
@@ -164,6 +215,28 @@ export class LegacySoapClient {
       }
     });
     this.throwIfBusinessError(raw, 'UpdateRegID');
+  }
+
+  async deleteRegId(contractNo: string, regId: string): Promise<void> {
+    const raw = await this.transport.call({
+      method: 'DeleteRegID',
+      params: {
+        Contract: contractNo,
+        RegID: regId
+      }
+    });
+    this.throwIfBusinessError(raw, 'DeleteRegID');
+  }
+
+  async getVersion(name: string): Promise<string> {
+    const raw = await this.transport.call({
+      method: 'GetVersion',
+      params: {
+        Name: name
+      }
+    });
+    this.throwIfBusinessError(raw, 'GetVersion');
+    return raw.trim();
   }
 
   async getShipment(trackingNo: string): Promise<ShipmentRecord> {
@@ -315,6 +388,211 @@ export class LegacySoapClient {
     this.throwIfBusinessError(raw, method);
   }
 
+  async getReservationZipAreas(): Promise<ReservationSupportRecord[]> {
+    const method = 'GetARV_ZIP';
+    const raw = await this.transport.call({
+      method
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeReservationSupport(item));
+  }
+
+  async getReservationAvailable(zip: string, contractNo: string): Promise<ReservationSupportRecord[]> {
+    const method = 'GetARV';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        ZIP: zip,
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeReservationSupport(item));
+  }
+
+  async getReservationAvailableBulk(zip: string, contractNo: string): Promise<ReservationSupportRecord[]> {
+    const method = 'GetBARV';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        ZIP: zip,
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeReservationSupport(item));
+  }
+
+  async getReservationAreaCodes(contractNo: string): Promise<ReservationSupportRecord[]> {
+    const method = 'GetAreaCode';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeReservationSupport(item));
+  }
+
+  async getReservationArrived(contractNo: string): Promise<ReservationSupportRecord[]> {
+    const method = 'GetArrived';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeReservationSupport(item));
+  }
+
+  async getProxyMates(area: string): Promise<ProxyMateRecord[]> {
+    const method = 'GetPxymate';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        Area: area
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeProxyMate(item));
+  }
+
+  async searchProxyKpi(year: string, month: string, area: string): Promise<ProxyKpiRecord[]> {
+    const method = 'SearchKPI';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        Year: year,
+        Month: month,
+        Area: area
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeProxyKpi(item));
+  }
+
+  async getProxyKpi(year: string, month: string, area: string): Promise<ProxyKpiRecord[]> {
+    const method = 'GetKPI';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        Year: year,
+        Month: month,
+        Area: area
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeProxyKpi(item));
+  }
+
+  async getProxyKpiDaily(date: string, area: string): Promise<ProxyKpiRecord[]> {
+    const method = 'GetKPI_dis';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        DD: date,
+        Area: area
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeProxyKpi(item));
+  }
+
+  async getDriverCurrency(date: string, contractNo: string): Promise<CurrencyRecord[]> {
+    const method = 'GetDriverCurrency';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        DD: date,
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeCurrency(item));
+  }
+
+  async getDriverCurrencyMonth(date: string, contractNo: string): Promise<CurrencyRecord[]> {
+    const method = 'GetDriverCurrencyMonth';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        DD: date,
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeCurrency(item));
+  }
+
+  async getDriverBalance(contractNo: string): Promise<CurrencyRecord[]> {
+    const method = 'GetDriverBalance';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeCurrency(item));
+  }
+
+  async getDepositHead(startDate: string, endDate: string, contractNo: string): Promise<CurrencyRecord[]> {
+    const method = 'GetDeposit_Head';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        StartDate: startDate,
+        EndDate: endDate,
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeCurrency(item));
+  }
+
+  async getDepositBody(tnum: string, address: string, contractNo: string): Promise<CurrencyRecord[]> {
+    const method = 'GetDeposit_Body';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        TNUM: tnum,
+        Addr: address,
+        DNUM: contractNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeCurrency(item));
+  }
+
+  async getShipmentCurrency(orderNum: string): Promise<CurrencyRecord[]> {
+    const method = 'GetShipment_Currency';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        OrderNum: orderNum
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+    const rows = this.parseJsonArray(raw);
+    return rows.map((item) => this.normalizeCurrency(item));
+  }
+
   private normalizeShipment(input: Record<string, unknown>, fallbackTrackingNo: string): ShipmentRecord {
     return {
       trackingNo: this.pickString(input, ['查件貨號', 'TNUM']) || fallbackTrackingNo,
@@ -382,6 +660,84 @@ export class LegacySoapClient {
     };
   }
 
+  private normalizeReservationSupport(input: Record<string, unknown>): ReservationSupportRecord {
+    const values = this.collectScalarValues(input);
+    const code =
+      this.pickString(input, ['Code', 'code', 'ID', 'Id', 'uid', 'ZIP', 'AreaCode']) ||
+      values[0] ||
+      'UNKNOWN';
+    const name = this.pickString(input, ['Name', 'name', 'Title', 'title']) || values[1] || code;
+
+    return {
+      code,
+      name,
+      status: this.pickString(input, ['Status', 'status']),
+      service: this.pickString(input, ['Service', 'service']),
+      role: this.pickString(input, ['Role', 'role']),
+      message: this.pickString(input, ['Message', 'message', 'Note', 'note']),
+      reservationNo: this.pickString(input, ['NUM', 'NUMs', 'ReservationNo', 'reservationNo']),
+      trackingNo: this.pickString(input, ['TNUM', 'TrackingNo', 'trackingNo']),
+      zip: this.pickString(input, ['ZIP', 'Zip', 'zip']),
+      areaCode: this.pickString(input, ['AreaCode', 'areaCode']),
+      address: this.pickString(input, ['Addr', 'address', 'Address']),
+      date: this.pickString(input, ['Date', 'date', 'DD', 'UpdateTime', 'updatedAt'])
+    };
+  }
+
+  private normalizeProxyMate(input: Record<string, unknown>): ProxyMateRecord {
+    const values = this.collectScalarValues(input);
+    const code = this.pickString(input, ['Code', 'code', 'ID', 'Id', 'uid']) || values[0] || 'UNKNOWN';
+    const name = this.pickString(input, ['Name', 'name', 'Title', 'title']) || values[1] || code;
+
+    return {
+      code,
+      name,
+      area: this.pickString(input, ['Area', 'area', 'Region', 'region']),
+      status: this.pickString(input, ['Status', 'status']),
+      service: this.pickString(input, ['Service', 'service']),
+      role: this.pickString(input, ['Role', 'role']),
+      message: this.pickString(input, ['Message', 'message', 'Note', 'note']),
+      updatedAt: this.pickString(input, ['Date', 'date', 'UpdateTime', 'updatedAt', 'DD'])
+    };
+  }
+
+  private normalizeProxyKpi(input: Record<string, unknown>): ProxyKpiRecord {
+    const values = this.collectScalarValues(input);
+    const code = this.pickString(input, ['Code', 'code', 'ID', 'Id', 'uid']) || values[0] || 'UNKNOWN';
+    const name = this.pickString(input, ['Name', 'name', 'Title', 'title']) || values[1] || code;
+
+    return {
+      code,
+      name,
+      status: this.pickString(input, ['Status', 'status']),
+      service: this.pickString(input, ['Service', 'service']),
+      role: this.pickString(input, ['Role', 'role']),
+      message: this.pickString(input, ['Message', 'message', 'Note', 'note']),
+      updatedAt: this.pickString(input, ['Date', 'date', 'UpdateTime', 'updatedAt', 'DD'])
+    };
+  }
+
+  private normalizeCurrency(input: Record<string, unknown>): CurrencyRecord {
+    const values = this.collectScalarValues(input);
+    const code = this.pickString(input, ['Code', 'code', 'ID', 'Id', 'uid']) || values[0] || 'UNKNOWN';
+    const name = this.pickString(input, ['Name', 'name', 'Title', 'title']) || values[1] || code;
+
+    return {
+      code,
+      name,
+      status: this.pickString(input, ['Status', 'status']),
+      service: this.pickString(input, ['Service', 'service']),
+      role: this.pickString(input, ['Role', 'role']),
+      message: this.pickString(input, ['Message', 'message', 'Note', 'note']),
+      currency: this.pickString(input, ['Currency', 'currency', 'CY']),
+      orderNo: this.pickString(input, ['OrderNum', 'orderNum', 'TNUM']),
+      address: this.pickString(input, ['Addr', 'address']),
+      date: this.pickString(input, ['Date', 'date', 'DD', 'StartDate', 'EndDate']),
+      amount: this.pickNumber(input, ['Amount', 'amount', 'Money', 'money', 'FEE']),
+      balance: this.pickNumber(input, ['Balance', 'balance', 'Total', 'total', 'Money', 'money'])
+    };
+  }
+
   private throwIfBusinessError(raw: string, method: string): void {
     if (this.isBusinessError(raw)) {
       throw new LegacySoapError('LEGACY_BUSINESS_ERROR', 422, `${method} failed: ${raw}`);
@@ -444,5 +800,17 @@ export class LegacySoapClient {
       }
     }
     return null;
+  }
+
+  private collectScalarValues(input: Record<string, unknown>): string[] {
+    return Object.values(input).flatMap((value) => {
+      if (typeof value === 'string' && value.trim().length > 0) {
+        return [value];
+      }
+      if (typeof value === 'number' || typeof value === 'boolean') {
+        return [String(value)];
+      }
+      return [];
+    });
   }
 }

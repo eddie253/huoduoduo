@@ -110,7 +110,230 @@ describe('API integration', () => {
       listReservations: jest.fn(async () => []),
       createReservation: jest.fn(async () => ({ reservationNo: 'R1', mode: 'standard' as const })),
       deleteReservation: jest.fn(async () => undefined),
-      updateRegId: jest.fn(async () => undefined)
+      getReservationZipAreas: jest.fn(async () => [
+        {
+          code: 'ARVZIP001',
+          name: 'Taipei Area',
+          status: 'open',
+          service: 'reservation',
+          role: null,
+          message: null,
+          reservationNo: null,
+          trackingNo: null,
+          zip: '100',
+          areaCode: 'A1',
+          address: null,
+          date: '2026-03-04'
+        }
+      ]),
+      getReservationAvailable: jest.fn(async () => [
+        {
+          code: 'ARV001',
+          name: 'Reservable Standard',
+          status: 'open',
+          service: 'reservation',
+          role: null,
+          message: null,
+          reservationNo: null,
+          trackingNo: 'T001',
+          zip: '100',
+          areaCode: null,
+          address: 'Addr',
+          date: '2026-03-04'
+        }
+      ]),
+      getReservationAvailableBulk: jest.fn(async () => [
+        {
+          code: 'BARV001',
+          name: 'Reservable Bulk',
+          status: 'open',
+          service: 'reservation',
+          role: null,
+          message: null,
+          reservationNo: null,
+          trackingNo: 'B001',
+          zip: '100',
+          areaCode: null,
+          address: 'Addr',
+          date: '2026-03-04'
+        }
+      ]),
+      getReservationAreaCodes: jest.fn(async () => [
+        {
+          code: 'AREA001',
+          name: 'Area Code',
+          status: 'active',
+          service: 'reservation',
+          role: null,
+          message: null,
+          reservationNo: null,
+          trackingNo: null,
+          zip: '100',
+          areaCode: 'A1',
+          address: null,
+          date: '2026-03-04'
+        }
+      ]),
+      getReservationArrived: jest.fn(async () => [
+        {
+          code: 'ARR001',
+          name: 'Arrived Shipment',
+          status: 'arrived',
+          service: 'reservation',
+          role: null,
+          message: null,
+          reservationNo: null,
+          trackingNo: 'T009',
+          zip: '100',
+          areaCode: null,
+          address: 'Warehouse',
+          date: '2026-03-04'
+        }
+      ]),
+      getProxyMates: jest.fn(async () => [
+        {
+          code: 'P001',
+          name: 'Proxy Mate',
+          area: 'A1',
+          status: 'active',
+          service: 'proxy',
+          role: null,
+          message: null,
+          updatedAt: '2026-03-04T00:00:00Z'
+        }
+      ]),
+      searchProxyKpi: jest.fn(async () => [
+        {
+          code: 'K001',
+          name: 'KPI Search',
+          status: 'ok',
+          service: 'proxy-kpi',
+          role: null,
+          message: null,
+          updatedAt: '2026-03-04T00:00:00Z'
+        }
+      ]),
+      getProxyKpi: jest.fn(async () => [
+        {
+          code: 'K002',
+          name: 'KPI Monthly',
+          status: 'ok',
+          service: 'proxy-kpi',
+          role: null,
+          message: null,
+          updatedAt: '2026-03-04T00:00:00Z'
+        }
+      ]),
+      getProxyKpiDaily: jest.fn(async () => [
+        {
+          code: 'K003',
+          name: 'KPI Daily',
+          status: 'ok',
+          service: 'proxy-kpi',
+          role: null,
+          message: null,
+          updatedAt: '2026-03-04T00:00:00Z'
+        }
+      ]),
+      getDriverCurrency: jest.fn(async () => [
+        {
+          code: 'CY001',
+          name: 'Daily Currency',
+          status: 'ok',
+          service: 'currency',
+          role: null,
+          message: null,
+          currency: 'TWD',
+          orderNo: null,
+          address: null,
+          date: '2026-03-04',
+          amount: 100,
+          balance: 1000
+        }
+      ]),
+      getDriverCurrencyMonth: jest.fn(async () => [
+        {
+          code: 'CY002',
+          name: 'Monthly Currency',
+          status: 'ok',
+          service: 'currency',
+          role: null,
+          message: null,
+          currency: 'TWD',
+          orderNo: null,
+          address: null,
+          date: '2026-03',
+          amount: 200,
+          balance: 1200
+        }
+      ]),
+      getDriverBalance: jest.fn(async () => [
+        {
+          code: 'CY003',
+          name: 'Balance',
+          status: 'ok',
+          service: 'currency',
+          role: null,
+          message: null,
+          currency: 'TWD',
+          orderNo: null,
+          address: null,
+          date: '2026-03-04',
+          amount: null,
+          balance: 1300
+        }
+      ]),
+      getDepositHead: jest.fn(async () => [
+        {
+          code: 'CY004',
+          name: 'Deposit Head',
+          status: 'ok',
+          service: 'currency',
+          role: null,
+          message: null,
+          currency: 'TWD',
+          orderNo: null,
+          address: null,
+          date: '2026-03-04',
+          amount: 300,
+          balance: null
+        }
+      ]),
+      getDepositBody: jest.fn(async () => [
+        {
+          code: 'CY005',
+          name: 'Deposit Body',
+          status: 'ok',
+          service: 'currency',
+          role: null,
+          message: null,
+          currency: 'TWD',
+          orderNo: 'T001',
+          address: 'Addr',
+          date: '2026-03-04',
+          amount: 50,
+          balance: null
+        }
+      ]),
+      getShipmentCurrency: jest.fn(async () => [
+        {
+          code: 'CY006',
+          name: 'Shipment Currency',
+          status: 'ok',
+          service: 'currency',
+          role: null,
+          message: null,
+          currency: 'TWD',
+          orderNo: 'T001',
+          address: null,
+          date: '2026-03-04',
+          amount: 80,
+          balance: null
+        }
+      ]),
+      updateRegId: jest.fn(async () => undefined),
+      deleteRegId: jest.fn(async () => undefined),
+      getVersion: jest.fn(async () => '123')
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -517,6 +740,53 @@ describe('API integration', () => {
     assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
   });
 
+  it('GET /reservations/zip-areas returns no-store headers and response payload', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/v1/reservations/zip-areas')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body.items)).toBe(true);
+    expect(response.body.items[0].code).toBe('ARVZIP001');
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('P7_RESERVATION_WEB_SUPPORT_REQUEST_MAXLEN_VALIDATION returns 400 on over-length zip', async () => {
+    const response = await request(app.getHttpServer())
+      .get(`/v1/reservations/available?zip=Z${'1'.repeat(64)}`)
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+
+    expect(response.status).toBe(400);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('P7_RESERVATION_WEB_SUPPORT_RESPONSE_CONTRACT_ENFORCEMENT rejects oversized structural fields', async () => {
+    (mockLegacySoapClient.getReservationAvailable as jest.Mock).mockResolvedValueOnce([
+      {
+        code: `C${'1'.repeat(64)}`,
+        name: 'Reservable Standard',
+        status: 'open',
+        service: 'reservation',
+        role: null,
+        message: null,
+        reservationNo: null,
+        trackingNo: null,
+        zip: '100',
+        areaCode: null,
+        address: null,
+        date: '2026-03-04'
+      }
+    ]);
+
+    const response = await request(app.getHttpServer())
+      .get('/v1/reservations/available?zip=100')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+
+    expect(response.status).toBe(502);
+    expect(response.body.code).toBe('LEGACY_BAD_RESPONSE');
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
   it('P4_ERROR_RESPONSE_MAXLEN_ENFORCEMENT truncates oversized error message', async () => {
     (mockLegacySoapClient.getShipment as jest.Mock).mockRejectedValueOnce(
       new LegacySoapError('LEGACY_BAD_RESPONSE', 502, 'e'.repeat(1400))
@@ -546,6 +816,117 @@ describe('API integration', () => {
     expect(Number.isNaN(Date.parse(response.body.timestamp))).toBe(false);
   });
 
+  it('GET /proxy/mates returns no-store headers and response payload', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/v1/proxy/mates?area=A1')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body.items)).toBe(true);
+    expect(response.body.items[0].code).toBe('P001');
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('P5_PROXY_KPI_REQUEST_MAXLEN_VALIDATION returns 400 on over-length query fields', async () => {
+    const mates = await request(app.getHttpServer())
+      .get(`/v1/proxy/mates?area=A${'1'.repeat(64)}`)
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+    expect(mates.status).toBe(400);
+    assertNoStoreHeaders(mates as unknown as { headers: Record<string, string> });
+
+    const kpi = await request(app.getHttpServer())
+      .get('/v1/proxy/kpi?year=20266&month=03&area=A1')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+    expect(kpi.status).toBe(400);
+    assertNoStoreHeaders(kpi as unknown as { headers: Record<string, string> });
+
+    const daily = await request(app.getHttpServer())
+      .get('/v1/proxy/kpi/daily?date=20260304&area=A1')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+    expect(daily.status).toBe(400);
+    assertNoStoreHeaders(daily as unknown as { headers: Record<string, string> });
+  });
+
+  it('P5_PROXY_KPI_RESPONSE_CONTRACT_ENFORCEMENT rejects oversized response fields', async () => {
+    (mockLegacySoapClient.getProxyKpi as jest.Mock).mockResolvedValueOnce([
+      {
+        code: `C${'1'.repeat(64)}`,
+        name: 'KPI',
+        status: 'ok',
+        service: 'proxy-kpi',
+        role: null,
+        message: null,
+        updatedAt: null
+      }
+    ]);
+
+    const response = await request(app.getHttpServer())
+      .get('/v1/proxy/kpi?year=2026&month=03&area=A1')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+
+    expect(response.status).toBe(502);
+    expect(response.body.code).toBe('LEGACY_BAD_RESPONSE');
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('GET /currency/daily returns no-store headers and response payload', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/v1/currency/daily?date=2026-03-04')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body.items)).toBe(true);
+    expect(response.body.items[0].code).toBe('CY001');
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('P6_CURRENCY_QUERY_REQUEST_MAXLEN_VALIDATION returns 400 on over-length query fields', async () => {
+    const daily = await request(app.getHttpServer())
+      .get(`/v1/currency/daily?date=2${'0'.repeat(40)}`)
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+    expect(daily.status).toBe(400);
+    assertNoStoreHeaders(daily as unknown as { headers: Record<string, string> });
+
+    const depositBody = await request(app.getHttpServer())
+      .get(`/v1/currency/deposit/body?tnum=T001&address=${'A'.repeat(513)}`)
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+    expect(depositBody.status).toBe(400);
+    assertNoStoreHeaders(depositBody as unknown as { headers: Record<string, string> });
+
+    const shipment = await request(app.getHttpServer())
+      .get(`/v1/currency/shipment?orderNum=O${'1'.repeat(64)}`)
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+    expect(shipment.status).toBe(400);
+    assertNoStoreHeaders(shipment as unknown as { headers: Record<string, string> });
+  });
+
+  it('P6_CURRENCY_RESPONSE_CONTRACT_ENFORCEMENT rejects oversized structural fields', async () => {
+    (mockLegacySoapClient.getDriverCurrency as jest.Mock).mockResolvedValueOnce([
+      {
+        code: `C${'1'.repeat(64)}`,
+        name: 'Daily Currency',
+        status: 'ok',
+        service: 'currency',
+        role: null,
+        message: null,
+        currency: 'TWD',
+        orderNo: null,
+        address: null,
+        date: '2026-03-04',
+        amount: 100,
+        balance: 1000
+      }
+    ]);
+
+    const response = await request(app.getHttpServer())
+      .get('/v1/currency/daily?date=2026-03-04')
+      .set('Authorization', `Bearer ${sharedAccessToken}`);
+
+    expect(response.status).toBe(502);
+    expect(response.body.code).toBe('LEGACY_BAD_RESPONSE');
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
   it('POST /push/register returns no-store headers', async () => {
     const response = await request(app.getHttpServer())
       .post('/v1/push/register')
@@ -558,6 +939,59 @@ describe('API integration', () => {
       });
 
     expect(response.status).toBe(200);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('POST /push/unregister returns no-store headers', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/v1/push/unregister')
+      .set('Authorization', `Bearer ${sharedAccessToken}`)
+      .send({
+        fcmToken: 'fcm-token-1'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('P9_PUSH_UNREGISTER_REQUEST_MAXLEN_VALIDATION returns 400 on over-length fcmToken', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/v1/push/unregister')
+      .set('Authorization', `Bearer ${sharedAccessToken}`)
+      .send({
+        fcmToken: `f${'1'.repeat(4096)}`
+      });
+
+    expect(response.status).toBe(400);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('GET /system/version returns no-store headers and payload', async () => {
+    const response = await request(app.getHttpServer()).get('/v1/system/version?name=DirverAPP');
+
+    expect(response.status).toBe(200);
+    expect(response.body.name).toBe('DirverAPP');
+    expect(response.body.versionCode).toBe(123);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('P9_SYSTEM_VERSION_QUERY_MAXLEN_VALIDATION returns 400 on over-length name', async () => {
+    const response = await request(app.getHttpServer()).get(
+      `/v1/system/version?name=D${'1'.repeat(64)}`
+    );
+
+    expect(response.status).toBe(400);
+    assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
+  });
+
+  it('P9_SYSTEM_VERSION_RESPONSE_CONTRACT_ENFORCEMENT rejects invalid legacy payload', async () => {
+    (mockLegacySoapClient.getVersion as jest.Mock).mockResolvedValueOnce('invalid-version');
+
+    const response = await request(app.getHttpServer()).get('/v1/system/version?name=DirverAPP');
+
+    expect(response.status).toBe(502);
+    expect(response.body.code).toBe('LEGACY_BAD_RESPONSE');
     assertNoStoreHeaders(response as unknown as { headers: Record<string, string> });
   });
 });

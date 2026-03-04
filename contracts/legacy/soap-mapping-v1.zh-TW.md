@@ -1,9 +1,9 @@
 ﻿# Legacy SOAP 對照規格 v1
 
 Doc ID: `HDD-LEGACY-SOAP-MAP`
-Version: `v1.4`
+Version: `v1.7`
 Owner: `BFF Lead`
-Last Updated: `2026-03-03`
+Last Updated: `2026-03-04`
 Review Status: `Draft for management review`
 CN/EN Pair Link:
 1. CN: `contracts/legacy/soap-mapping-v1.zh-TW.md`
@@ -28,6 +28,7 @@ Legacy 程式依據：
 | `GET /v1/bootstrap/webview` | N/A | 用 account + identify 組 cookie | `baseUrl/registerUrl/resetPasswordUrl/cookies` |
 | `GET /v1/bootstrap/bulletin` | `GetBulletin` | 無 SOAP request 欄位 | `message/hasAnnouncement/updatedAt` |
 | `POST /v1/push/register` | `UpdateRegID` | `DNUM=contractNo`, `RegID=fcmToken`, `Kind=Android|ios`, `Version=appVersion` | `{ ok, registeredAt }` |
+| `POST /v1/push/unregister` | `DeleteRegID` | `Contract=contractNo`, `RegID=fcmToken` | `{ ok, unregisteredAt }` |
 | `GET /v1/shipments/{trackingNo}` | `GetShipment_elf` 後備 `GetShipment` | `TNUM=trackingNo` | Legacy 中文欄位 -> 標準 Shipment DTO |
 | `POST /v1/shipments/{trackingNo}/delivery` | `UpdateArrival` | `DNUM`, `TNUM`, `Image`, `Image_FN`, `Itude=lat,lng` | `{ ok: true }` |
 | `POST /v1/shipments/{trackingNo}/exception` | `UpdateArrivalErr_NEW` | `DNUM`, `TNUM`, `Image`, `Image_FN`, `Itude=lat,lng` | `{ ok: true }` |
@@ -37,6 +38,22 @@ Legacy 程式依據：
 | `POST /v1/reservations?mode=bulk` | `UpdateBARV` | `NUM=shipmentNos[0]`, `Addr=address`, `FEE=fee`, `DNUM=contractNo` | `{ reservationNo, mode }` |
 | `DELETE /v1/reservations/{id}?mode=standard` | `RemoveARV` | `NUMs=id`, `Addr=address`, `DNUM=contractNo` | `{ ok: true }` |
 | `DELETE /v1/reservations/{id}?mode=bulk` | `RemoveBARV` | `NUM=id`, `Addr=address`, `DNUM=contractNo` | `{ ok: true }` |
+| `GET /v1/proxy/mates?area=...` | `GetPxymate` | `Area=area` | `{ items: ProxyMateItem[] }` |
+| `GET /v1/proxy/kpi/search?year=...&month=...&area=...` | `SearchKPI` | `Year=year`, `Month=month`, `Area=area` | `{ items: ProxyKpiItem[] }` |
+| `GET /v1/proxy/kpi?year=...&month=...&area=...` | `GetKPI` | `Year=year`, `Month=month`, `Area=area` | `{ items: ProxyKpiItem[] }` |
+| `GET /v1/proxy/kpi/daily?date=...&area=...` | `GetKPI_dis` | `DD=date`, `Area=area` | `{ items: ProxyKpiItem[] }` |
+| `GET /v1/currency/daily?date=...` | `GetDriverCurrency` | `DD=date`, `DNUM=contractNo` | `{ items: CurrencyItem[] }` |
+| `GET /v1/currency/monthly?date=...` | `GetDriverCurrencyMonth` | `DD=date`, `DNUM=contractNo` | `{ items: CurrencyItem[] }` |
+| `GET /v1/currency/balance` | `GetDriverBalance` | `DNUM=contractNo` | `{ items: CurrencyItem[] }` |
+| `GET /v1/currency/deposit/head?startDate=...&endDate=...` | `GetDeposit_Head` | `StartDate=startDate`, `EndDate=endDate`, `DNUM=contractNo` | `{ items: CurrencyItem[] }` |
+| `GET /v1/currency/deposit/body?tnum=...&address=...` | `GetDeposit_Body` | `TNUM=tnum`, `Addr=address`, `DNUM=contractNo` | `{ items: CurrencyItem[] }` |
+| `GET /v1/currency/shipment?orderNum=...` | `GetShipment_Currency` | `OrderNum=orderNum` | `{ items: CurrencyItem[] }` |
+| `GET /v1/reservations/zip-areas` | `GetARV_ZIP` | 無 request 欄位 | `{ items: ReservationSupportItem[] }` |
+| `GET /v1/reservations/available?zip=...` | `GetARV` | `ZIP=zip`, `DNUM=contractNo` | `{ items: ReservationSupportItem[] }` |
+| `GET /v1/reservations/available/bulk?zip=...` | `GetBARV` | `ZIP=zip`, `DNUM=contractNo` | `{ items: ReservationSupportItem[] }` |
+| `GET /v1/reservations/area-codes` | `GetAreaCode` | `DNUM=contractNo` | `{ items: ReservationSupportItem[] }` |
+| `GET /v1/reservations/arrived` | `GetArrived` | `DNUM=contractNo` | `{ items: ReservationSupportItem[] }` |
+| `GET /v1/system/version?name=...` | `GetVersion` | `Name=name` | `{ name, versionCode }` |
 
 ## 3. 身分與 Cookies
 1. `Account` = 帳號。
@@ -78,3 +95,50 @@ Legacy 程式依據：
 2. `POST /v1/reservations` 與 `DELETE /v1/reservations/{id}`：
    1. request 欄位已補 `MaxLength` / `ArrayMaxSize` 驗證。
    2. create response 契約已加 enforcement（`reservationNo`, `mode`）。
+
+## 9. P4 實作註記
+1. Cross-cutting 錯誤輸出已正規化為 `{ code, message }`。
+2. legacy 錯誤碼語意維持不變：
+   1. `LEGACY_TIMEOUT`
+   2. `LEGACY_BAD_RESPONSE`
+   3. `LEGACY_BUSINESS_ERROR`
+3. `GET /v1/health` 已落地回傳契約 enforcement。
+
+## 10. P5 實作註記
+1. Proxy/KPI 等價轉接已落地：
+   1. `GET /v1/proxy/mates`
+   2. `GET /v1/proxy/kpi/search`
+   3. `GET /v1/proxy/kpi`
+   4. `GET /v1/proxy/kpi/daily`
+2. query 驗證已套用 `MaxLength` 與格式檢查（`area/year/month/date`）。
+3. response 契約 enforcement 已套用（結構欄位 reject、message 截斷）。
+
+## 11. P6 實作註記
+1. Currency 查詢等價轉接已落地：
+   1. `GET /v1/currency/daily`
+   2. `GET /v1/currency/monthly`
+   3. `GET /v1/currency/balance`
+   4. `GET /v1/currency/deposit/head`
+   5. `GET /v1/currency/deposit/body`
+   6. `GET /v1/currency/shipment`
+2. query 驗證已套用 `MaxLength`（`date/startDate/endDate/tnum/address/orderNum`）。
+3. response 契約 enforcement 已套用（結構欄位 reject、message 截斷）。
+
+## 12. P7 實作註記
+1. Reservation web-support 查詢映射已落地：
+   1. `GET /v1/reservations/zip-areas`
+   2. `GET /v1/reservations/available`
+   3. `GET /v1/reservations/available/bulk`
+   4. `GET /v1/reservations/area-codes`
+   5. `GET /v1/reservations/arrived`
+2. query 驗證已套用 `MaxLength`（`zip`）。
+3. response 契約 enforcement 已套用（結構欄位 reject、message 截斷）。
+
+## 13. P9 實作註記
+1. Conditional-Go 兩支方法已完成落地：
+   1. `POST /v1/push/unregister` -> `DeleteRegID`
+   2. `GET /v1/system/version` -> `GetVersion`
+2. request 驗證已套用 `MaxLength`：
+   1. `push/unregister.fcmToken <= 4096`
+   2. `system/version.name <= 64`
+3. `GetVersion` 回傳已正規化為 `{ name, versionCode }`，若 payload 非法則回 `LEGACY_BAD_RESPONSE`。

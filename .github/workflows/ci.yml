@@ -6,6 +6,20 @@ on:
   pull_request:
 
 jobs:
+  workspace_settings_guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enforce workspace settings guard
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          ALLOWED_WORKSPACE_SETTINGS_ACTORS: eddie253
+        run: bash ops/ci/check-workspace-settings-guard.sh
+
   legacy_baseline_readonly:
     runs-on: ubuntu-latest
     steps:

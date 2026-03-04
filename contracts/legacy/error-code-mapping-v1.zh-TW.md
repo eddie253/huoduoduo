@@ -1,9 +1,9 @@
 ﻿# 錯誤碼對照規格 v1
 
 Doc ID: `HDD-ERROR-CODE-MAP`
-Version: `v1.1`
+Version: `v1.2`
 Owner: `BFF Lead`
-Last Updated: `2026-03-03`
+Last Updated: `2026-03-04`
 Review Status: `Draft for management review`
 CN/EN Pair Link:
 1. CN: `contracts/legacy/error-code-mapping-v1.zh-TW.md`
@@ -59,3 +59,12 @@ CN/EN Pair Link:
 | login/bootstrap/refresh/shipment/logout 全通過 | `PASS` |
 | reservation（standard+bulk）查無資料 | `BLOCKED` + `UAT_DATA_BLOCKED` |
 | API/transport 失敗 | `FAIL`（附 BFF code） |
+
+## 7. P4 契約硬化註記
+1. 錯誤輸出已全域正規化為 `{ code, message }`。
+2. `code` 回退策略：
+   1. 既有 legacy code 合法時維持不變。
+   2. code 缺失或超長時回退 `INTERNAL_SERVER_ERROR`。
+3. `message` 正規化策略：
+   1. 優先採用例外訊息。
+   2. 超長時截斷至 `1024`。

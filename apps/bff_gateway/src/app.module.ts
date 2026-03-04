@@ -6,10 +6,13 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { SoapModule } from './adapters/soap/soap.module';
 import { readPositiveInt } from './core/config/number-env';
 import { AuthModule } from './modules/auth/auth.module';
+import { CurrencyModule } from './modules/currency/currency.module';
 import { HealthModule } from './modules/health/health.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { ProxyModule } from './modules/proxy/proxy.module';
 import { ReservationModule } from './modules/reservation/reservation.module';
 import { ShipmentModule } from './modules/shipment/shipment.module';
+import { SystemModule } from './modules/system/system.module';
 import { WebviewModule } from './modules/webview/webview.module';
 import { HttpLoggingInterceptor } from './observability/http-logging.interceptor';
 import { BearerAuthGuard } from './security/bearer-auth.guard';
@@ -47,9 +50,12 @@ import { SecurityModule } from './security/security.module';
     HealthModule,
     AuthModule,
     WebviewModule,
+    CurrencyModule,
     ShipmentModule,
     ReservationModule,
-    NotificationModule
+    NotificationModule,
+    ProxyModule,
+    SystemModule
   ],
   providers: [
     {

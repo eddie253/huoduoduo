@@ -1,9 +1,9 @@
 ﻿# Error Code Mapping v1
 
 Doc ID: `HDD-ERROR-CODE-MAP`
-Version: `v1.1`
+Version: `v1.2`
 Owner: `BFF Lead`
-Last Updated: `2026-03-03`
+Last Updated: `2026-03-04`
 Review Status: `Draft for management review`
 CN/EN Pair Link:
 1. CN: `contracts/legacy/error-code-mapping-v1.zh-TW.md`
@@ -59,3 +59,12 @@ This document standardizes error mapping between:
 | Full path passes login/bootstrap/refresh/shipment/logout | `PASS` |
 | No discoverable shipment in reservations (standard+bulk) | `BLOCKED` + `UAT_DATA_BLOCKED` |
 | API/transport failure | `FAIL` (with mapped BFF code) |
+
+## 7. P4 contract hardening note
+1. Error output contract is normalized to `{ code, message }` globally.
+2. `code` fallback policy:
+   1. Preserve existing legacy code when valid.
+   2. Fallback to `INTERNAL_SERVER_ERROR` when code is missing or exceeds contract length.
+3. `message` normalization policy:
+   1. Use exception message when available.
+   2. Truncate to `1024` when oversized.

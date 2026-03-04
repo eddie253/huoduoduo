@@ -4,7 +4,9 @@ import {
   P1_CONTRACT_LIMITS,
   ensureIsoDatetime
 } from '../../core/contracts/p1-contract-policy';
+import { P9_CONTRACT_LIMITS } from '../../core/contracts/p9-contract-policy';
 import { RegisterPushTokenDto } from './dto/register-push-token.dto';
+import { UnregisterPushTokenDto } from './dto/unregister-push-token.dto';
 
 @Injectable()
 export class NotificationService {
@@ -29,6 +31,22 @@ export class NotificationService {
     return {
       ok: true,
       registeredAt: registeredAt!
+    };
+  }
+
+  async unregisterPushToken(
+    contractNo: string,
+    dto: UnregisterPushTokenDto
+  ): Promise<{ ok: boolean; unregisteredAt: string }> {
+    await this.legacySoapClient.deleteRegId(contractNo, dto.fcmToken);
+    const unregisteredAt = ensureIsoDatetime(
+      'push.unregister.unregisteredAt',
+      new Date().toISOString(),
+      P9_CONTRACT_LIMITS.datetime
+    );
+    return {
+      ok: true,
+      unregisteredAt: unregisteredAt!
     };
   }
 }
