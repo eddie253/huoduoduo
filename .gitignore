@@ -65,6 +65,13 @@ settings.gradle
 gradle.properties
 gradlew
 gradlew.bat
+!apps/mobile_flutter/android/gradle.properties
+!apps/mobile_flutter/android/gradlew
+!apps/mobile_flutter/android/gradlew.bat
+!apps/mobile_flutter/android/gradle/
+!apps/mobile_flutter/android/gradle/wrapper/
+!apps/mobile_flutter/android/gradle/wrapper/gradle-wrapper.properties
+!apps/mobile_flutter/android/gradle/wrapper/gradle-wrapper.jar
 window_dump*.xml
 /PLAN*.md
 docs/plans/*

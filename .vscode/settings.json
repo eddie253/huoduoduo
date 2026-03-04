@@ -9,5 +9,6 @@
     },
     "search.exclude": {
         "**/docs/archive/**": true
-    }
+    },
+    "java.configuration.updateBuildConfiguration": "automatic"
 }
