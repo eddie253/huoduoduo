@@ -15,6 +15,8 @@ void main() {
 
     expect(AppEventKind.fromRaw('dial'), AppEventKind.dial);
     expect(AppEventKind.fromRaw('\u64a5\u865f'), AppEventKind.dial);
+    expect(AppEventKind.fromRaw('\u624b\u6a5f'), AppEventKind.dial);
+    expect(AppEventKind.fromRaw('\u96fb\u8a71'), AppEventKind.dial);
 
     expect(AppEventKind.fromRaw('close'), AppEventKind.close);
     expect(AppEventKind.fromRaw('\u95dc\u9589'), AppEventKind.close);

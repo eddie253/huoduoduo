@@ -72,6 +72,10 @@ enum AppEventKind {
     'tel',
     '\u64a5\u865f',
     '\u62e8\u53f7',
+    '\u624b\u6a5f',
+    '\u624b\u673a',
+    '\u96fb\u8a71',
+    '\u7535\u8bdd',
   };
 
   static const Set<String> _closeAliases = <String>{

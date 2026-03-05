@@ -16,6 +16,7 @@ import '../application/webview_shell_navigation_helper.dart';
 import '../domain/legacy_menu_mapping.dart';
 import '../domain/shell_navigation_state.dart';
 import '../domain/webview_cache_policy.dart';
+import '../domain/webview_navigation_policy.dart';
 
 enum _MenuActionType {
   openWeb,
@@ -84,7 +85,7 @@ class _MenuTile {
 
   const _MenuTile.placeholder()
       : this._(
-          label: '建置中',
+          label: '功能開發中',
           icon: Icons.local_shipping_outlined,
           actionType: _MenuActionType.placeholder,
           enabled: false,
@@ -116,7 +117,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   static const Key topSettingsButtonKey = Key('webview.top.settingsButton');
   static const Key bottomBarKey = Key('webview.bottomBar');
 
-  static const String _defaultAnnouncement = '歡迎使用貨多多物流';
+  static const String _defaultAnnouncement = '公告載入中，請稍候。';
   static const String _errorAnnouncement = '公告載入失敗';
 
   static final InAppWebViewKeepAlive _keepAlive = InAppWebViewKeepAlive();
@@ -180,8 +181,11 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   late final Map<ShellSection, List<_MenuTile>> _menuTiles;
 
   InAppWebViewController? _controller;
-  bool _didErrorFallback = false;
   bool _cookiesBootstrapped = false;
+  bool _resetHistoryAfterMenuNavigation = false;
+  bool _hasSuspendedWebSnapshot = false;
+  ShellSection? _suspendedWebSection;
+  String? _suspendedWebTitle;
 
   ShellNavigationState _navState = ShellNavigationState.initial();
   String _announcement = _defaultAnnouncement;
@@ -520,8 +524,9 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     }
 
     await _bootstrapCookies();
-    if (_controller != null && menuIntent) {
-      await _controller!.clearHistory();
+    _clearSuspendedWebSnapshot();
+    if (menuIntent) {
+      _resetHistoryAfterMenuNavigation = true;
     }
 
     final URLRequestCachePolicy requestPolicy = menuIntent
@@ -537,7 +542,6 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     }
 
     setState(() {
-      _didErrorFallback = false;
       _navState = _navState.enteringWeb(
         title: title,
         request: request,
@@ -593,6 +597,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     if (!tile.enabled) {
       return;
     }
+    _clearSuspendedWebSnapshot();
 
     switch (tile.actionType) {
       case _MenuActionType.openWeb:
@@ -653,11 +658,15 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     setState(() {
       _navState = _navState.leavingWeb();
     });
+    _clearSuspendedWebSnapshot();
   }
 
   Future<void> _handleBack() async {
     if (_inWeb) {
       await _handleWebBack();
+      return;
+    }
+    if (_restoreSuspendedWebSnapshot()) {
       return;
     }
     if (_currentSection != ShellSection.reservation) {
@@ -683,6 +692,34 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
       case ShellSection.wallet:
         return '錢包';
     }
+  }
+
+  void _clearSuspendedWebSnapshot() {
+    _hasSuspendedWebSnapshot = false;
+    _suspendedWebSection = null;
+    _suspendedWebTitle = null;
+  }
+
+  bool _restoreSuspendedWebSnapshot() {
+    if (!_hasSuspendedWebSnapshot) {
+      return false;
+    }
+    final ShellSection restoreSection =
+        _suspendedWebSection ?? ShellSection.reservation;
+    final String restoreTitle =
+        _suspendedWebTitle ?? _sectionTitle(restoreSection);
+    _clearSuspendedWebSnapshot();
+    setState(() {
+      _navState = _navState.copyWith(
+        currentSection: restoreSection,
+        inWeb: true,
+        loadingWeb: false,
+        webTitle: restoreTitle,
+        clearErrorText: true,
+        clearPendingRequest: true,
+      );
+    });
+    return true;
   }
 
   List<_MenuTile> _slotsForSection(ShellSection section) {
@@ -890,11 +927,13 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
           keepAlive: _keepAlive,
           initialSettings: InAppWebViewSettings(
             javaScriptEnabled: true,
-            javaScriptCanOpenWindowsAutomatically: false,
+            // Legacy reservation pages may open township selection via JS flow.
+            javaScriptCanOpenWindowsAutomatically: true,
+            domStorageEnabled: true,
             useShouldOverrideUrlLoading: true,
             mediaPlaybackRequiresUserGesture: true,
             geolocationEnabled: true,
-            mixedContentMode: MixedContentMode.MIXED_CONTENT_NEVER_ALLOW,
+            mixedContentMode: MixedContentMode.MIXED_CONTENT_COMPATIBILITY_MODE,
             clearCache: false,
             allowFileAccessFromFileURLs: false,
             allowUniversalAccessFromFileURLs: false,
@@ -934,7 +973,8 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
           shouldOverrideUrlLoading: (controller, navigationAction) async {
             final WebUri? uri = navigationAction.request.url;
             if (uri == null) {
-              return NavigationActionPolicy.CANCEL;
+              // Legacy pages may trigger internal postback actions without URL.
+              return NavigationActionPolicy.ALLOW;
             }
             final String scheme = uri.scheme.toLowerCase();
             if (scheme == 'about' ||
@@ -961,9 +1001,11 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                 _cachePolicyResolver.cachePolicyFor(uri);
             final URLRequestCachePolicy? currentPolicy =
                 navigationAction.request.cachePolicy;
-            if (cachePolicy ==
-                    URLRequestCachePolicy.RELOAD_IGNORING_LOCAL_CACHE_DATA &&
-                currentPolicy != cachePolicy) {
+            if (WebviewNavigationPolicy.shouldForceReload(
+              targetCachePolicy: cachePolicy,
+              currentCachePolicy: currentPolicy,
+              requestMethod: navigationAction.request.method,
+            )) {
               await controller.loadUrl(
                 urlRequest: URLRequest(url: uri, cachePolicy: cachePolicy),
               );
@@ -991,18 +1033,6 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             );
           },
           onLoadStop: (controller, url) async {
-            if (url != null &&
-                !_didErrorFallback &&
-                url.host.toLowerCase() == 'app.elf.com.tw' &&
-                url.path.toLowerCase() == '/error.aspx') {
-              _didErrorFallback = true;
-              await _openWebPage(
-                title: '預約貨件',
-                uri: _reservationFallback,
-                menuIntent: true,
-              );
-              return;
-            }
             try {
               await controller.evaluateJavascript(source: _bridgeAdapterScript);
             } catch (e) {
@@ -1013,6 +1043,14 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                 });
               }
             }
+            if (_resetHistoryAfterMenuNavigation) {
+              _resetHistoryAfterMenuNavigation = false;
+              try {
+                await controller.clearHistory();
+              } catch (e) {
+                debugPrint('clearHistory after menu navigation failed: $e');
+              }
+            }
             if (mounted) {
               setState(() {
                 _navState = _navState.copyWith(loadingWeb: false);
@@ -1020,6 +1058,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             }
           },
           onReceivedError: (controller, request, error) {
+            _resetHistoryAfterMenuNavigation = false;
             if (mounted) {
               setState(() {
                 _navState = _navState.copyWith(
@@ -1081,6 +1120,12 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
             child: InkWell(
               onTap: () {
                 setState(() {
+                  if (_inWeb) {
+                    _hasSuspendedWebSnapshot = true;
+                    _suspendedWebSection = _currentSection;
+                    _suspendedWebTitle =
+                        _webTitle ?? _sectionTitle(_currentSection);
+                  }
                   _navState = _navState.selectSection(tab.section);
                 });
               },
