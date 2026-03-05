@@ -1,3 +1,5 @@
+/* global process */
+
 const js = require('@eslint/js');
 const tsParser = require('@typescript-eslint/parser');
 const tsPlugin = require('@typescript-eslint/eslint-plugin');
@@ -13,7 +15,7 @@ module.exports = [
       parser: tsParser,
       parserOptions: {
         project: ['./tsconfig.json'],
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: process.cwd(),
         sourceType: 'module'
       },
       globals: {

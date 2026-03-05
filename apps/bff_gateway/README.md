@@ -59,15 +59,41 @@ The script first runs login/bootstrap/refresh, then discovers shipment tracking 
 
 If no tracking number is found, it returns `UAT_DATA_BLOCKED` and still executes logout.
 
-### Container-based option (legacy)
+### Container-based option (dev mode)
 
 ```bash
-docker compose -f ops/docker/docker-compose.yml up -d
+docker compose -f ops/docker/docker-compose.yml --profile dev up -d
 powershell -ExecutionPolicy Bypass -File .\scripts\run-wave2-uat-smoke.ps1 `
   -Account "<UAT_ACCOUNT>" `
   -Password "<UAT_PASSWORD>"
-docker compose -f ops/docker/docker-compose.yml down
+docker compose -f ops/docker/docker-compose.yml --profile dev down
 ```
+
+## Container image build (deployment)
+
+`ops/docker/docker-compose.yml` is a development setup that mounts source code and runs `start:dev`.
+For deployment image build, use `apps/bff_gateway/Dockerfile`.
+
+Build from repo root:
+
+```bash
+docker build -f apps/bff_gateway/Dockerfile -t hdd/bff-gateway:latest .
+```
+
+Run container:
+
+```bash
+docker run --rm -p 3000:3000 --env-file apps/bff_gateway/.env.example hdd/bff-gateway:latest
+```
+
+Or run with compose prod profile:
+
+```bash
+docker compose -f ops/docker/docker-compose.yml --profile prod up -d --build
+docker compose -f ops/docker/docker-compose.yml --profile prod down
+```
+
+Prod profile publishes host port `3001` -> container `3000`.
 
 ## Environment variables
 
