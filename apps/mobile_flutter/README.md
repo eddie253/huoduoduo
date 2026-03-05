@@ -23,14 +23,14 @@ Flutter client for Wave 2 -> Wave 4 migration.
 ```bash
 flutter pub get
 flutter analyze
-flutter test test lib
+flutter test lib
 flutter build apk --debug
 ```
 
 ## Coverage
 
 ```bash
-flutter test --coverage test lib
+flutter test --coverage lib
 ```
 
 Monorepo helper commands (from repo root):
