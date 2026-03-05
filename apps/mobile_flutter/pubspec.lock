@@ -546,13 +546,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.14+3"
-  hdd_scan_kit:
-    dependency: "direct main"
-    description:
-      path: "packages/hdd_scan_kit"
-      relative: true
-    source: path
-    version: "0.1.0"
   hooks:
     dependency: transitive
     description:
@@ -958,6 +951,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  scan_kit_core:
+    dependency: "direct main"
+    description:
+      path: "packages/scan_kit_core"
+      relative: true
+    source: path
+    version: "0.1.0"
   shared_preferences:
     dependency: "direct main"
     description:

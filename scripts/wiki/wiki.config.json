@@ -1,0 +1,125 @@
+{
+  "excludeWorkspaceNames": [
+    "@repo/wiki"
+  ],
+  "excludeWorkspacePaths": [],
+  "sourceExtensions": [
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".mts",
+    ".cts",
+    ".vue"
+  ],
+  "routePathPatterns": [
+    "/router/",
+    "/routes/"
+  ],
+  "maxSamples": {
+    "routes": 120,
+    "apiEndpoints": 120,
+    "sourceImportEdges": 400
+  },
+  "domainRules": [
+    {
+      "key": "application-shell",
+      "title": "應用殼層（Apps）",
+      "summary": "對外可部署應用與主要執行入口。",
+      "order": 1,
+      "prefixes": [
+        "apps/"
+      ]
+    },
+    {
+      "key": "internal-infrastructure",
+      "title": "內部基礎設施（Internal）",
+      "summary": "Lint、Vite、Tailwind、Node 工具等共享基礎。",
+      "order": 2,
+      "prefixes": [
+        "internal/"
+      ]
+    },
+    {
+      "key": "core-base",
+      "title": "Core Base",
+      "summary": "@core/base 與基礎型別、設計系統。",
+      "order": 3,
+      "prefixes": [
+        "packages/@core/base/"
+      ]
+    },
+    {
+      "key": "core-ui-kit",
+      "title": "Core UI Kit",
+      "summary": "@core/ui-kit 元件與介面層模組。",
+      "order": 4,
+      "prefixes": [
+        "packages/@core/ui-kit/"
+      ]
+    },
+    {
+      "key": "core-runtime",
+      "title": "Core Runtime",
+      "summary": "@core 其他執行期能力（composables/preferences）。",
+      "order": 5,
+      "prefixes": [
+        "packages/@core/"
+      ]
+    },
+    {
+      "key": "effects-extensions",
+      "title": "Effects 擴充層",
+      "summary": "effects/* 套件（access/layout/request/plugins 等）。",
+      "order": 6,
+      "prefixes": [
+        "packages/effects/"
+      ]
+    },
+    {
+      "key": "jnpf-business-core",
+      "title": "JNPF 業務核心",
+      "summary": "jnpf hooks/ui/utils 等業務核心能力。",
+      "order": 7,
+      "prefixes": [
+        "packages/jnpf/"
+      ]
+    },
+    {
+      "key": "jnpf-plugins",
+      "title": "JNPF 插件域",
+      "summary": "jnpf/plugins 下的插件型 workspace。",
+      "order": 8,
+      "prefixes": [
+        "packages/jnpf/plugins/"
+      ]
+    },
+    {
+      "key": "shared-packages",
+      "title": "共享套件",
+      "summary": "constants/locales/types/utils 等跨域共享模組。",
+      "order": 9,
+      "prefixes": [
+        "packages/"
+      ]
+    },
+    {
+      "key": "developer-toolchain",
+      "title": "開發工具鏈（Scripts）",
+      "summary": "turbo-run、vsh、wiki generator 等開發維運工具。",
+      "order": 10,
+      "prefixes": [
+        "scripts/"
+      ]
+    },
+    {
+      "key": "quality-assurance",
+      "title": "品質驗證（Tests）",
+      "summary": "E2E、smoke 等自動化驗證工作區。",
+      "order": 11,
+      "prefixes": [
+        "tests/"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@repo/wiki",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node ./generate.mjs --mdx && node ./sync-en.mjs",
+    "check": "node ./generate.mjs --check --mdx && node ./sync-en.mjs --check",
+    "generate:mdx": "node ./generate.mjs --mdx && node ./sync-en.mjs",
+    "check:mdx": "node ./generate.mjs --check --mdx && node ./sync-en.mjs --check",
+    "sync:en": "node ./sync-en.mjs",
+    "check:en": "node ./sync-en.mjs --check",
+    "build:site": "node ./build-site.mjs",
+    "check:site": "node ./build-site.mjs --check",
+    "build:site:sync-main-public": "node ./build-site.mjs --sync-main-public"
+  },
+  "dependencies": {
+    "@mdx-js/mdx": "^3.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remark-gfm": "^4.0.1"
+  }
+}

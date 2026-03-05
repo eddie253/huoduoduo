@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hdd_scan_kit/hdd_scan_kit.dart' show ScanFrameMode;
+import 'package:scan_kit_core/scan_kit_core.dart' show ScanFrameMode;
 
 import 'package:mobile_flutter/features/scanner/presentation/scanner_page.dart';
 
@@ -183,3 +183,4 @@ class _CountingNavigatorObserver extends NavigatorObserver {
     super.didPop(route, previousRoute);
   }
 }
+

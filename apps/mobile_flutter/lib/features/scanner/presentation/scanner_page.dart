@@ -1,7 +1,7 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:hdd_scan_kit/hdd_scan_kit.dart';
+import 'package:scan_kit_core/scan_kit_core.dart';
 
 typedef ScannerViewBuilder = Widget Function(
   BuildContext context,
@@ -25,6 +25,22 @@ enum ScannerCodeMode {
   twoDimensional,
 }
 
+enum ScannerFrameSize {
+  compact,
+  medium,
+  large,
+}
+
+class _ScannerSettingResult {
+  const _ScannerSettingResult({
+    required this.mode,
+    required this.frameSize,
+  });
+
+  final ScannerCodeMode mode;
+  final ScannerFrameSize frameSize;
+}
+
 String scannerCodeModeLabel(ScannerCodeMode mode) {
   switch (mode) {
     case ScannerCodeMode.oneDimensional:
@@ -43,8 +59,12 @@ ScanFrameMode scanFrameModeFor(ScannerCodeMode mode) {
   return ScanFrameMode.twoDimensional;
 }
 
-Rect legacyScanFrameRect(Size size, ScanFrameMode mode) {
-  return scanFrameRect(size, mode);
+Rect legacyScanFrameRect(
+  Size size,
+  ScanFrameMode mode, {
+  ScannerFrameSize frameSize = ScannerFrameSize.medium,
+}) {
+  return scanFrameRect(size, mode, frameSize: _toFrameSize(frameSize));
 }
 
 class ScannerPage extends StatefulWidget {
@@ -69,6 +89,7 @@ class _ScannerPageState extends State<ScannerPage> {
   bool _isCompleted = false;
   bool _torchOn = false;
   ScannerCodeMode _scanMode = ScannerCodeMode.all;
+  ScannerFrameSize _frameSize = ScannerFrameSize.medium;
   late ScanRequest _request;
 
   @override
@@ -146,19 +167,20 @@ class _ScannerPageState extends State<ScannerPage> {
 
   Future<void> _openScanModeSettings() async {
     ScannerCodeMode selectedMode = _scanMode;
-    final ScannerCodeMode? nextMode = await showDialog<ScannerCodeMode>(
+    ScannerFrameSize selectedFrameSize = _frameSize;
+    final _ScannerSettingResult? result = await showDialog<_ScannerSettingResult>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('掃描模式'),
+          title: const Text('掃描設定'),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) {
               return Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 10,
+                runSpacing: 10,
                 children: <Widget>[
                   ChoiceChip(
-                    label: const Text('全部（1D + 2D）'),
+                    label: const Text('1D + 2D'),
                     selected: selectedMode == ScannerCodeMode.all,
                     onSelected: (_) {
                       setDialogState(() {
@@ -176,11 +198,39 @@ class _ScannerPageState extends State<ScannerPage> {
                     },
                   ),
                   ChoiceChip(
-                    label: const Text('二維條碼'),
+                    label: const Text('二維碼'),
                     selected: selectedMode == ScannerCodeMode.twoDimensional,
                     onSelected: (_) {
                       setDialogState(() {
                         selectedMode = ScannerCodeMode.twoDimensional;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 9999, height: 2),
+                  ChoiceChip(
+                    label: const Text('框小'),
+                    selected: selectedFrameSize == ScannerFrameSize.compact,
+                    onSelected: (_) {
+                      setDialogState(() {
+                        selectedFrameSize = ScannerFrameSize.compact;
+                      });
+                    },
+                  ),
+                  ChoiceChip(
+                    label: const Text('框中'),
+                    selected: selectedFrameSize == ScannerFrameSize.medium,
+                    onSelected: (_) {
+                      setDialogState(() {
+                        selectedFrameSize = ScannerFrameSize.medium;
+                      });
+                    },
+                  ),
+                  ChoiceChip(
+                    label: const Text('框大'),
+                    selected: selectedFrameSize == ScannerFrameSize.large,
+                    onSelected: (_) {
+                      setDialogState(() {
+                        selectedFrameSize = ScannerFrameSize.large;
                       });
                     },
                   ),
@@ -194,19 +244,25 @@ class _ScannerPageState extends State<ScannerPage> {
               child: const Text('取消'),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(context).pop(selectedMode),
-              child: const Text('確定'),
+              onPressed: () => Navigator.of(context).pop(
+                _ScannerSettingResult(
+                  mode: selectedMode,
+                  frameSize: selectedFrameSize,
+                ),
+              ),
+              child: const Text('確認'),
             ),
           ],
         );
       },
     );
 
-    if (!mounted || nextMode == null) {
+    if (!mounted || result == null) {
       return;
     }
     setState(() {
-      _scanMode = nextMode;
+      _scanMode = result.mode;
+      _frameSize = result.frameSize;
       _request = _buildRequest();
     });
     _controller.start(_request);
@@ -222,6 +278,7 @@ class _ScannerPageState extends State<ScannerPage> {
           HddScannerView(
             controller: _controller,
             request: _request,
+            frameSize: _toFrameSize(_frameSize),
             overlayKey: scannerFrameOverlayKey,
             windowKey: scannerFrameWindowKey,
             engineViewBuilder: widget.scannerViewBuilder,
@@ -242,8 +299,7 @@ class _ScannerPageState extends State<ScannerPage> {
                         alignment: Alignment.centerLeft,
                         child: IconButton(
                           key: scannerCloseButtonKey,
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
                           tooltip: 'Close scanner',
                           onPressed: () => Navigator.of(context).pop(),
                         ),
@@ -285,10 +341,9 @@ class _ScannerPageState extends State<ScannerPage> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     child: Text(
-                      'Mode: ${scannerCodeModeLabel(_scanMode)}',
+                      'Mode: ${scannerCodeModeLabel(_scanMode)} / Frame: ${_frameSize.name}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 13,
@@ -353,8 +408,11 @@ Set<ScanSymbology> _allowedSymbologiesFor(
   }
   if (mode == ScannerCodeMode.oneDimensional) {
     return <ScanSymbology>{
+      ScanSymbology.codabar,
       ScanSymbology.code39,
+      ScanSymbology.code93,
       ScanSymbology.code128,
+      ScanSymbology.itf,
       ScanSymbology.ean13,
       ScanSymbology.ean8,
       ScanSymbology.upca,
@@ -374,3 +432,15 @@ ScanMode _toScanMode(ScannerCodeMode mode) {
       return ScanMode.all;
   }
 }
+
+ScanFrameSize _toFrameSize(ScannerFrameSize size) {
+  switch (size) {
+    case ScannerFrameSize.compact:
+      return ScanFrameSize.compact;
+    case ScannerFrameSize.medium:
+      return ScanFrameSize.medium;
+    case ScannerFrameSize.large:
+      return ScanFrameSize.large;
+  }
+}
+

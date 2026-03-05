@@ -1,4 +1,4 @@
-name: mobile_flutter
+﻿name: mobile_flutter
 description: Didi Express Flutter migration shell (v1).
 publish_to: "none"
 version: 0.1.0+1
@@ -20,8 +20,8 @@ dependencies:
   sqflite: ^2.4.2
   google_maps_flutter: ^2.9.0
   firebase_messaging: ^15.1.3
-  hdd_scan_kit:
-    path: packages/hdd_scan_kit
+  scan_kit_core:
+    path: packages/scan_kit_core
   signature: ^5.5.0
   url_launcher: ^6.3.1
   image_picker: ^1.1.2
@@ -43,3 +43,4 @@ flutter:
   assets:
     - assets/legacy_login/
     - assets/legacy_shell/
+

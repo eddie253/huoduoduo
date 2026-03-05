@@ -1,0 +1,39 @@
+﻿{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**"]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "generate": {
+      "outputs": ["docs/wiki-mdx/**"]
+    },
+    "sync:en": {
+      "dependsOn": ["generate"],
+      "outputs": ["docs/wiki-mdx/en-US/**"]
+    },
+    "check": {
+      "dependsOn": ["generate"],
+      "outputs": []
+    },
+    "check:en": {
+      "dependsOn": ["sync:en"],
+      "outputs": []
+    },
+    "build:site": {
+      "dependsOn": ["generate"],
+      "outputs": ["apps/public/wiki-site/**"]
+    },
+    "check:site": {
+      "dependsOn": ["build:site"],
+      "outputs": []
+    }
+  }
+}

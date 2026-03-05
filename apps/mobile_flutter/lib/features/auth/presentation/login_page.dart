@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +27,47 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _accountController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isAndroidEmulator = false;
+  bool _autoLoginScheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tryDevAutoLogin();
+  }
+
+  Future<void> _tryDevAutoLogin() async {
+    if (!AppConfig.devAutoLoginEnabled) {
+      return;
+    }
+    if (_autoLoginScheduled) {
+      return;
+    }
+    if (AppConfig.devAutoLoginAccount.trim().isEmpty ||
+        AppConfig.devAutoLoginPassword.trim().isEmpty) {
+      return;
+    }
+
+    if (Platform.isAndroid) {
+      try {
+        final androidInfo = await DeviceInfoPlugin().androidInfo;
+        _isAndroidEmulator = !androidInfo.isPhysicalDevice;
+      } catch (_) {
+        _isAndroidEmulator = false;
+      }
+    }
+
+    _accountController.text = AppConfig.devAutoLoginAccount.trim();
+    _passwordController.text = AppConfig.devAutoLoginPassword.trim();
+    _autoLoginScheduled = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _submit();
+    });
+  }
 
   @override
   void dispose() {
@@ -45,6 +89,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         Theme.of(context).platform == TargetPlatform.iOS ? 'ios' : 'android';
     final ready = await _ensureLocationPrerequisites();
     if (!ready) {
+      return;
+    }
+    final permissionsReady = await _ensureCriticalPermissions();
+    if (!permissionsReady) {
       return;
     }
 
@@ -74,6 +122,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<bool> _ensureLocationPrerequisites() async {
     final serviceStatus = await Permission.locationWhenInUse.serviceStatus;
     if (!serviceStatus.isEnabled) {
+      if (_isAndroidEmulator) {
+        return true;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('請先開啟手機定位服務')),
@@ -92,6 +143,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (status.isGranted || status.isLimited) {
         return true;
       }
+      if (_isAndroidEmulator) {
+        return true;
+      }
     }
 
     if (mounted) {
@@ -100,6 +154,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
+    }
+    return false;
+  }
+
+  Future<bool> _ensureCriticalPermissions() async {
+    final bool cameraReady = await _ensurePermissionReady(Permission.camera);
+    final bool photosReady =
+        Platform.isIOS ? await _ensurePermissionReady(Permission.photos) : true;
+    final bool granted = cameraReady && photosReady;
+    if (granted) {
+      return true;
+    }
+    if (_isAndroidEmulator) {
+      return true;
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('請先開啟相機/相簿權限再登入。')),
+      );
+    }
+    return false;
+  }
+
+  Future<bool> _ensurePermissionReady(Permission permission) async {
+    var status = await permission.status;
+    if (status.isGranted || status.isLimited) {
+      return true;
+    }
+    if (status.isDenied || status.isRestricted) {
+      status = await permission.request();
+      return status.isGranted || status.isLimited;
     }
     return false;
   }

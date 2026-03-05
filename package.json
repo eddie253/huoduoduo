@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "description": "Monorepo root for Flutter + BFF migration baseline.",
   "workspaces": [
-    "apps/bff_gateway"
+    "apps/bff_gateway",
+    "scripts/wiki"
   ],
   "scripts": {
     "bff:dev": "npm --workspace apps/bff_gateway run start:dev",
@@ -23,7 +24,7 @@
     "mobile:verify": "npm run mobile:analyze && npm run mobile:test && npm run mobile:build:apk:debug",
     "mobile:test:coverage": "node ops/ci/run-flutter-coverage.js",
     "mobile:coverage:check": "node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 65",
-    "mobile:test:login-it": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-mobile-login-it.ps1",
+    "mobile:run:auto-login": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-mobile-auto-login.ps1",
     "mobile:repro:route-nav": "powershell -ExecutionPolicy Bypass -File .\\scripts\\repro-route-nav.ps1",
     "mobile:log:bridge": "powershell -ExecutionPolicy Bypass -File .\\scripts\\tail-mobile-bridge-log.ps1",
     "mobile:log:all": "powershell -ExecutionPolicy Bypass -File .\\scripts\\tail-mobile-bridge-log.ps1 -ShowAll",
@@ -32,6 +33,13 @@
     "coverage:collect:all": "node ops/ci/collect-coverage.js --component all",
     "coverage:html": "node ops/ci/generate-coverage-html.js",
     "coverage:verify": "npm run bff:test:coverage && npm run mobile:test:coverage && npm run mobile:coverage:check && npm run coverage:collect:all && npm run coverage:html",
-    "wave2:uat-smoke": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-wave2-uat-smoke.ps1"
+    "wave2:uat-smoke": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-wave2-uat-smoke.ps1",
+    "turbo:wiki:generate": "pnpm exec turbo run generate --filter=@repo/wiki",
+    "turbo:wiki:check": "pnpm exec turbo run check --filter=@repo/wiki",
+    "turbo:bff:verify": "pnpm exec turbo run lint test build --filter=bff_gateway",
+    "turbo:verify": "pnpm exec turbo run lint test build check --filter=bff_gateway --filter=@repo/wiki"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
   }
 }

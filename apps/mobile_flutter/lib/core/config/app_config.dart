@@ -18,4 +18,20 @@ class AppConfig {
     'reserve.huoduoduo.com.tw',
     'app.elf.com.tw'
   ];
+
+  // Dev-only login automation controls for emulator and CI smoke.
+  static const bool devAutoLoginEnabled = bool.fromEnvironment(
+    'DEV_AUTO_LOGIN',
+    defaultValue: false,
+  );
+
+  static const String devAutoLoginAccount = String.fromEnvironment(
+    'DEV_AUTO_LOGIN_ACCOUNT',
+    defaultValue: '',
+  );
+
+  static const String devAutoLoginPassword = String.fromEnvironment(
+    'DEV_AUTO_LOGIN_PASSWORD',
+    defaultValue: '',
+  );
 }
