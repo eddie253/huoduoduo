@@ -5,7 +5,6 @@
 ## 1) 啟動本機 BFF（終端機 A）
 
 ```powershell
-npm run mobile:log:bridge
 npm run bff:start:local
 ```
 

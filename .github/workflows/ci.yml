@@ -80,6 +80,8 @@ jobs:
           channel: stable
       - name: Install deps
         run: flutter pub get
+      - name: Test hdd_scan_kit package
+        run: cd packages/hdd_scan_kit && flutter pub get && flutter test
       - name: Analyze
         run: flutter analyze
       - name: Test

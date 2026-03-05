@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:hdd_scan_kit/hdd_scan_kit.dart' show ScanFrameMode;
 
 import 'package:mobile_flutter/features/scanner/presentation/scanner_page.dart';
 
@@ -59,12 +59,12 @@ void main() {
       tester,
       pageBuilder: () => ScannerPage(
         scannerViewBuilder: (
-          MobileScannerController controller,
-          ValueChanged<String> onDetectedValue,
+          BuildContext context,
+          ValueChanged<Object> onEngineCode,
         ) {
           return Center(
             child: FilledButton(
-              onPressed: () => onDetectedValue('   '),
+              onPressed: () => onEngineCode('   '),
               child: const Text('Emit Empty'),
             ),
           );
@@ -85,14 +85,14 @@ void main() {
       observer: observer,
       pageBuilder: () => ScannerPage(
         scannerViewBuilder: (
-          MobileScannerController controller,
-          ValueChanged<String> onDetectedValue,
+          BuildContext context,
+          ValueChanged<Object> onEngineCode,
         ) {
           return Center(
             child: FilledButton(
               onPressed: () {
-                onDetectedValue('CODE-123');
-                onDetectedValue('CODE-456');
+                onEngineCode('CODE-123');
+                onEngineCode('CODE-456');
               },
               child: const Text('Emit Twice'),
             ),
@@ -107,54 +107,6 @@ void main() {
     final result = await resultFuture;
     expect(result, 'CODE-123');
     expect(observer.popCount, 1);
-  });
-
-  test('barcode format filter supports 1D/2D modes', () {
-    expect(
-      isBarcodeAllowedForMode(
-        format: BarcodeFormat.qrCode,
-        mode: ScannerCodeMode.twoDimensional,
-      ),
-      isTrue,
-    );
-    expect(
-      isBarcodeAllowedForMode(
-        format: BarcodeFormat.code128,
-        mode: ScannerCodeMode.twoDimensional,
-      ),
-      isFalse,
-    );
-    expect(
-      isBarcodeAllowedForMode(
-        format: BarcodeFormat.code128,
-        mode: ScannerCodeMode.oneDimensional,
-      ),
-      isTrue,
-    );
-  });
-
-  test('firstNonEmptyBarcodeValueForMode returns match for selected mode', () {
-    const capture = BarcodeCapture(
-      barcodes: <Barcode>[
-        Barcode(format: BarcodeFormat.qrCode, rawValue: 'QR-001'),
-        Barcode(format: BarcodeFormat.code128, rawValue: 'BAR-001'),
-      ],
-    );
-
-    expect(
-      firstNonEmptyBarcodeValueForMode(
-        capture,
-        ScannerCodeMode.twoDimensional,
-      ),
-      'QR-001',
-    );
-    expect(
-      firstNonEmptyBarcodeValueForMode(
-        capture,
-        ScannerCodeMode.oneDimensional,
-      ),
-      'BAR-001',
-    );
   });
 
   test('scan frame mode follows scanner code mode', () {
@@ -183,8 +135,8 @@ void main() {
 }
 
 Widget _buildNoopScanner(
-  MobileScannerController controller,
-  ValueChanged<String> onDetectedValue,
+  BuildContext context,
+  ValueChanged<Object> onEngineCode,
 ) {
   return const SizedBox.expand();
 }
