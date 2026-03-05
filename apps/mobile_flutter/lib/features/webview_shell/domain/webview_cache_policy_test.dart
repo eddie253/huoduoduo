@@ -14,6 +14,15 @@ void main() {
     );
   });
 
+  test('classifies legacy app routes to no-cache policy', () {
+    final uri = WebUri('https://old.huoduoduo.com.tw/app/rvt/ge.aspx');
+    expect(resolver.classify(uri), WebviewRouteClass.transaction);
+    expect(
+      resolver.cachePolicyFor(uri),
+      URLRequestCachePolicy.RELOAD_IGNORING_LOCAL_CACHE_DATA,
+    );
+  });
+
   test('classifies non-transaction routes to protocol cache policy', () {
     final uri = WebUri('https://app.elf.com.tw/cn/entrust.aspx?IDCompany=S1');
     expect(resolver.classify(uri), WebviewRouteClass.session);

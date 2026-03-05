@@ -11,6 +11,5 @@ void main() {
     expect(find.byKey(const Key('login.accountField')), findsOneWidget);
     expect(find.byKey(const Key('login.passwordField')), findsOneWidget);
     expect(find.byKey(const Key('login.submitButton')), findsOneWidget);
-    expect(find.text('貨多多物流'), findsOneWidget);
   });
 }

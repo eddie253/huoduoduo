@@ -4,7 +4,7 @@ const path = require('path');
 const repoRoot = path.resolve(__dirname, '..', '..');
 const mobileDir = path.join(repoRoot, 'apps', 'mobile_flutter');
 const extraArgs = process.argv.slice(2);
-const defaultTargets = ['test', 'lib'];
+const defaultTargets = ['lib'];
 
 const args = [
   'test',

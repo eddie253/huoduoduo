@@ -49,6 +49,8 @@ void main() {
     expect(find.byKey(scannerFlashButtonKey), findsOneWidget);
     expect(find.byKey(scannerKeypadButtonKey), findsOneWidget);
     expect(find.byKey(scannerSettingButtonKey), findsOneWidget);
+    expect(find.byKey(scannerFrameOverlayKey), findsOneWidget);
+    expect(find.byKey(scannerFrameWindowKey), findsOneWidget);
   });
 
   testWidgets('ignores empty scan value and stays on page',
@@ -153,6 +155,30 @@ void main() {
       ),
       'BAR-001',
     );
+  });
+
+  test('scan frame mode follows scanner code mode', () {
+    expect(
+      scanFrameModeFor(ScannerCodeMode.oneDimensional),
+      ScanFrameMode.oneDimensional,
+    );
+    expect(
+      scanFrameModeFor(ScannerCodeMode.twoDimensional),
+      ScanFrameMode.twoDimensional,
+    );
+    expect(
+      scanFrameModeFor(ScannerCodeMode.all),
+      ScanFrameMode.twoDimensional,
+    );
+  });
+
+  test('legacy scan frame rect uses wider and shorter frame for 1D', () {
+    const size = Size(360, 640);
+    final oneDim = legacyScanFrameRect(size, ScanFrameMode.oneDimensional);
+    final twoDim = legacyScanFrameRect(size, ScanFrameMode.twoDimensional);
+
+    expect(oneDim.width, equals(twoDim.width));
+    expect(oneDim.height, lessThan(twoDim.height));
   });
 }
 

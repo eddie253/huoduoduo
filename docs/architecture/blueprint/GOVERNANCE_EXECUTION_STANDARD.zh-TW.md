@@ -1,7 +1,7 @@
 ﻿# GOVERNANCE_EXECUTION_STANDARD.zh-TW
 
 Doc ID: HDD-GOV-EXECUTION-STANDARD
-Version: v1.1
+Version: v1.2
 Owner: Architecture Lead
 Last Updated: 2026-03-05
 Review Status: Draft
@@ -28,6 +28,12 @@ CN/EN Pair Link: N/A
 1. 命令順序固定：Docker command -> PowerShell fallback。
 2. 文件語言政策：中文主文 + 英文關鍵詞。
 3. 交付回覆需包含可重跑驗收命令。
+
+## Report Output Policy（輸出目錄政策）
+
+1. 執行產物統一路徑為 `reports/output/`。
+2. `reports/test/` 視為舊路徑，僅供歷史記錄參考，不再新增。
+3. 每次交付需在 `reports/output/<run_id>/` 放置 log、summary 與報告檔。
 
 ## Link Format Policy（連結格式政策）
 
@@ -57,5 +63,6 @@ CN/EN Pair Link: N/A
 
 ## Change Log
 
-1. v1.1 - 新增連結格式政策：永遠輸出純路徑，禁止 vscode-resource/file+ URL。
+1. v1.2 - 新增 Report Output Policy：執行產物統一使用 `reports/output/`，`reports/test/` 改為歷史路徑。
+2. v1.1 - 新增連結格式政策：永遠輸出純路徑，禁止 vscode-resource/file+ URL。
 

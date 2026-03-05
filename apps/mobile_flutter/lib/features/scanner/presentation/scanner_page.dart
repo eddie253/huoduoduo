@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -6,14 +8,21 @@ typedef ScannerViewBuilder = Widget Function(
   ValueChanged<String> onDetectedValue,
 );
 
-const String scannerHintText = 'Point the camera to barcode or QR code';
+const String scannerHintText = '請將條碼或 QR Code 對準掃描框';
 const Key scannerCloseButtonKey = Key('scanner_close_button');
 const Key scannerToolRowKey = Key('scanner_tool_row');
 const Key scannerFlashButtonKey = Key('scanner_flash_button');
 const Key scannerKeypadButtonKey = Key('scanner_keypad_button');
 const Key scannerSettingButtonKey = Key('scanner_setting_button');
+const Key scannerFrameOverlayKey = Key('scanner_frame_overlay');
+const Key scannerFrameWindowKey = Key('scanner_frame_window');
 
-String scannerTitleFor(String scanType) => 'Scanner ($scanType)';
+String scannerTitleFor(String scanType) => '掃描器（$scanType）';
+
+enum ScanFrameMode {
+  oneDimensional,
+  twoDimensional,
+}
 
 enum ScannerCodeMode {
   all,
@@ -30,6 +39,13 @@ String scannerCodeModeLabel(ScannerCodeMode mode) {
     case ScannerCodeMode.all:
       return 'All';
   }
+}
+
+ScanFrameMode scanFrameModeFor(ScannerCodeMode mode) {
+  if (mode == ScannerCodeMode.oneDimensional) {
+    return ScanFrameMode.oneDimensional;
+  }
+  return ScanFrameMode.twoDimensional;
 }
 
 const Set<BarcodeFormat> _twoDimensionalFormats = <BarcodeFormat>{
@@ -154,7 +170,7 @@ class _ScannerPageState extends State<ScannerPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('掃描類型設定'),
+          title: const Text('掃描設定'),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) {
               return Column(
@@ -165,7 +181,7 @@ class _ScannerPageState extends State<ScannerPage> {
                     runSpacing: 8,
                     children: <Widget>[
                       ChoiceChip(
-                        label: const Text('一維 + 二維'),
+                        label: const Text('一維條碼 + 二維條碼'),
                         selected: selectedMode == ScannerCodeMode.all,
                         onSelected: (_) {
                           setDialogState(() {
@@ -174,7 +190,7 @@ class _ScannerPageState extends State<ScannerPage> {
                         },
                       ),
                       ChoiceChip(
-                        label: const Text('僅一維'),
+                        label: const Text('一維條碼'),
                         selected:
                             selectedMode == ScannerCodeMode.oneDimensional,
                         onSelected: (_) {
@@ -184,7 +200,7 @@ class _ScannerPageState extends State<ScannerPage> {
                         },
                       ),
                       ChoiceChip(
-                        label: const Text('僅二維'),
+                        label: const Text('二維條碼'),
                         selected:
                             selectedMode == ScannerCodeMode.twoDimensional,
                         onSelected: (_) {
@@ -206,7 +222,7 @@ class _ScannerPageState extends State<ScannerPage> {
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(selectedMode),
-              child: const Text('套用'),
+              child: const Text('確認'),
             ),
           ],
         );
@@ -240,6 +256,14 @@ class _ScannerPageState extends State<ScannerPage> {
         fit: StackFit.expand,
         children: <Widget>[
           scannerView,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: LegacyScanFrameOverlay(
+                key: scannerFrameOverlayKey,
+                mode: scanFrameModeFor(_scanMode),
+              ),
+            ),
+          ),
           Positioned(
             top: 0,
             left: 0,
@@ -465,7 +489,7 @@ class _ManualInputPadState extends State<_ManualInputPad> {
                 border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: Text(
-                _value.isEmpty ? '請輸入條碼' : _value,
+                _value.isEmpty ? '請輸入單號' : _value,
                 style: TextStyle(
                   fontSize: 18,
                   color: _value.isEmpty
@@ -496,6 +520,7 @@ class _ManualInputPadState extends State<_ManualInputPad> {
                   '0',
                 ])
                   FilledButton(
+                    // Keep default system feedback behavior.
                     onPressed: () => _append(key),
                     child: Text(key),
                   ),
@@ -536,5 +561,84 @@ class _ManualInputPadState extends State<_ManualInputPad> {
         ),
       ),
     );
+  }
+}
+
+class LegacyScanFrameOverlay extends StatelessWidget {
+  const LegacyScanFrameOverlay({
+    super.key,
+    required this.mode,
+  });
+
+  final ScanFrameMode mode;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final Size size = Size(constraints.maxWidth, constraints.maxHeight);
+        final Rect frameRect = legacyScanFrameRect(size, mode);
+        final RRect frameRRect =
+            RRect.fromRectAndRadius(frameRect, const Radius.circular(14));
+
+        return Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _LegacyScanMaskPainter(frameRRect: frameRRect),
+              ),
+            ),
+            Positioned.fromRect(
+              rect: frameRect,
+              child: Container(
+                key: scannerFrameWindowKey,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white, width: 2.2),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+Rect legacyScanFrameRect(Size size, ScanFrameMode mode) {
+  final double width = math.min(size.width * 0.78, 360);
+  final double height =
+      mode == ScanFrameMode.oneDimensional ? math.max(84, width * 0.28) : width;
+  final double topBias = size.height * 0.08;
+  final double left = (size.width - width) / 2;
+  final double top = ((size.height - height) / 2 - topBias)
+      .clamp(72.0, size.height - height - 24);
+
+  return Rect.fromLTWH(left, top, width, height);
+}
+
+class _LegacyScanMaskPainter extends CustomPainter {
+  const _LegacyScanMaskPainter({required this.frameRRect});
+
+  final RRect frameRRect;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect bounds = Offset.zero & size;
+    canvas.saveLayer(bounds, Paint());
+    canvas.drawRect(
+      bounds,
+      Paint()..color = Colors.black.withValues(alpha: 0.55),
+    );
+    canvas.drawRRect(
+      frameRRect,
+      Paint()..blendMode = BlendMode.clear,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _LegacyScanMaskPainter oldDelegate) {
+    return oldDelegate.frameRRect != frameRRect;
   }
 }

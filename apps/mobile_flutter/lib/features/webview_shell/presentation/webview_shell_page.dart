@@ -84,7 +84,7 @@ class _MenuTile {
 
   const _MenuTile.placeholder()
       : this._(
-          label: '?喳??',
+          label: '建置中',
           icon: Icons.local_shipping_outlined,
           actionType: _MenuActionType.placeholder,
           enabled: false,
@@ -108,7 +108,7 @@ class WebViewShellPage extends ConsumerStatefulWidget {
 }
 
 class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
-  static const int _menuSlotCount = 8;
+  static const int _menuColumns = 2;
   static const int _bridgeLogMaxLength = 240;
 
   static const Key shellScaffoldKey = Key('webview.shell.scaffold');
@@ -116,8 +116,8 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   static const Key topSettingsButtonKey = Key('webview.top.settingsButton');
   static const Key bottomBarKey = Key('webview.bottomBar');
 
-  static const String _defaultAnnouncement = '系統公告';
-  static const String _errorAnnouncement = '頛憭望?';
+  static const String _defaultAnnouncement = '歡迎使用貨多多物流';
+  static const String _errorAnnouncement = '公告載入失敗';
 
   static final InAppWebViewKeepAlive _keepAlive = InAppWebViewKeepAlive();
   static final WebUri _reservationFallback =
@@ -270,25 +270,25 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   List<_BottomTab> _buildTabs() => const <_BottomTab>[
         _BottomTab(
           section: ShellSection.reservation,
-          label: '??',
+          label: '預約',
           icon: Icons.calendar_month_outlined,
           activeIcon: Icons.calendar_month_rounded,
         ),
         _BottomTab(
           section: ShellSection.order,
-          label: '?亙',
+          label: '接單',
           icon: Icons.inventory_2_outlined,
           activeIcon: Icons.inventory_2_rounded,
         ),
         _BottomTab(
           section: ShellSection.signature,
-          label: '蝪賣',
+          label: '簽收',
           icon: Icons.draw_outlined,
           activeIcon: Icons.draw_rounded,
         ),
         _BottomTab(
           section: ShellSection.wallet,
-          label: '?Ｗ?',
+          label: '錢包',
           icon: Icons.account_balance_wallet_outlined,
           activeIcon: Icons.account_balance_wallet_rounded,
         ),
@@ -502,8 +502,11 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     return args.first['method']?.toString() == 'pre_page';
   }
 
-  Future<void> _openWebPage(
-      {required String title, required WebUri uri}) async {
+  Future<void> _openWebPage({
+    required String title,
+    required WebUri uri,
+    bool menuIntent = false,
+  }) async {
     final WebUri? normalized = _normalizeAllowedUri(uri);
     if (normalized == null) {
       if (mounted) {
@@ -517,9 +520,16 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     }
 
     await _bootstrapCookies();
+    if (_controller != null && menuIntent) {
+      await _controller!.clearHistory();
+    }
+
+    final URLRequestCachePolicy requestPolicy = menuIntent
+        ? URLRequestCachePolicy.RELOAD_IGNORING_LOCAL_CACHE_DATA
+        : _cachePolicyResolver.cachePolicyFor(normalized);
     final URLRequest request = URLRequest(
       url: normalized,
-      cachePolicy: _cachePolicyResolver.cachePolicyFor(normalized),
+      cachePolicy: requestPolicy,
     );
 
     if (!mounted) {
@@ -562,7 +572,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     final uri = path.startsWith('http')
         ? WebUri(path)
         : WebUri(legacyAppUri(path).toString());
-    await _openWebPage(title: '代理', uri: uri);
+    await _openWebPage(title: '代理', uri: uri, menuIntent: true);
   }
 
   Future<void> _logout() async {
@@ -574,7 +584,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('?餃憭望?嚗?e')));
+            .showSnackBar(const SnackBar(content: Text('登出失敗，請稍後再試')));
       }
     }
   }
@@ -587,7 +597,8 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     switch (tile.actionType) {
       case _MenuActionType.openWeb:
         if (tile.uri != null) {
-          await _openWebPage(title: tile.label, uri: tile.uri!);
+          await _openWebPage(
+              title: tile.label, uri: tile.uri!, menuIntent: true);
         }
         break;
       case _MenuActionType.openScanner:
@@ -664,24 +675,27 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   String _sectionTitle(ShellSection section) {
     switch (section) {
       case ShellSection.reservation:
-        return '??';
+        return '預約';
       case ShellSection.order:
-        return '?亙';
+        return '接單';
       case ShellSection.signature:
-        return '蝪賣';
+        return '簽收';
       case ShellSection.wallet:
-        return '?Ｗ?';
+        return '錢包';
     }
   }
 
   List<_MenuTile> _slotsForSection(ShellSection section) {
     final List<_MenuTile> source =
         List<_MenuTile>.from(_menuTiles[section] ?? const <_MenuTile>[]);
-    if (source.length >= _menuSlotCount) {
-      return source.take(_menuSlotCount).toList();
+    final int targetCount =
+        source.length.isOdd ? source.length + 1 : source.length;
+    final int normalizedTarget = targetCount < 8 ? 8 : targetCount;
+    if (source.length >= normalizedTarget) {
+      return source;
     }
     source.addAll(List<_MenuTile>.generate(
-      _menuSlotCount - source.length,
+      normalizedTarget - source.length,
       (_) => const _MenuTile.placeholder(),
     ));
     return source;
@@ -790,18 +804,20 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
         builder: (BuildContext context, BoxConstraints c) {
           const double spacing = 14;
           const double pad = 14;
+          final int rowCount = (slots.length / _menuColumns).ceil();
           final double usableW = c.maxWidth - pad * 2 - spacing;
-          final double usableH = c.maxHeight - pad * 2 - spacing * 3;
-          final double cardW = usableW / 2;
-          final double cardH = usableH / 4;
+          final double usableH =
+              c.maxHeight - pad * 2 - spacing * (rowCount - 1);
+          final double cardW = usableW / _menuColumns;
+          final double cardH = usableH / rowCount;
           final double ratio = cardH <= 0 ? 1 : cardW / cardH;
 
           return GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(pad),
-            itemCount: _menuSlotCount,
+            itemCount: slots.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: _menuColumns,
               childAspectRatio: ratio,
               crossAxisSpacing: spacing,
               mainAxisSpacing: spacing,
@@ -943,10 +959,14 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
 
             final URLRequestCachePolicy cachePolicy =
                 _cachePolicyResolver.cachePolicyFor(uri);
+            final URLRequestCachePolicy? currentPolicy =
+                navigationAction.request.cachePolicy;
             if (cachePolicy ==
-                URLRequestCachePolicy.RELOAD_IGNORING_LOCAL_CACHE_DATA) {
+                    URLRequestCachePolicy.RELOAD_IGNORING_LOCAL_CACHE_DATA &&
+                currentPolicy != cachePolicy) {
               await controller.loadUrl(
-                  urlRequest: URLRequest(url: uri, cachePolicy: cachePolicy));
+                urlRequest: URLRequest(url: uri, cachePolicy: cachePolicy),
+              );
               return NavigationActionPolicy.CANCEL;
             }
             return NavigationActionPolicy.ALLOW;
@@ -976,7 +996,11 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                 url.host.toLowerCase() == 'app.elf.com.tw' &&
                 url.path.toLowerCase() == '/error.aspx') {
               _didErrorFallback = true;
-              await _openWebPage(title: '??鞎其辣', uri: _reservationFallback);
+              await _openWebPage(
+                title: '預約貨件',
+                uri: _reservationFallback,
+                menuIntent: true,
+              );
               return;
             }
             try {

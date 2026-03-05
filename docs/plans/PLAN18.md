@@ -96,11 +96,11 @@ Execution window: `2026-03-03 18:10~18:13 +08:00`.
    2. Added network signal alert branch/widget tests:
       `apps/mobile_flutter/lib/core/network/network_signal_alert_host_test.dart`.
 7. Evidence logs:
-   1. `reports/test/plan18_closure_20260303/mobile_analyze.log`
-   2. `reports/test/plan18_closure_20260303/mobile_test.log`
-   3. `reports/test/plan18_closure_20260303/mobile_test_coverage.log`
-   4. `reports/test/plan18_closure_20260303/mobile_coverage_check.log`
-   5. `reports/test/plan18_closure_20260303/coverage_verify.log`
+   1. `reports/output/plan18_closure_20260303/mobile_analyze.log`
+   2. `reports/output/plan18_closure_20260303/mobile_test.log`
+   3. `reports/output/plan18_closure_20260303/mobile_test_coverage.log`
+   4. `reports/output/plan18_closure_20260303/mobile_coverage_check.log`
+   5. `reports/output/plan18_closure_20260303/coverage_verify.log`
 
 ## Risk Notes
 1. `webview_shell_page.dart` remains intentionally low (`1.79%`) due heavy platform-view/plugin runtime coupling.

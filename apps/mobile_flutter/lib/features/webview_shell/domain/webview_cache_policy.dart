@@ -6,6 +6,11 @@ class WebviewCachePolicyResolver {
   const WebviewCachePolicyResolver();
 
   static const List<String> _transactionPathKeywords = <String>[
+    '/app/rvt/',
+    '/app/inq/',
+    '/app/arv/',
+    '/app/currency/',
+    '/app/pxy/',
     '/shipment',
     '/delivery',
     '/exception',

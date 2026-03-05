@@ -14,7 +14,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 
 ROOT = Path(__file__).resolve().parents[2]
 INPUT_MD = ROOT / "docs" / "architecture" / "LEGACY_APP_API_SPEC_FINAL.zh-TW.md"
-OUTPUT_PDF = ROOT / "output" / "pdf" / "LEGACY_APP_API_SPEC_FINAL.zh-TW.pdf"
+OUTPUT_PDF = ROOT / "reports" / "output" / "pdf" / "LEGACY_APP_API_SPEC_FINAL.zh-TW.pdf"
 
 
 def register_fonts() -> None:

@@ -1,7 +1,7 @@
 ﻿# Architecture Docs Index
 
 Doc ID: HDD-DOCS-ARCHITECTURE-README
-Version: v1.0
+Version: v1.3
 Owner: Architecture Lead
 Last Updated: 2026-03-05
 Review Status: Draft
@@ -52,5 +52,8 @@ CN/EN Pair Link: N/A
 
 1. Start implementation from `WAVE3_EXECUTION_SPEC.md` or `WAVE4_NATIVE_PARITY_MATRIX.md`.
 2. Record execution evidence in `WAVE2_UAT_EVIDENCE.md` (or next wave evidence file when created).
-3. Keep this folder as the single architecture source of truth.
+3. Runtime execution outputs are stored under `reports/output/`.
+4. Long-lived test docs/scripts are under `tests/` (entry: `tests/INDEX.md`).
+5. Generated document exports (for example PDF) are under `reports/output/pdf/`.
+6. Keep this folder as the single architecture source of truth.
 

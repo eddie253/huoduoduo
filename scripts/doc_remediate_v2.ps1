@@ -3,7 +3,7 @@ $today = "2026-03-05"
 $todayCompact = "20260305"
 $repo = (Get-Location).Path
 $manifestPath = "docs/architecture/blueprint/DOC_REMEDIATION_MANIFEST_${todayCompact}.zh-TW.md"
-$reportDir = "reports/test/doc_governance_remediation_v2_${todayCompact}"
+$reportDir = "reports/output/doc_governance_remediation_v2_${todayCompact}"
 
 function Get-Rel([string]$full) {
   $rel = $full.Substring($repo.Length + 1)

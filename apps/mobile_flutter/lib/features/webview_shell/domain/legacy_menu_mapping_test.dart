@@ -40,4 +40,33 @@ void main() {
     );
     expect(hasProxyMenu, isTrue);
   });
+
+  test('wallet section includes legacy virtual currency web entry', () {
+    final mapping = buildLegacyMenuMapping();
+    final wallet = mapping[ShellSection.wallet]!;
+
+    final hasVirtualCurrency = wallet.any(
+      (tile) =>
+          tile.actionType == LegacyMenuActionType.openWeb &&
+          tile.webPath == 'currency/virtual.aspx',
+    );
+    expect(hasVirtualCurrency, isTrue);
+  });
+
+  test('all non-placeholder legacy tiles include traceability targets', () {
+    final mapping = buildLegacyMenuMapping();
+    final allTiles =
+        mapping.values.expand((tiles) => tiles).toList(growable: false);
+
+    for (final tile in allTiles) {
+      if (tile.actionType == LegacyMenuActionType.placeholder) {
+        continue;
+      }
+      expect(tile.newTarget, isNotNull);
+      expect(tile.routeType, isNot(LegacyMenuRouteType.placeholder));
+      if (tile.actionType == LegacyMenuActionType.openWeb) {
+        expect(tile.legacyPath, startsWith('/app/'));
+      }
+    }
+  });
 }
