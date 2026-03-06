@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/storage/token_storage.dart';
 import '../../webview_shell/application/webview_session_cleanup_service.dart';
 import '../data/auth_repository.dart';
 import '../domain/auth_models.dart';
+import '../domain/auth_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepositoryImpl(ref.watch(dioProvider));
@@ -22,19 +24,22 @@ final webviewSessionCleanupServiceProvider =
 final authControllerProvider =
     StateNotifierProvider<AuthController, AsyncValue<AuthSession?>>((ref) {
   return AuthController(
-    ref: ref,
     authRepository: ref.watch(authRepositoryProvider),
+    tokenStorage: ref.watch(tokenStorageProvider),
+    sessionCleanupService: ref.watch(webviewSessionCleanupServiceProvider),
   );
 });
 
 class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
   AuthController({
-    required this.ref,
     required this.authRepository,
+    required this.tokenStorage,
+    required this.sessionCleanupService,
   }) : super(const AsyncData<AuthSession?>(null));
 
-  final Ref ref;
   final AuthRepository authRepository;
+  final TokenStorage tokenStorage;
+  final WebviewSessionCleanupService sessionCleanupService;
 
   Future<AuthSession> login({
     required String account,
@@ -52,10 +57,10 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
 
     try {
       final session = await authRepository.login(request);
-      await ref.read(tokenStorageProvider).saveTokens(
-            accessToken: session.accessToken,
-            refreshToken: session.refreshToken,
-          );
+      await tokenStorage.saveTokens(
+        accessToken: session.accessToken,
+        refreshToken: session.refreshToken,
+      );
       state = AsyncData<AuthSession?>(session);
       return session;
     } catch (error, stackTrace) {
@@ -66,13 +71,12 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
   }
 
   Future<void> logout() async {
-    final refreshToken =
-        await ref.read(tokenStorageProvider).readRefreshToken();
+    final refreshToken = await tokenStorage.readRefreshToken();
     await authRepository.logout(refreshToken);
-    await ref
-        .read(webviewSessionCleanupServiceProvider)
-        .clearWebSession(domains: AppConfig.allowedWebHosts);
-    await ref.read(tokenStorageProvider).clear();
+    await sessionCleanupService.clearWebSession(
+      domains: AppConfig.allowedWebHosts,
+    );
+    await tokenStorage.clear();
     state = const AsyncData<AuthSession?>(null);
   }
 

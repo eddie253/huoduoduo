@@ -270,6 +270,18 @@ export class LegacySoapClient {
     return this.normalizeShipment(rows[0], trackingNo);
   }
 
+  async acceptOrder(contractNo: string, trackingNo: string): Promise<void> {
+    const method = 'AddOrder_elf';
+    const raw = await this.transport.call({
+      method,
+      params: {
+        DNUM: contractNo,
+        TNUM: trackingNo
+      }
+    });
+    this.throwIfBusinessError(raw, method);
+  }
+
   async submitShipmentDelivery(
     trackingNo: string,
     payload: {

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../webview_shell/application/map_navigation_preflight_service.dart';
+import 'package:mobile_flutter/core/navigation/map_navigation_preflight_port.dart';
+
+import '../application/maps_view_model.dart';
 
 typedef LaunchExternalPort = Future<bool> Function(Uri uri, LaunchMode mode);
 
 class MapsPage extends StatefulWidget {
   const MapsPage({
     super.key,
-    MapNavigationPreflightPort? mapPreflight,
+    required MapNavigationPreflightPort mapPreflight,
     LaunchExternalPort? launchExternal,
-  })  : _mapPreflight =
-            mapPreflight ?? const DefaultMapNavigationPreflightService(),
+  })  : _mapPreflight = mapPreflight,
         _launchExternal = launchExternal ?? _defaultLaunchExternal;
 
   static Future<bool> _defaultLaunchExternal(Uri uri, LaunchMode mode) {
@@ -26,6 +27,7 @@ class MapsPage extends StatefulWidget {
 }
 
 class _MapsPageState extends State<MapsPage> {
+  final _viewModel = const MapsViewModel();
   final _latitudeController = TextEditingController(text: '25.0330');
   final _longitudeController = TextEditingController(text: '121.5654');
   final _phoneController = TextEditingController();
@@ -39,26 +41,14 @@ class _MapsPageState extends State<MapsPage> {
   }
 
   Future<void> _openMap() async {
-    final latitudeRaw = _latitudeController.text.trim();
-    final longitudeRaw = _longitudeController.text.trim();
-    final latitude = double.tryParse(latitudeRaw);
-    final longitude = double.tryParse(longitudeRaw);
-    if (latitude == null ||
-        longitude == null ||
-        latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180) {
-      _showMessage('Latitude/longitude format is invalid.');
+    final (:uri, :error) = _viewModel.buildMapUri(
+      _latitudeController.text,
+      _longitudeController.text,
+    );
+    if (error != null) {
+      _showMessage(error);
       return;
     }
-
-    final uri = Uri.https('www.google.com', '/maps/dir/', <String, String>{
-      'api': '1',
-      'destination': '$latitude,$longitude',
-      'travelmode': 'driving',
-      'dir_action': 'navigate',
-    });
 
     final preflight = await widget._mapPreflight.ensureReady();
     if (!preflight.allowed) {
@@ -66,15 +56,15 @@ class _MapsPageState extends State<MapsPage> {
       return;
     }
 
-    if (!await widget._launchExternal(uri, LaunchMode.externalApplication)) {
+    if (!await widget._launchExternal(uri!, LaunchMode.externalApplication)) {
       _showMessage('Failed to open map application.');
     }
   }
 
   Future<void> _dialPhone() async {
-    final phone = _phoneController.text.replaceAll(RegExp(r'[^0-9+#*]'), '');
-    if (phone.length < 5) {
-      _showMessage('Phone number is invalid.');
+    final (:phone, :error) = _viewModel.sanitizePhone(_phoneController.text);
+    if (error != null) {
+      _showMessage(error);
       return;
     }
 

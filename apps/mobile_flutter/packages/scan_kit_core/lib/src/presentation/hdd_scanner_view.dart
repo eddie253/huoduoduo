@@ -82,8 +82,9 @@ class _HddScannerViewState extends State<HddScannerView> {
               showGallery: false,
               showToggleCamera: false,
               showScannerOverlay: false,
-              scanDelay: const Duration(milliseconds: 30),
-              scanDelaySuccess: const Duration(milliseconds: 60),
+              scanDelay: Duration(milliseconds: widget.request.scanDelayMs),
+              scanDelaySuccess:
+                  Duration(milliseconds: widget.request.scanDelaySuccessMs),
               onControllerCreated:
                   (CameraController? controller, Exception? error) {
                 if (error == null) {

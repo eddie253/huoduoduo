@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:mobile_flutter/features/maps/presentation/maps_page.dart';
-import 'package:mobile_flutter/features/webview_shell/application/map_navigation_preflight_service.dart';
+import 'package:mobile_flutter/core/navigation/map_navigation_preflight_port.dart';
 
 void main() {
   testWidgets('shows validation message when coordinate format is invalid',

@@ -24,9 +24,11 @@ abstract interface class ScanEngineAdapter {
 class ZxingEngineAdapter implements ScanEngineAdapter {
   const ZxingEngineAdapter({
     this.mapper = const SymbologyMapper(),
+    this.minReliableDecodeMs = 2,
   });
 
   final SymbologyMapper mapper;
+  final int minReliableDecodeMs;
 
   @override
   MappedScanData? mapEngineCode(Object engineCode) {
@@ -38,14 +40,20 @@ class ZxingEngineAdapter implements ScanEngineAdapter {
       return null;
     }
 
+    final int? durationMs = engineCode.duration;
+    if (durationMs != null && durationMs < minReliableDecodeMs) {
+      return null;
+    }
+
     final int? format = engineCode.format;
     final ScanSymbology symbology = mapper.fromZxingFormat(format);
+
     return MappedScanData(
       value: value,
       symbology: symbology,
       rawMeta: <String, Object?>{
         'format': format,
-        'durationMs': engineCode.duration,
+        'durationMs': durationMs,
         'isInverted': engineCode.isInverted,
         'isMirrored': engineCode.isMirrored,
       },

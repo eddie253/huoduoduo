@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as p;
 import 'package:signature/signature.dart';
 
-typedef SignatureFileWriter = Future<void> Function(File file, List<int> bytes);
+import '../application/signature_view_model.dart';
+
+export '../application/signature_view_model.dart' show SignatureFileWriter;
 
 class SignaturePage extends StatefulWidget {
   const SignaturePage({
@@ -25,8 +24,7 @@ class SignaturePage extends StatefulWidget {
 class _SignaturePageState extends State<SignaturePage> {
   late final SignatureController _controller;
   late final bool _ownsController;
-
-  bool _isSaving = false;
+  late final SignatureViewModel _viewModel;
 
   @override
   void initState() {
@@ -38,10 +36,15 @@ class _SignaturePageState extends State<SignaturePage> {
           exportBackgroundColor: Colors.white,
         );
     _ownsController = widget.controller == null;
+    _viewModel = SignatureViewModel();
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
+    _viewModel.dispose();
     if (_ownsController) {
       _controller.dispose();
     }
@@ -56,36 +59,19 @@ class _SignaturePageState extends State<SignaturePage> {
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-    });
-
     try {
-      final bytes = await _controller.toPngBytes();
-      if (bytes == null || bytes.isEmpty) {
-        throw const FormatException('Signature bytes are empty');
-      }
-
-      final timestamp =
-          (widget.now ?? DateTime.now).call().millisecondsSinceEpoch;
-      final fileName = 'signature_$timestamp.png';
-      final filePath = p.join(Directory.systemTemp.path, fileName);
-      final output = File(filePath);
-      final writer = widget.writeBytes;
-      if (writer != null) {
-        await writer(output, bytes);
-      } else {
-        await output.writeAsBytes(bytes, flush: true);
-      }
-
-      if (!mounted) {
+      final result = await _viewModel.save(
+        exportBytes: () async => await _controller.toPngBytes(),
+        now: widget.now,
+        writeBytes: widget.writeBytes,
+      );
+      if (!mounted || result == null) {
         return;
       }
-
       Navigator.of(context).pop(<String, dynamic>{
-        'filePath': filePath,
-        'fileName': fileName,
-        'mimeType': 'image/png',
+        'filePath': result.filePath,
+        'fileName': result.fileName,
+        'mimeType': result.mimeType,
       });
     } catch (error) {
       if (!mounted) {
@@ -94,12 +80,6 @@ class _SignaturePageState extends State<SignaturePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save signature: $error')),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
     }
   }
 
@@ -137,7 +117,7 @@ class _SignaturePageState extends State<SignaturePage> {
               children: <Widget>[
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: _isSaving
+                    onPressed: _viewModel.isSaving
                         ? null
                         : () {
                             _controller.clear();
@@ -149,8 +129,8 @@ class _SignaturePageState extends State<SignaturePage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: _isSaving ? null : _saveSignature,
-                    icon: _isSaving
+                    onPressed: _viewModel.isSaving ? null : _saveSignature,
+                    icon: _viewModel.isSaving
                         ? const SizedBox(
                             width: 16,
                             height: 16,

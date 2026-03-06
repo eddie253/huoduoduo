@@ -9,7 +9,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/network/dio_provider.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../auth/application/auth_event_bus.dart';
+import '../../shipment/application/connectivity_aware_flush_service.dart';
+import '../../shipment/application/queue_snapshot_provider.dart';
+import '../../shipment/application/shipment_confirmation_provider.dart';
+import '../../shipment/application/shipment_upload_orchestrator.dart';
+import '../../shipment/application/transaction_event_bus.dart';
 import '../../auth/domain/auth_models.dart';
+import '../application/bridge_action_executor.dart';
 import '../application/js_bridge_service.dart';
 import '../application/map_navigation_preflight_service.dart';
 import '../application/webview_shell_navigation_helper.dart';
@@ -108,7 +115,8 @@ class WebViewShellPage extends ConsumerStatefulWidget {
   ConsumerState<WebViewShellPage> createState() => _WebViewShellPageState();
 }
 
-class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
+class _WebViewShellPageState extends ConsumerState<WebViewShellPage>
+    with WidgetsBindingObserver {
   static const int _menuColumns = 2;
   static const int _bridgeLogMaxLength = 240;
 
@@ -163,8 +171,20 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     openfile: function (url) { return emit('openfile', { url: String(url || '') }); },
     open_IMG_Scanner: function (type) { return emit('open_IMG_Scanner', { type: String(type || '') }); },
     openMsgExit: function (msg) { return emit('openMsgExit', { msg: String(msg || '') }); },
-    cfs_sign: function () { return emit('cfs_sign', {}); },
+    cfs_sign: function () {
+      return emit('cfs_sign', {}).then(function (result) {
+        if (result && result.action === 'signature_queued') {
+          window.__signaturePending = true;
+          window.dispatchEvent(new CustomEvent('signaturePending', { detail: result }));
+        }
+        return result;
+      });
+    },
     APPEvent: function (kind, result) { return emit('APPEvent', { kind: String(kind || ''), result: String(result || '') }); }
+  };
+  window.onSignatureConfirmed = function (detail) {
+    window.__signaturePending = false;
+    window.dispatchEvent(new CustomEvent('signatureConfirmed', { detail: detail }));
   };
 })();
 ''';
@@ -180,6 +200,9 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   late final List<_BottomTab> _tabs;
   late final Map<ShellSection, List<_MenuTile>> _menuTiles;
 
+  StreamSubscription<AuthEvent>? _authEventSub;
+  StreamSubscription<TransactionEvent>? _txEventSub;
+  ConnectivityAwareFlushService? _flushService;
   InAppWebViewController? _controller;
   bool _cookiesBootstrapped = false;
   bool _resetHistoryAfterMenuNavigation = false;
@@ -194,6 +217,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabs = _buildTabs();
     _menuTiles = _buildMenuTiles();
     unawaited(_bootstrapCookies());
@@ -201,12 +225,68 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
     _bulletinTimer = Timer.periodic(const Duration(minutes: 5), (_) {
       unawaited(_fetchAnnouncement());
     });
+    _authEventSub = AuthEventBus.instance.stream.listen((event) {
+      if (event == AuthEvent.sessionExpired && mounted) {
+        unawaited(_logout());
+      }
+    });
+    _txEventSub = TransactionEventBus.instance.stream.listen((_) {
+      if (mounted) {
+        setState(() {
+          _navState = _navState.markSectionStale(ShellSection.order);
+        });
+      }
+    });
+    Future<void>.microtask(() async {
+      if (!mounted) return;
+      final orchestrator =
+          await ref.read(shipmentUploadOrchestratorProvider.future);
+      if (!mounted) return;
+      _flushService = ConnectivityAwareFlushService(orchestrator: orchestrator);
+      _flushService!.start();
+    });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _authEventSub?.cancel();
+    _txEventSub?.cancel();
+    _flushService?.stop();
     _bulletinTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_inWeb && _currentSection == ShellSection.order) {
+        unawaited(_controller?.reload());
+      }
+      Future<void>.microtask(() async {
+        if (!mounted) return;
+        final orchestrator =
+            await ref.read(shipmentUploadOrchestratorProvider.future);
+        await orchestrator.runStartupMaintenance();
+        if (mounted) {
+          ref.read(queueSnapshotNotifierProvider.notifier).refresh();
+        }
+      });
+    }
+  }
+
+  Future<void> _notifySignatureConfirmed(
+      String trackingNo, String status) async {
+    await _controller?.evaluateJavascript(source: '''
+      if (typeof window.onSignatureConfirmed === 'function') {
+        window.onSignatureConfirmed({ trackingNo: ${_jsString(trackingNo)}, status: ${_jsString(status)} });
+      }
+    ''');
+  }
+
+  String _jsString(String value) {
+    final escaped = value.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
+    return "'$escaped'";
   }
 
   bool get _inWeb => _navState.inWeb;
@@ -953,7 +1033,10 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                   _logBridgeOutgoing(response);
                   return response;
                 }
-                final response = await _bridgeService.handle(args, context);
+                final response = await _bridgeService.handle(
+                  args,
+                  ContextBridgeUiPort(context: context),
+                );
                 _logBridgeOutgoing(response);
                 _showBridgeErrorIfNeeded(response);
                 return response;
@@ -1119,6 +1202,7 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
           return Expanded(
             child: InkWell(
               onTap: () {
+                final isStale = _navState.isSectionStale(tab.section);
                 setState(() {
                   if (_inWeb) {
                     _hasSuspendedWebSnapshot = true;
@@ -1126,8 +1210,13 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
                     _suspendedWebTitle =
                         _webTitle ?? _sectionTitle(_currentSection);
                   }
-                  _navState = _navState.selectSection(tab.section);
+                  _navState = _navState
+                      .selectSection(tab.section)
+                      .markSectionActive(tab.section);
                 });
+                if (isStale && _inWeb) {
+                  unawaited(_controller?.reload());
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1155,6 +1244,20 @@ class _WebViewShellPageState extends ConsumerState<WebViewShellPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      shipmentConfirmationProvider,
+      (prev, next) {
+        final prevKeys = prev?.keys.toSet() ?? <String>{};
+        for (final entry in next.entries) {
+          if (!prevKeys.contains(entry.key)) {
+            unawaited(
+              _notifySignatureConfirmed(entry.key, entry.value.status),
+            );
+          }
+        }
+      },
+    );
+    ref.watch(authControllerProvider);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) {

@@ -42,11 +42,13 @@ export class RedisTokenStoreService implements OnModuleInit, OnModuleDestroy {
   }
 
   async ensureReady(): Promise<void> {
-    if (!this.ready || !this.redis.isReady) {
+    if (!this.redis.isReady) {
+      this.ready = false;
       throw new ServiceUnavailableException('Token store unavailable.');
     }
     try {
       await this.redis.ping();
+      this.ready = true;
     } catch {
       this.ready = false;
       throw new ServiceUnavailableException('Token store unavailable.');

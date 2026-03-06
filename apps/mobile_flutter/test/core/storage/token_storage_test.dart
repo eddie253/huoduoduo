@@ -1,54 +1,66 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile_flutter/core/storage/token_storage.dart';
 
+class _FakeStorage extends FlutterSecureStorage {
+  final Map<String, String?> _data = {};
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    _data[key] = value;
+  }
+
+  @override
+  Future<String?> read({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    return _data[key];
+  }
+
+  @override
+  Future<void> deleteAll({
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    _data.clear();
+  }
+}
+
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  const MethodChannel _channel =
-      MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
-
-  final Map<String, String?> _store = {};
+  late _FakeStorage fakeStorage;
 
   setUp(() {
-    _store.clear();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_channel, (MethodCall call) async {
-      final args = call.arguments as Map?;
-      switch (call.method) {
-        case 'write':
-          _store[args!['key'] as String] = args['value'] as String?;
-          return null;
-        case 'read':
-          return _store[args!['key'] as String];
-        case 'delete':
-          _store.remove(args!['key'] as String);
-          return null;
-        case 'deleteAll':
-          _store.clear();
-          return null;
-        default:
-          return null;
-      }
-    });
+    fakeStorage = _FakeStorage();
   });
 
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_channel, null);
-  });
-
-  TokenStorage makeStorage() =>
-      TokenStorage(const FlutterSecureStorage());
+  TokenStorage makeStorage() => TokenStorage(fakeStorage);
 
   group('TokenStorage.saveTokens', () {
     test('writes both access and refresh tokens', () async {
       final storage = makeStorage();
       await storage.saveTokens(accessToken: 'at-1', refreshToken: 'rt-1');
 
-      expect(_store['access_token'], 'at-1');
-      expect(_store['refresh_token'], 'rt-1');
+      expect(await storage.readAccessToken(), 'at-1');
+      expect(await storage.readRefreshToken(), 'rt-1');
     });
 
     test('overwrites previously saved tokens', () async {
@@ -56,8 +68,8 @@ void main() {
       await storage.saveTokens(accessToken: 'old-at', refreshToken: 'old-rt');
       await storage.saveTokens(accessToken: 'new-at', refreshToken: 'new-rt');
 
-      expect(_store['access_token'], 'new-at');
-      expect(_store['refresh_token'], 'new-rt');
+      expect(await storage.readAccessToken(), 'new-at');
+      expect(await storage.readRefreshToken(), 'new-rt');
     });
   });
 

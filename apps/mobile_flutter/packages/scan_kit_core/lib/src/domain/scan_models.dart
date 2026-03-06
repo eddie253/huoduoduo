@@ -44,6 +44,9 @@ class ScanRequest {
     this.mode = ScanMode.all,
     this.allowedSymbologies = legacyEquivalentSymbologies,
     this.dedupWindowMs = 800,
+    this.scanDelayMs = 80,
+    this.scanDelaySuccessMs = 200,
+    this.minLengthBySymbology = const <ScanSymbology, int>{},
     this.sessionId = '',
   });
 
@@ -51,6 +54,9 @@ class ScanRequest {
   final ScanMode mode;
   final Set<ScanSymbology> allowedSymbologies;
   final int dedupWindowMs;
+  final int scanDelayMs;
+  final int scanDelaySuccessMs;
+  final Map<ScanSymbology, int> minLengthBySymbology;
   final String sessionId;
 }
 

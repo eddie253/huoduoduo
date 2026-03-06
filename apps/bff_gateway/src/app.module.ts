@@ -18,6 +18,7 @@ import { HttpLoggingInterceptor } from './observability/http-logging.interceptor
 import { BearerAuthGuard } from './security/bearer-auth.guard';
 import { NoStoreResponseInterceptor } from './security/no-store-response.interceptor';
 import { SecurityModule } from './security/security.module';
+import { IdempotencyModule } from './shared/idempotency/idempotency.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { SecurityModule } from './security/security.module';
     ]),
     SoapModule,
     SecurityModule,
+    IdempotencyModule,
     HealthModule,
     AuthModule,
     WebviewModule,

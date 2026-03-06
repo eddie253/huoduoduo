@@ -1,8 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import '../../../core/config/app_config.dart';
+import '../../../core/navigation/map_navigation_preflight_port.dart';
 import '../domain/bridge_action_models.dart';
 import '../domain/bridge_models.dart';
 import 'bridge_action_executor.dart';
@@ -10,14 +9,10 @@ import 'map_navigation_preflight_service.dart';
 
 class JsBridgeService {
   JsBridgeService({
-    BridgeActionExecutor? actionExecutor,
     MapNavigationPreflightPort? mapNavigationPreflight,
-  })  : _actionExecutor =
-            actionExecutor ?? const PlatformBridgeActionExecutor(),
-        _mapNavigationPreflight = mapNavigationPreflight ??
+  }) : _mapNavigationPreflight = mapNavigationPreflight ??
             const DefaultMapNavigationPreflightService();
 
-  final BridgeActionExecutor _actionExecutor;
   final MapNavigationPreflightPort _mapNavigationPreflight;
 
   static final Set<String> _allowedWebHosts =
@@ -38,7 +33,7 @@ class JsBridgeService {
 
   Future<Map<String, dynamic>> handle(
     List<dynamic> args,
-    BuildContext context,
+    BridgeUiPort uiPort,
   ) async {
     try {
       if (args.isEmpty) {
@@ -60,21 +55,21 @@ class JsBridgeService {
             },
           );
         case 'pre_page':
-          return _handleLegacyPrePage(context);
+          return _handleLegacyPrePage(uiPort);
         case 'openImage':
-          return _handleLegacyOpenImage(message);
+          return _handleLegacyOpenImage(message, uiPort);
         case 'redirect':
-          return await _handleRedirect(message, context);
+          return await _handleRedirect(message, uiPort);
         case 'openfile':
-          return await _handleOpenFile(message);
+          return await _handleOpenFile(message, uiPort);
         case 'open_IMG_Scanner':
-          return await _handleOpenScanner(message, context);
+          return await _handleOpenScanner(message, uiPort);
         case 'openMsgExit':
-          return await _handleOpenMsgExit(message, context);
+          return await _handleOpenMsgExit(message, uiPort);
         case 'cfs_sign':
-          return await _handleSignature(context);
+          return await _handleSignature(uiPort);
         case 'APPEvent':
-          return await _handleAppEvent(message, context);
+          return await _handleAppEvent(message, uiPort);
         default:
           return _error(
             BridgeErrorCode.unsupportedMethod,
@@ -95,14 +90,15 @@ class JsBridgeService {
   }
 
   Future<Map<String, dynamic>> _handleLegacyPrePage(
-    BuildContext context,
+    BridgeUiPort uiPort,
   ) async {
-    final closed = await _actionExecutor.closePage(context);
+    final closed = await uiPort.closePage();
     return _ok(closed ? 'legacy_pre_page_closed' : 'legacy_pre_page_ignored');
   }
 
   Future<Map<String, dynamic>> _handleLegacyOpenImage(
     BridgeMessage message,
+    BridgeUiPort uiPort,
   ) async {
     final url = message.params['url']?.toString() ?? '';
     final uri = _parseHttpsUri(url, allowedHosts: _allowedWebHosts);
@@ -112,7 +108,7 @@ class JsBridgeService {
         'Legacy openImage URL is not allowed',
       );
     }
-    final opened = await _actionExecutor.launchExternal(uri);
+    final opened = await uiPort.launchExternal(uri);
     if (!opened) {
       return _error(
         BridgeErrorCode.runtimeError,
@@ -127,7 +123,7 @@ class JsBridgeService {
 
   Future<Map<String, dynamic>> _handleRedirect(
     BridgeMessage message,
-    BuildContext context,
+    BridgeUiPort uiPort,
   ) async {
     final page = message.params['page']?.toString() ?? '';
     if (page.trim().isEmpty) {
@@ -149,7 +145,7 @@ class JsBridgeService {
           'Redirect URL is not allowed',
         );
       }
-      final opened = await _actionExecutor.launchExternal(secured);
+      final opened = await uiPort.launchExternal(secured);
       if (!opened) {
         return _error(
           BridgeErrorCode.runtimeError,
@@ -162,14 +158,17 @@ class JsBridgeService {
       );
     }
 
-    await _actionExecutor.redirect(context, page);
+    await uiPort.redirect(page);
     return _ok(
       'redirect_received',
       data: <String, dynamic>{'page': page},
     );
   }
 
-  Future<Map<String, dynamic>> _handleOpenFile(BridgeMessage message) async {
+  Future<Map<String, dynamic>> _handleOpenFile(
+    BridgeMessage message,
+    BridgeUiPort uiPort,
+  ) async {
     final url = message.params['url']?.toString() ?? '';
     final uri = _parseHttpsUri(url, allowedHosts: _allowedWebHosts);
     if (uri == null) {
@@ -179,7 +178,7 @@ class JsBridgeService {
       );
     }
 
-    final opened = await _actionExecutor.launchExternal(uri);
+    final opened = await uiPort.launchExternal(uri);
     if (!opened) {
       return _error(
         BridgeErrorCode.runtimeError,
@@ -195,13 +194,10 @@ class JsBridgeService {
 
   Future<Map<String, dynamic>> _handleOpenScanner(
     BridgeMessage message,
-    BuildContext context,
+    BridgeUiPort uiPort,
   ) async {
     final scanType = message.params['type']?.toString() ?? 'default';
-    final result = await _actionExecutor.openScanner(
-      context,
-      scanType: scanType,
-    );
+    final result = await uiPort.openScanner(scanType);
     if (result == null) {
       return _ok('scanner_cancelled');
     }
@@ -209,27 +205,30 @@ class JsBridgeService {
     return _ok('scanner_completed', data: result.toJson());
   }
 
-  Future<Map<String, dynamic>> _handleSignature(BuildContext context) async {
-    final result = await _actionExecutor.openSignature(context);
+  Future<Map<String, dynamic>> _handleSignature(BridgeUiPort uiPort) async {
+    final result = await uiPort.openSignature();
     if (result == null) {
       return _ok('signature_cancelled');
     }
 
-    return _ok('signature_completed', data: result.toJson());
+    return _ok('signature_queued', data: <String, dynamic>{
+      ...result.toJson(),
+      'uploadStatus': 'queued',
+    });
   }
 
   Future<Map<String, dynamic>> _handleOpenMsgExit(
     BridgeMessage message,
-    BuildContext context,
+    BridgeUiPort uiPort,
   ) async {
     final text = message.params['msg']?.toString() ?? 'Session expired.';
-    await _actionExecutor.showExitDialog(context, text);
+    await uiPort.showExitDialog(text);
     return _ok('dialog_shown');
   }
 
   Future<Map<String, dynamic>> _handleAppEvent(
     BridgeMessage message,
-    BuildContext context,
+    BridgeUiPort uiPort,
   ) async {
     final kindRaw = message.params['kind']?.toString() ?? '';
     final resultRaw = message.params['result']?.toString() ?? '';
@@ -237,14 +236,14 @@ class JsBridgeService {
 
     switch (kind) {
       case AppEventKind.map:
-        return _handleMapEvent(resultRaw, message.params);
+        return _handleMapEvent(resultRaw, message.params, uiPort);
       case AppEventKind.dial:
-        return _handleDialEvent(resultRaw, message.params);
+        return _handleDialEvent(resultRaw, message.params, uiPort);
       case AppEventKind.close:
-        final closed = await _actionExecutor.closePage(context);
+        final closed = await uiPort.closePage();
         return _ok(closed ? 'page_closed' : 'page_close_ignored');
       case AppEventKind.contract:
-        return _handleContractEvent(resultRaw, message.params);
+        return _handleContractEvent(resultRaw, message.params, uiPort);
       case AppEventKind.unknown:
         return _error(
           BridgeErrorCode.unsupportedMethod,
@@ -256,6 +255,7 @@ class JsBridgeService {
   Future<Map<String, dynamic>> _handleMapEvent(
     String resultRaw,
     Map<String, dynamic> params,
+    BridgeUiPort uiPort,
   ) async {
     final mapUri = _resolveMapUri(resultRaw, params);
     if (mapUri == null) {
@@ -276,13 +276,11 @@ class JsBridgeService {
       );
     }
 
-    final opened = await _actionExecutor.launchExternal(mapUri);
+    final opened = await uiPort.launchExternal(mapUri);
     if (!opened) {
       final Uri? fallbackMapUri = _buildWebFallbackMapUri(mapUri);
       if (fallbackMapUri != null) {
-        final fallbackOpened = await _actionExecutor.launchExternal(
-          fallbackMapUri,
-        );
+        final fallbackOpened = await uiPort.launchExternal(fallbackMapUri);
         if (fallbackOpened) {
           return _ok(
             'map_opened',
@@ -305,6 +303,7 @@ class JsBridgeService {
   Future<Map<String, dynamic>> _handleDialEvent(
     String resultRaw,
     Map<String, dynamic> params,
+    BridgeUiPort uiPort,
   ) async {
     final phone = _normalizePhone(
       resultRaw.isEmpty ? params['phone']?.toString() ?? '' : resultRaw,
@@ -316,7 +315,7 @@ class JsBridgeService {
       );
     }
 
-    final opened = await _actionExecutor.launchExternal(
+    final opened = await uiPort.launchExternal(
       Uri(scheme: 'tel', path: phone),
     );
     if (!opened) {
@@ -335,6 +334,7 @@ class JsBridgeService {
   Future<Map<String, dynamic>> _handleContractEvent(
     String resultRaw,
     Map<String, dynamic> params,
+    BridgeUiPort uiPort,
   ) async {
     final url = resultRaw.isEmpty ? params['url']?.toString() ?? '' : resultRaw;
     final uri = _parseHttpsUri(url, allowedHosts: _allowedWebHosts);
@@ -345,7 +345,7 @@ class JsBridgeService {
       );
     }
 
-    final opened = await _actionExecutor.launchExternal(uri);
+    final opened = await uiPort.launchExternal(uri);
     if (!opened) {
       return _error(
         BridgeErrorCode.runtimeError,

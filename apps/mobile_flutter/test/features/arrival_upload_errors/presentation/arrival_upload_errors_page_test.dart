@@ -4,29 +4,25 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mobile_flutter/features/arrival_upload_errors/presentation/arrival_upload_errors_page.dart';
 import 'package:mobile_flutter/features/shipment/application/shipment_upload_orchestrator.dart';
-import 'package:mobile_flutter/features/shipment/data/local/media_local_provider.dart';
-import 'package:mobile_flutter/features/shipment/data/local/media_local_repository.dart';
-import 'package:mobile_flutter/features/shipment/data/shipment_repository.dart';
+import 'package:mobile_flutter/features/shipment/domain/media_local_repository.dart';
+import 'package:mobile_flutter/features/shipment/domain/shipment_models.dart';
+import 'package:mobile_flutter/features/shipment/domain/shipment_repository.dart';
 import 'package:mobile_flutter/features/shipment/domain/media_queue_models.dart';
 
 void main() {
   testWidgets(
       'LEGACY_MENU_ARRIVAL_UPLOAD_ERROR_ENTRY list includes failed/dead_letter',
       (tester) async {
-    final fakeRepo = _FakeMediaLocalRepository()
-      ..seed(
-        failed: <MediaQueueItem>[
-          _item(1, MediaQueueStatus.failed),
-        ],
-        deadLetter: <MediaQueueItem>[
-          _item(2, MediaQueueStatus.deadLetter),
-        ],
-      );
-
-    final orchestrator = _FakeOrchestrator();
+    final orchestrator = _FakeOrchestrator(
+      snapshot: QueueSnapshot(
+        pending: const <MediaQueueItem>[],
+        failed: <MediaQueueItem>[_item(1, MediaQueueStatus.failed)],
+        uploaded: const <MediaQueueItem>[],
+        deadLetter: <MediaQueueItem>[_item(2, MediaQueueStatus.deadLetter)],
+      ),
+    );
     final container = ProviderContainer(
       overrides: <Override>[
-        mediaLocalRepositoryProvider.overrideWith((ref) async => fakeRepo),
         shipmentUploadOrchestratorProvider.overrideWith(
           (ref) async => orchestrator,
         ),
@@ -49,15 +45,17 @@ void main() {
 
   testWidgets('UPLOAD_ERROR_SINGLE_RETRY_SUCCESS retries selected row',
       (tester) async {
-    final fakeRepo = _FakeMediaLocalRepository()
-      ..seed(
+    final orchestrator = _FakeOrchestrator(
+      snapshot: QueueSnapshot(
+        pending: const <MediaQueueItem>[],
         failed: <MediaQueueItem>[_item(10, MediaQueueStatus.failed)],
-      );
-    final orchestrator = _FakeOrchestrator();
+        uploaded: const <MediaQueueItem>[],
+        deadLetter: const <MediaQueueItem>[],
+      ),
+    );
 
     final container = ProviderContainer(
       overrides: <Override>[
-        mediaLocalRepositoryProvider.overrideWith((ref) async => fakeRepo),
         shipmentUploadOrchestratorProvider.overrideWith(
           (ref) async => orchestrator,
         ),
@@ -82,15 +80,17 @@ void main() {
 
   testWidgets('UPLOAD_ERROR_SINGLE_RETRY_FAILURE shows error message',
       (tester) async {
-    final fakeRepo = _FakeMediaLocalRepository()
-      ..seed(
+    final orchestrator = _FakeOrchestrator(
+      snapshot: QueueSnapshot(
+        pending: const <MediaQueueItem>[],
         failed: <MediaQueueItem>[_item(11, MediaQueueStatus.failed)],
-      );
-    final orchestrator = _FakeOrchestrator()..failIds = <int>{11};
+        uploaded: const <MediaQueueItem>[],
+        deadLetter: const <MediaQueueItem>[],
+      ),
+    )..failIds = <int>{11};
 
     final container = ProviderContainer(
       overrides: <Override>[
-        mediaLocalRepositoryProvider.overrideWith((ref) async => fakeRepo),
         shipmentUploadOrchestratorProvider.overrideWith(
           (ref) async => orchestrator,
         ),
@@ -131,14 +131,19 @@ MediaQueueItem _item(int id, MediaQueueStatus status) {
 }
 
 class _FakeOrchestrator extends ShipmentUploadOrchestrator {
-  _FakeOrchestrator()
-      : super(
+  _FakeOrchestrator({QueueSnapshot? snapshot})
+      : _snapshot = snapshot ?? QueueSnapshot.empty(),
+        super(
           shipmentRepository: _NoopShipmentRepository(),
           mediaLocalRepository: _NoopMediaLocalRepository(),
         );
 
+  final QueueSnapshot _snapshot;
   final List<int> retriedIds = <int>[];
   Set<int> failIds = <int>{};
+
+  @override
+  Future<QueueSnapshot> getQueueSnapshot() async => _snapshot;
 
   @override
   Future<ShipmentUploadResult> retryFailedUploadById(
@@ -156,54 +161,6 @@ class _FakeOrchestrator extends ShipmentUploadOrchestrator {
   }
 }
 
-class _FakeMediaLocalRepository implements MediaLocalRepository {
-  final Map<MediaQueueStatus, List<MediaQueueItem>> _byStatus =
-      <MediaQueueStatus, List<MediaQueueItem>>{};
-
-  void seed({
-    List<MediaQueueItem> failed = const <MediaQueueItem>[],
-    List<MediaQueueItem> deadLetter = const <MediaQueueItem>[],
-  }) {
-    _byStatus[MediaQueueStatus.failed] = failed;
-    _byStatus[MediaQueueStatus.deadLetter] = deadLetter;
-  }
-
-  @override
-  Future<void> init() async {}
-
-  @override
-  Future<void> close() async {}
-
-  @override
-  Future<int> cleanupUploadedOlderThan(DateTime threshold) async => 0;
-
-  @override
-  Future<MediaQueueItem> enqueue(MediaQueueDraft draft) async {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<MediaQueueItem?> getById(int id) async => null;
-
-  @override
-  Future<List<MediaQueueItem>> listByStatus(
-    MediaQueueStatus status, {
-    int limit = 50,
-  }) async {
-    return List<MediaQueueItem>.from(
-        _byStatus[status] ?? const <MediaQueueItem>[]);
-  }
-
-  @override
-  Future<void> markDeadLetter(int id, {String? errorCode}) async {}
-
-  @override
-  Future<void> markFailed(int id, {String? errorCode}) async {}
-
-  @override
-  Future<void> markUploaded(int id) async {}
-}
-
 class _NoopShipmentRepository implements ShipmentRepository {
   @override
   Future<void> submitDelivery({
@@ -212,6 +169,8 @@ class _NoopShipmentRepository implements ShipmentRepository {
     required String imageFileName,
     required String latitude,
     required String longitude,
+    String? signatureBase64,
+    required String idempotencyKey,
   }) async {}
 
   @override
@@ -223,7 +182,13 @@ class _NoopShipmentRepository implements ShipmentRepository {
     String? reasonMessage,
     required String latitude,
     required String longitude,
+    required String idempotencyKey,
   }) async {}
+
+  @override
+  Future<ShipmentDetail> fetchShipment(String trackingNo) async {
+    return ShipmentDetail(trackingNo: trackingNo, status: 'delivered');
+  }
 }
 
 class _NoopMediaLocalRepository implements MediaLocalRepository {

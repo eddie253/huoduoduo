@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_flutter/app/theme/app_theme_preset.dart';
 
 void main() {
+  setUpAll(TestWidgetsFlutterBinding.ensureInitialized);
+
   group('AppThemePreset.fromStorageKey', () {
     test('returns legacyOrange for null key', () {
       expect(AppThemePreset.fromStorageKey(null), AppThemePreset.legacyOrange);

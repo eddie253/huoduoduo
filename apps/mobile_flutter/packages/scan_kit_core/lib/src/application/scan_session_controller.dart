@@ -24,6 +24,7 @@ class ScanSessionController {
   DedupFilter _dedupFilter = DedupFilter(windowMs: 800);
   TorchToggleHandler? _torchToggleHandler;
   bool _running = false;
+  bool _draining = false;
 
   Stream<ScanEvent> get events => _events.stream;
   bool get isRunning => _running;
@@ -33,7 +34,10 @@ class ScanSessionController {
     _torchToggleHandler = handler;
   }
 
+  bool get isDraining => _draining;
+
   void start(ScanRequest request) {
+    _draining = false;
     _activeRequest = request;
     _dedupFilter = DedupFilter(windowMs: request.dedupWindowMs);
     _running = true;
@@ -45,7 +49,11 @@ class ScanSessionController {
       return;
     }
     _running = false;
+    _draining = true;
     _emit(ScanStoppedEvent(timestamp: _clock()));
+    Future<void>.delayed(const Duration(milliseconds: 300), () {
+      _draining = false;
+    });
   }
 
   Future<bool> toggleTorch() async {
@@ -74,7 +82,7 @@ class ScanSessionController {
   }
 
   bool consumeEngineCode(Object engineCode) {
-    if (!_running) {
+    if (!_running || _draining) {
       return false;
     }
     if (engineCode is String) {
@@ -132,6 +140,11 @@ class ScanSessionController {
     }
     if (request.allowedSymbologies.isNotEmpty &&
         !request.allowedSymbologies.contains(symbology)) {
+      return false;
+    }
+
+    final int? minLen = request.minLengthBySymbology[symbology];
+    if (minLen != null && trimmed.length < minLen) {
       return false;
     }
 

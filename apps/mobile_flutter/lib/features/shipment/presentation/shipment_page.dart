@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/location/location_service.dart';
+import '../../../core/location/location_service_provider.dart';
+import '../../../core/network/network_status_provider.dart';
+import '../application/queue_snapshot_provider.dart';
+import '../application/shipment_confirmation_provider.dart';
 import '../application/shipment_upload_orchestrator.dart';
-import '../data/local/media_local_provider.dart';
 import '../domain/media_queue_models.dart';
 
 class ShipmentPage extends ConsumerStatefulWidget {
@@ -17,28 +21,27 @@ class ShipmentPage extends ConsumerStatefulWidget {
 
 class _ShipmentPageState extends ConsumerState<ShipmentPage> {
   final _trackingNoController = TextEditingController(text: '907563299214');
-  final _latitudeController = TextEditingController(text: '25.0330');
-  final _longitudeController = TextEditingController(text: '121.5654');
   final _reasonCodeController = TextEditingController(text: 'EXCEPTION');
   final _reasonMessageController = TextEditingController();
+
+  LocationResult? _locationResult;
+  bool _fetchingGps = false;
 
   final ImagePicker _imagePicker = ImagePicker();
 
   String? _selectedImagePath;
   String? _selectedImageName;
   bool _isBusy = false;
-  late Future<_QueueSnapshot> _queueFuture;
 
   @override
   void initState() {
     super.initState();
-    _queueFuture = _loadQueueSnapshot();
     Future<void>.microtask(() async {
       final orchestrator =
           await ref.read(shipmentUploadOrchestratorProvider.future);
       await orchestrator.runStartupMaintenance();
       if (mounted) {
-        _refreshQueue();
+        ref.read(queueSnapshotNotifierProvider.notifier).refresh();
       }
     });
   }
@@ -46,11 +49,27 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
   @override
   void dispose() {
     _trackingNoController.dispose();
-    _latitudeController.dispose();
-    _longitudeController.dispose();
     _reasonCodeController.dispose();
     _reasonMessageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchGps() async {
+    if (_fetchingGps) return;
+    setState(() => _fetchingGps = true);
+    try {
+      final svc = ref.read(locationServiceProvider);
+      final result = await svc.getCurrentLocation();
+      if (mounted) {
+        setState(() => _locationResult = result);
+      }
+    } on LocationPermissionDeniedException catch (e) {
+      _showMessage('定位失敗：${e.message}');
+    } catch (e) {
+      _showMessage('定位失敗：$e');
+    } finally {
+      if (mounted) setState(() => _fetchingGps = false);
+    }
   }
 
   Future<void> _pickImage() async {
@@ -78,18 +97,24 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
 
       final orchestrator =
           await ref.read(shipmentUploadOrchestratorProvider.future);
+      final loc = _locationResult;
+      if (loc == null) {
+        _showMessage('請先取得 GPS 定位。');
+        return;
+      }
       final result = await orchestrator.uploadDelivery(
         trackingNo: _trackingNoController.text.trim(),
         filePath: imagePath!,
         fileName: imageName!,
-        latitude: _latitudeController.text.trim(),
-        longitude: _longitudeController.text.trim(),
+        latitude: loc.latitudeString,
+        longitude: loc.longitudeString,
+        metadata: <String, String>{
+          'accuracyMeters': loc.accuracyMeters.toStringAsFixed(1),
+        },
       );
 
-      _showMessage(
-        'Delivery upload result: ${result.status.value} (queueId=${result.queueId})',
-      );
-      _refreshQueue();
+      _showUploadResult(result);
+      ref.read(queueSnapshotNotifierProvider.notifier).refresh();
     });
   }
 
@@ -103,20 +128,26 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
 
       final orchestrator =
           await ref.read(shipmentUploadOrchestratorProvider.future);
+      final loc = _locationResult;
+      if (loc == null) {
+        _showMessage('請先取得 GPS 定位。');
+        return;
+      }
       final result = await orchestrator.uploadException(
         trackingNo: _trackingNoController.text.trim(),
         filePath: imagePath!,
         fileName: imageName!,
         reasonCode: _reasonCodeController.text.trim(),
         reasonMessage: _reasonMessageController.text.trim(),
-        latitude: _latitudeController.text.trim(),
-        longitude: _longitudeController.text.trim(),
+        latitude: loc.latitudeString,
+        longitude: loc.longitudeString,
+        metadata: <String, String>{
+          'accuracyMeters': loc.accuracyMeters.toStringAsFixed(1),
+        },
       );
 
-      _showMessage(
-        'Exception upload result: ${result.status.value} (queueId=${result.queueId})',
-      );
-      _refreshQueue();
+      _showUploadResult(result);
+      ref.read(queueSnapshotNotifierProvider.notifier).refresh();
     });
   }
 
@@ -128,7 +159,7 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
       _showMessage(
         'Retry processed=${result.processed}, uploaded=${result.uploaded}, failed=${result.failed}, deadLetter=${result.deadLetter}',
       );
-      _refreshQueue();
+      ref.read(queueSnapshotNotifierProvider.notifier).refresh();
     });
   }
 
@@ -173,31 +204,41 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
     return true;
   }
 
-  Future<_QueueSnapshot> _loadQueueSnapshot() async {
-    final repository = await ref.read(mediaLocalRepositoryProvider.future);
-    final pending = await repository.listByStatus(MediaQueueStatus.pending);
-    final failed = await repository.listByStatus(MediaQueueStatus.failed);
-    final uploaded = await repository.listByStatus(MediaQueueStatus.uploaded);
-    final deadLetter =
-        await repository.listByStatus(MediaQueueStatus.deadLetter);
-
-    return _QueueSnapshot(
-      pending: pending,
-      failed: failed,
-      uploaded: uploaded,
-      deadLetter: deadLetter,
-    );
-  }
-
-  void _refreshQueue() {
-    setState(() {
-      _queueFuture = _loadQueueSnapshot();
-    });
-  }
-
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
+    );
+  }
+
+  void _showUploadResult(ShipmentUploadResult result) {
+    final isOnline = ref.read(networkStatusProvider).valueOrNull ?? true;
+
+    final String text;
+    final Color bg;
+
+    if (result.queueId == -1) {
+      text = '⏳ 該追蹤號正在上傳中，請勿重複提交。';
+      bg = Colors.grey.shade700;
+    } else if (result.status == MediaQueueStatus.uploaded) {
+      text = '✔ 已成功上傳至後端。';
+      bg = Colors.green.shade700;
+    } else if (result.status == MediaQueueStatus.pending && !isOnline) {
+      text = '📶 網路斷線，已離線暂存。恢復連線後會自動重傳。';
+      bg = Colors.orange.shade800;
+    } else if (result.status == MediaQueueStatus.failed) {
+      text = '✖ 上傳失敗 (${result.errorCode ?? 'UNKNOWN'})，請前往錯誤列表重試。';
+      bg = Colors.red.shade700;
+    } else {
+      text = '☑ 已加入上傳佇列。';
+      bg = Colors.blue.shade700;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text, style: const TextStyle(color: Colors.white)),
+        backgroundColor: bg,
+        duration: const Duration(seconds: 4),
+      ),
     );
   }
 
@@ -210,7 +251,10 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
         title: const Text('Shipment Upload Queue'),
         actions: <Widget>[
           IconButton(
-            onPressed: _isBusy ? null : _refreshQueue,
+            onPressed: _isBusy
+                ? null
+                : () =>
+                    ref.read(queueSnapshotNotifierProvider.notifier).refresh(),
             icon: const Icon(Icons.refresh),
           )
         ],
@@ -228,16 +272,25 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: TextField(
-                    controller: _latitudeController,
-                    decoration: const InputDecoration(labelText: 'Latitude'),
+                  child: OutlinedButton.icon(
+                    onPressed: (_isBusy || _fetchingGps) ? null : _fetchGps,
+                    icon: _fetchingGps
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.my_location),
+                    label: const Text('取得 GPS 定位'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextField(
-                    controller: _longitudeController,
-                    decoration: const InputDecoration(labelText: 'Longitude'),
+                  child: Text(
+                    _locationResult == null
+                        ? '尚未定位'
+                        : '${_locationResult!.latitudeString}, ${_locationResult!.longitudeString}\n精度 ${_locationResult!.accuracyMeters.toStringAsFixed(0)} m${_locationResult!.isBelowAccuracyThreshold ? '' : ' ⚠️'}',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
               ],
@@ -300,56 +353,70 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
               ],
             ),
             const SizedBox(height: 24),
+            _buildConfirmationBanner(),
+            const SizedBox(height: 24),
             const Text(
               'Queue Snapshot',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            FutureBuilder<_QueueSnapshot>(
-              future: _queueFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Padding(
+            ref.watch(queueSnapshotNotifierProvider).when(
+                  loading: () => const Padding(
                     padding: EdgeInsets.all(8),
                     child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Text('Failed to load queue: ${snapshot.error}');
-                }
-
-                final queue = snapshot.data ?? _QueueSnapshot.empty();
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    _statusChip(
-                      'Pending',
-                      queue.pending.length,
-                      colors.primary,
-                    ),
-                    _statusChip(
-                      'Failed',
-                      queue.failed.length,
-                      colors.tertiary,
-                    ),
-                    _statusChip(
-                      'Uploaded',
-                      queue.uploaded.length,
-                      colors.secondary,
-                    ),
-                    _statusChip(
-                      'Dead Letter',
-                      queue.deadLetter.length,
-                      colors.error,
-                    ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                  error: (e, _) => Text('Failed to load queue: $e'),
+                  data: (queue) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      _statusChip(
+                          'Pending', queue.pending.length, colors.primary),
+                      _statusChip(
+                          'Failed', queue.failed.length, colors.tertiary),
+                      _statusChip(
+                          'Uploaded', queue.uploaded.length, colors.secondary),
+                      _statusChip(
+                          'Dead Letter', queue.deadLetter.length, colors.error),
+                    ],
+                  ),
+                ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildConfirmationBanner() {
+    final confirmations = ref.watch(shipmentConfirmationProvider);
+    if (confirmations.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Text(
+          'Server Confirmed',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 4),
+        ...confirmations.entries.map(
+          (e) => Card(
+            color: colors.secondaryContainer,
+            child: ListTile(
+              leading: Icon(Icons.check_circle, color: colors.secondary),
+              title: Text(e.key),
+              subtitle: Text('status=${e.value.status}'),
+              trailing: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => ref
+                    .read(shipmentConfirmationProvider.notifier)
+                    .clear(e.key),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -366,29 +433,6 @@ class _ShipmentPageState extends ConsumerState<ShipmentPage> {
         ),
         label: Text(label),
       ),
-    );
-  }
-}
-
-class _QueueSnapshot {
-  const _QueueSnapshot({
-    required this.pending,
-    required this.failed,
-    required this.uploaded,
-    required this.deadLetter,
-  });
-
-  final List<MediaQueueItem> pending;
-  final List<MediaQueueItem> failed;
-  final List<MediaQueueItem> uploaded;
-  final List<MediaQueueItem> deadLetter;
-
-  factory _QueueSnapshot.empty() {
-    return const _QueueSnapshot(
-      pending: <MediaQueueItem>[],
-      failed: <MediaQueueItem>[],
-      uploaded: <MediaQueueItem>[],
-      deadLetter: <MediaQueueItem>[],
     );
   }
 }

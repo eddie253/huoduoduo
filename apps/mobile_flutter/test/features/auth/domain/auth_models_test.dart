@@ -85,10 +85,18 @@ void main() {
     expect(session.accessToken, 'at-1');
     expect(session.user.contractNo, 'C001');
     expect(session.webviewBootstrap.cookies.first.name, 'Kind');
+  });
 
-    final fallback = AuthSession.fromJson(<String, dynamic>{});
-    expect(fallback.accessToken, isEmpty);
-    expect(fallback.user.id, isEmpty);
-    expect(fallback.webviewBootstrap.cookies, isEmpty);
+  test(
+      'AuthSession.fromJson throws FormatException when required fields missing',
+      () {
+    expect(
+      () => AuthSession.fromJson(<String, dynamic>{}),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      () => AuthSession.fromJson(<String, dynamic>{'accessToken': 'at'}),
+      throwsA(isA<FormatException>()),
+    );
   });
 }

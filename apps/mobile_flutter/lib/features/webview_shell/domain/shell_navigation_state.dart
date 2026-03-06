@@ -15,6 +15,7 @@ class ShellNavigationState {
     this.webTitle,
     this.errorText,
     this.pendingRequest,
+    this.sectionLastActiveAt = const <ShellSection, DateTime>{},
   });
 
   factory ShellNavigationState.initial() {
@@ -31,6 +32,7 @@ class ShellNavigationState {
   final String? webTitle;
   final String? errorText;
   final URLRequest? pendingRequest;
+  final Map<ShellSection, DateTime> sectionLastActiveAt;
 
   ShellNavigationState copyWith({
     ShellSection? currentSection,
@@ -42,6 +44,7 @@ class ShellNavigationState {
     bool clearErrorText = false,
     URLRequest? pendingRequest,
     bool clearPendingRequest = false,
+    Map<ShellSection, DateTime>? sectionLastActiveAt,
   }) {
     return ShellNavigationState(
       currentSection: currentSection ?? this.currentSection,
@@ -51,7 +54,32 @@ class ShellNavigationState {
       errorText: clearErrorText ? null : (errorText ?? this.errorText),
       pendingRequest:
           clearPendingRequest ? null : (pendingRequest ?? this.pendingRequest),
+      sectionLastActiveAt: sectionLastActiveAt ?? this.sectionLastActiveAt,
     );
+  }
+
+  ShellNavigationState markSectionActive(ShellSection section) {
+    return copyWith(
+      sectionLastActiveAt: <ShellSection, DateTime>{
+        ...sectionLastActiveAt,
+        section: DateTime.now(),
+      },
+    );
+  }
+
+  ShellNavigationState markSectionStale(ShellSection section) {
+    final updated = Map<ShellSection, DateTime>.from(sectionLastActiveAt);
+    updated.remove(section);
+    return copyWith(sectionLastActiveAt: updated);
+  }
+
+  bool isSectionStale(
+    ShellSection section, {
+    Duration threshold = const Duration(seconds: 30),
+  }) {
+    final last = sectionLastActiveAt[section];
+    if (last == null) return true;
+    return DateTime.now().difference(last) > threshold;
   }
 
   ShellNavigationState enteringWeb({

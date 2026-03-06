@@ -1,18 +1,26 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scan_kit_core/scan_kit_core.dart' show ScanFrameMode;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'package:mobile_flutter/features/scanner/application/scanner_view_model.dart';
 import 'package:mobile_flutter/features/scanner/presentation/scanner_page.dart';
 
+Widget _scoped(Widget child) => ProviderScope(child: MaterialApp(home: child));
+
 void main() {
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
+
   testWidgets('shows scan type in app bar title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: ScannerPage(
-          scanType: 'qr',
-          scannerViewBuilder: _buildNoopScanner,
-        ),
-      ),
+      _scoped(const ScannerPage(
+        scanType: 'qr',
+        scannerViewBuilder: _buildNoopScanner,
+      )),
     );
 
     expect(find.text(scannerTitleFor('qr')), findsOneWidget);
@@ -36,12 +44,10 @@ void main() {
   testWidgets('hint text is visible and unchanged',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: ScannerPage(
-          scanType: 'qr',
-          scannerViewBuilder: _buildNoopScanner,
-        ),
-      ),
+      _scoped(const ScannerPage(
+        scanType: 'qr',
+        scannerViewBuilder: _buildNoopScanner,
+      )),
     );
 
     expect(find.text(scannerHintText), findsOneWidget);
@@ -132,6 +138,92 @@ void main() {
     expect(oneDim.width, equals(twoDim.width));
     expect(oneDim.height, lessThan(twoDim.height));
   });
+
+  test('scannerCodeModeLabel returns correct labels', () {
+    expect(scannerCodeModeLabel(ScannerCodeMode.oneDimensional), '1D');
+    expect(scannerCodeModeLabel(ScannerCodeMode.twoDimensional), '2D');
+    expect(scannerCodeModeLabel(ScannerCodeMode.all), 'All');
+  });
+
+  test('scannerTitleFor formats title string', () {
+    expect(scannerTitleFor('qr'), '掃描：qr');
+    expect(scannerTitleFor('barcode'), '掃描：barcode');
+  });
+
+  test('legacyScanFrameRect compact frame is smallest', () {
+    const size = Size(360, 640);
+    final compact = legacyScanFrameRect(size, ScanFrameMode.twoDimensional,
+        frameSize: ScannerFrameSize.compact);
+    final medium = legacyScanFrameRect(size, ScanFrameMode.twoDimensional,
+        frameSize: ScannerFrameSize.medium);
+    final large = legacyScanFrameRect(size, ScanFrameMode.twoDimensional,
+        frameSize: ScannerFrameSize.large);
+
+    expect(compact.width, lessThan(medium.width));
+    expect(medium.width, lessThan(large.width));
+  });
+
+  testWidgets('flash button toggles torch', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _scoped(const ScannerPage(scannerViewBuilder: _buildNoopScanner)),
+    );
+
+    await tester.tap(find.byKey(scannerFlashButtonKey));
+    await tester.pump();
+  });
+
+  testWidgets('keypad button opens manual input sheet',
+      (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      _scoped(const ScannerPage(scannerViewBuilder: _buildNoopScanner)),
+    );
+
+    await tester.tap(find.byKey(scannerKeypadButtonKey));
+    await tester.pump();
+  });
+
+  testWidgets('settings button opens scan mode dialog',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _scoped(const ScannerPage(scannerViewBuilder: _buildNoopScanner)),
+    );
+
+    await tester.tap(find.byKey(scannerSettingButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('掃描設定'), findsOneWidget);
+    expect(find.text('1D + 2D'), findsOneWidget);
+    expect(find.text('一維條碼'), findsOneWidget);
+    expect(find.text('二維碼'), findsOneWidget);
+
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('掃描設定'), findsNothing);
+  });
+
+  testWidgets('settings dialog confirm changes scan mode',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _scoped(const ScannerPage(scannerViewBuilder: _buildNoopScanner)),
+    );
+
+    await tester.tap(find.byKey(scannerSettingButtonKey));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('一維條碼'));
+    await tester.pump();
+    await tester.tap(find.text('框小'));
+    await tester.pump();
+    await tester.tap(find.text('確認'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('掃描設定'), findsNothing);
+    expect(find.textContaining('1D'), findsWidgets);
+  });
 }
 
 Widget _buildNoopScanner(
@@ -148,23 +240,25 @@ Future<Future<Object?>> _openScannerPage(
 }) async {
   late Future<Object?> resultFuture;
   await tester.pumpWidget(
-    MaterialApp(
-      navigatorObservers: <NavigatorObserver>[
-        if (observer != null) observer,
-      ],
-      home: Builder(
-        builder: (BuildContext context) {
-          return FilledButton(
-            onPressed: () {
-              resultFuture = Navigator.of(context).push<Object?>(
-                MaterialPageRoute<Object?>(
-                  builder: (BuildContext context) => pageBuilder(),
-                ),
-              );
-            },
-            child: const Text('Open Scanner'),
-          );
-        },
+    ProviderScope(
+      child: MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          if (observer != null) observer,
+        ],
+        home: Builder(
+          builder: (BuildContext context) {
+            return FilledButton(
+              onPressed: () {
+                resultFuture = Navigator.of(context).push<Object?>(
+                  MaterialPageRoute<Object?>(
+                    builder: (BuildContext context) => pageBuilder(),
+                  ),
+                );
+              },
+              child: const Text('Open Scanner'),
+            );
+          },
+        ),
       ),
     ),
   );
@@ -183,4 +277,3 @@ class _CountingNavigatorObserver extends NavigatorObserver {
     super.didPop(route, previousRoute);
   }
 }
-

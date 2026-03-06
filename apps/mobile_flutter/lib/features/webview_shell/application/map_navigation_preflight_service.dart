@@ -1,45 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile_flutter/core/navigation/map_navigation_preflight_port.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum MapNavigationBlockReason {
-  locationServiceDisabled,
-  locationPermissionDenied,
-  googleMapsUnavailable,
-  googleAccountMissing,
-  googleAccountUnknown,
-}
-
-class MapNavigationPreflightResult {
-  const MapNavigationPreflightResult._({
-    required this.allowed,
-    this.reason,
-    this.message,
-  });
-
-  const MapNavigationPreflightResult.allow()
-      : this._(
-          allowed: true,
-        );
-
-  const MapNavigationPreflightResult.block({
-    required MapNavigationBlockReason reason,
-    required String message,
-  }) : this._(
-          allowed: false,
-          reason: reason,
-          message: message,
-        );
-
-  final bool allowed;
-  final MapNavigationBlockReason? reason;
-  final String? message;
-}
-
-abstract class MapNavigationPreflightPort {
-  Future<MapNavigationPreflightResult> ensureReady();
-}
+export 'package:mobile_flutter/core/navigation/map_navigation_preflight_port.dart';
 
 abstract class LocationAccessPort {
   Future<ServiceStatus> serviceStatus();

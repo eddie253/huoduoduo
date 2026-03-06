@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/domain/auth_models.dart';
+import '../features/webview_shell/application/map_navigation_preflight_service.dart';
 import '../features/arrival_upload_errors/presentation/arrival_upload_errors_page.dart';
 import '../features/auth/presentation/login_page.dart';
 import '../features/maps/presentation/maps_page.dart';
 import '../features/notifications/presentation/notifications_page.dart';
 import '../features/proxy_menu/presentation/proxy_menu_page.dart';
+import '../features/scanner/presentation/scan_diagnostics_page.dart';
 import '../features/scanner/presentation/scanner_page.dart';
 import '../features/settings/presentation/settings_page.dart';
 import '../features/shipment/presentation/shipment_page.dart';
@@ -57,7 +59,9 @@ final GoRouter appRouter =
       }),
   GoRoute(
       path: '/maps',
-      builder: (BuildContext context, GoRouterState state) => const MapsPage()),
+      builder: (BuildContext context, GoRouterState state) => const MapsPage(
+            mapPreflight: DefaultMapNavigationPreflightService(),
+          )),
   GoRoute(
       path: '/arrival-upload-errors',
       builder: (BuildContext context, GoRouterState state) =>
@@ -75,5 +79,10 @@ final GoRouter appRouter =
     path: '/settings',
     builder: (BuildContext context, GoRouterState state) =>
         const SettingsPage(),
-  )
+  ),
+  GoRoute(
+    path: '/scan-diagnostics',
+    builder: (BuildContext context, GoRouterState state) =>
+        const ScanDiagnosticsPage(),
+  ),
 ]);

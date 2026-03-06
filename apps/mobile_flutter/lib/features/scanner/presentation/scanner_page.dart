@@ -1,7 +1,12 @@
 ﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scan_kit_core/scan_kit_core.dart';
+
+import '../application/scanner_view_model.dart';
+import '../data/scan_audit_repository.dart';
+import '../domain/scan_audit_entry.dart';
 
 typedef ScannerViewBuilder = Widget Function(
   BuildContext context,
@@ -18,18 +23,6 @@ const Key scannerFrameOverlayKey = Key('scanner_frame_overlay');
 const Key scannerFrameWindowKey = Key('scanner_frame_window');
 
 String scannerTitleFor(String scanType) => '掃描：$scanType';
-
-enum ScannerCodeMode {
-  all,
-  oneDimensional,
-  twoDimensional,
-}
-
-enum ScannerFrameSize {
-  compact,
-  medium,
-  large,
-}
 
 class _ScannerSettingResult {
   const _ScannerSettingResult({
@@ -67,7 +60,7 @@ Rect legacyScanFrameRect(
   return scanFrameRect(size, mode, frameSize: _toFrameSize(frameSize));
 }
 
-class ScannerPage extends StatefulWidget {
+class ScannerPage extends ConsumerStatefulWidget {
   const ScannerPage({
     super.key,
     this.scanType = 'default',
@@ -78,31 +71,32 @@ class ScannerPage extends StatefulWidget {
   final ScannerViewBuilder? scannerViewBuilder;
 
   @override
-  State<ScannerPage> createState() => _ScannerPageState();
+  ConsumerState<ScannerPage> createState() => _ScannerPageState();
 }
 
-class _ScannerPageState extends State<ScannerPage> {
+class _ScannerPageState extends ConsumerState<ScannerPage> {
   static const Color _legacyHeaderColor = Color(0xFFFC5000);
 
   final ScanSessionController _controller = ScanSessionController();
   StreamSubscription<ScanEvent>? _eventSubscription;
-  bool _isCompleted = false;
-  bool _torchOn = false;
-  ScannerCodeMode _scanMode = ScannerCodeMode.all;
-  ScannerFrameSize _frameSize = ScannerFrameSize.medium;
+  late final ScannerViewModel _viewModel;
   late ScanRequest _request;
 
   @override
   void initState() {
     super.initState();
-    _scanMode = _defaultScanMode(widget.scanType);
-    _request = _buildRequest();
+    _viewModel = ScannerViewModel(scanType: widget.scanType);
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
+    _request = _viewModel.buildRequest();
     _eventSubscription = _controller.events.listen(_onScanEvent);
     _controller.start(_request);
   }
 
   @override
   void dispose() {
+    _viewModel.dispose();
     _eventSubscription?.cancel();
     _controller.dispose();
     super.dispose();
@@ -112,34 +106,19 @@ class _ScannerPageState extends State<ScannerPage> {
     if (event is! ScanSuccessEvent) {
       return;
     }
-    _completeWith(event.result.value);
-  }
-
-  void _completeWith(String value) {
-    if (_isCompleted) {
+    final String? result = _viewModel.tryComplete(event.result.value);
+    if (result == null) {
       return;
     }
-    final String trimmed = value.trim();
-    if (trimmed.isEmpty) {
-      return;
-    }
-    _isCompleted = true;
+    _logAudit(event.result);
     _controller.stop();
-    Navigator.of(context).pop(trimmed);
+    Navigator.of(context).pop(result);
   }
 
-  ScanRequest _buildRequest() {
-    final ScanMode mode = _toScanMode(_scanMode);
-    final Set<ScanSymbology> allowedSymbologies =
-        _allowedSymbologiesFor(widget.scanType, _scanMode);
-
-    return ScanRequest(
-      scanType: widget.scanType,
-      mode: mode,
-      allowedSymbologies: allowedSymbologies,
-      dedupWindowMs: 800,
-      sessionId: '${widget.scanType}_${DateTime.now().millisecondsSinceEpoch}',
-    );
+  void _logAudit(ScanResult result) {
+    ref.read(scanAuditRepositoryProvider.future).then((repo) {
+      repo.insert(ScanAuditEntry.fromResult(result));
+    }).ignore();
   }
 
   Future<void> _toggleTorch() async {
@@ -147,9 +126,7 @@ class _ScannerPageState extends State<ScannerPage> {
     if (!mounted) {
       return;
     }
-    setState(() {
-      _torchOn = torchOn;
-    });
+    _viewModel.setTorchOn(torchOn);
   }
 
   Future<void> _openManualInputPad() async {
@@ -166,9 +143,10 @@ class _ScannerPageState extends State<ScannerPage> {
   }
 
   Future<void> _openScanModeSettings() async {
-    ScannerCodeMode selectedMode = _scanMode;
-    ScannerFrameSize selectedFrameSize = _frameSize;
-    final _ScannerSettingResult? result = await showDialog<_ScannerSettingResult>(
+    ScannerCodeMode selectedMode = _viewModel.scanMode;
+    ScannerFrameSize selectedFrameSize = _viewModel.frameSize;
+    final _ScannerSettingResult? result =
+        await showDialog<_ScannerSettingResult>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -260,10 +238,9 @@ class _ScannerPageState extends State<ScannerPage> {
     if (!mounted || result == null) {
       return;
     }
+    _viewModel.applySettings(result.mode, result.frameSize);
     setState(() {
-      _scanMode = result.mode;
-      _frameSize = result.frameSize;
-      _request = _buildRequest();
+      _request = _viewModel.buildRequest();
     });
     _controller.start(_request);
   }
@@ -278,7 +255,7 @@ class _ScannerPageState extends State<ScannerPage> {
           HddScannerView(
             controller: _controller,
             request: _request,
-            frameSize: _toFrameSize(_frameSize),
+            frameSize: _toFrameSize(_viewModel.frameSize),
             overlayKey: scannerFrameOverlayKey,
             windowKey: scannerFrameWindowKey,
             engineViewBuilder: widget.scannerViewBuilder,
@@ -299,7 +276,8 @@ class _ScannerPageState extends State<ScannerPage> {
                         alignment: Alignment.centerLeft,
                         child: IconButton(
                           key: scannerCloseButtonKey,
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          icon:
+                              const Icon(Icons.arrow_back, color: Colors.white),
                           tooltip: 'Close scanner',
                           onPressed: () => Navigator.of(context).pop(),
                         ),
@@ -341,9 +319,10 @@ class _ScannerPageState extends State<ScannerPage> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     child: Text(
-                      'Mode: ${scannerCodeModeLabel(_scanMode)} / Frame: ${_frameSize.name}',
+                      'Mode: ${scannerCodeModeLabel(_viewModel.scanMode)} / Frame: ${_viewModel.frameSize.name}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 13,
@@ -362,7 +341,7 @@ class _ScannerPageState extends State<ScannerPage> {
             child: SafeArea(
               top: false,
               child: HddScannerToolbar(
-                torchOn: _torchOn,
+                torchOn: _viewModel.torchOn,
                 onToggleTorch: _toggleTorch,
                 onManualInput: _openManualInputPad,
                 onOpenSettings: _openScanModeSettings,
@@ -379,60 +358,6 @@ class _ScannerPageState extends State<ScannerPage> {
   }
 }
 
-ScannerCodeMode _defaultScanMode(String scanType) {
-  final String normalized = scanType.trim().toLowerCase();
-  if (normalized.contains('qr')) {
-    return ScannerCodeMode.twoDimensional;
-  }
-  if (normalized.contains('1d') || normalized.contains('barcode')) {
-    return ScannerCodeMode.oneDimensional;
-  }
-  return ScannerCodeMode.all;
-}
-
-Set<ScanSymbology> _allowedSymbologiesFor(
-  String scanType,
-  ScannerCodeMode mode,
-) {
-  final String normalized = scanType.trim().toLowerCase();
-  if (normalized.isEmpty || normalized == 'default') {
-    return legacyEquivalentSymbologies;
-  }
-  if (mode == ScannerCodeMode.twoDimensional) {
-    return <ScanSymbology>{
-      ScanSymbology.qrCode,
-      ScanSymbology.pdf417,
-      ScanSymbology.dataMatrix,
-      ScanSymbology.aztec,
-    };
-  }
-  if (mode == ScannerCodeMode.oneDimensional) {
-    return <ScanSymbology>{
-      ScanSymbology.codabar,
-      ScanSymbology.code39,
-      ScanSymbology.code93,
-      ScanSymbology.code128,
-      ScanSymbology.itf,
-      ScanSymbology.ean13,
-      ScanSymbology.ean8,
-      ScanSymbology.upca,
-      ScanSymbology.upce,
-    };
-  }
-  return legacyEquivalentSymbologies;
-}
-
-ScanMode _toScanMode(ScannerCodeMode mode) {
-  switch (mode) {
-    case ScannerCodeMode.oneDimensional:
-      return ScanMode.oneDimensional;
-    case ScannerCodeMode.twoDimensional:
-      return ScanMode.twoDimensional;
-    case ScannerCodeMode.all:
-      return ScanMode.all;
-  }
-}
-
 ScanFrameSize _toFrameSize(ScannerFrameSize size) {
   switch (size) {
     case ScannerFrameSize.compact:
@@ -443,4 +368,3 @@ ScanFrameSize _toFrameSize(ScannerFrameSize size) {
       return ScanFrameSize.large;
   }
 }
-

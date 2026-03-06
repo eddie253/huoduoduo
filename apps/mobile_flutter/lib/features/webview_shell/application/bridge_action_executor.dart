@@ -62,6 +62,51 @@ abstract class BridgeActionExecutor {
   Future<void> redirect(BuildContext context, String page);
 }
 
+abstract class BridgeUiPort {
+  Future<bool> launchExternal(Uri uri);
+
+  Future<bool> closePage();
+
+  Future<void> redirect(String page);
+
+  Future<ScannerResult?> openScanner(String scanType);
+
+  Future<SignatureResult?> openSignature();
+
+  Future<void> showExitDialog(String message);
+}
+
+class ContextBridgeUiPort implements BridgeUiPort {
+  const ContextBridgeUiPort({
+    required BuildContext context,
+    BridgeActionExecutor executor = const PlatformBridgeActionExecutor(),
+  })  : _context = context,
+        _executor = executor;
+
+  final BuildContext _context;
+  final BridgeActionExecutor _executor;
+
+  @override
+  Future<bool> launchExternal(Uri uri) => _executor.launchExternal(uri);
+
+  @override
+  Future<bool> closePage() => _executor.closePage(_context);
+
+  @override
+  Future<void> redirect(String page) => _executor.redirect(_context, page);
+
+  @override
+  Future<ScannerResult?> openScanner(String scanType) =>
+      _executor.openScanner(_context, scanType: scanType);
+
+  @override
+  Future<SignatureResult?> openSignature() => _executor.openSignature(_context);
+
+  @override
+  Future<void> showExitDialog(String message) =>
+      _executor.showExitDialog(_context, message);
+}
+
 class PlatformBridgeActionExecutor implements BridgeActionExecutor {
   const PlatformBridgeActionExecutor({
     UrlLauncherPort urlLauncher = const FlutterUrlLauncherPort(),

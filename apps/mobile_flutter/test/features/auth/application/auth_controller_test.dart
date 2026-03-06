@@ -9,7 +9,7 @@ import 'package:mobile_flutter/core/config/app_config.dart';
 import 'package:mobile_flutter/core/network/dio_provider.dart';
 import 'package:mobile_flutter/core/storage/token_storage.dart';
 import 'package:mobile_flutter/features/auth/application/auth_controller.dart';
-import 'package:mobile_flutter/features/auth/data/auth_repository.dart';
+import 'package:mobile_flutter/features/auth/domain/auth_repository.dart';
 import 'package:mobile_flutter/features/auth/domain/auth_models.dart';
 import 'package:mobile_flutter/features/webview_shell/application/webview_session_cleanup_service.dart';
 

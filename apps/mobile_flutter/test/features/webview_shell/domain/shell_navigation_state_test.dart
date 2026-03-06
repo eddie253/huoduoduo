@@ -60,6 +60,39 @@ void main() {
     expect(state.pendingRequest, isNull);
   });
 
+  test('isSectionStale returns true when section has never been active', () {
+    final state = ShellNavigationState.initial();
+    expect(state.isSectionStale(ShellSection.wallet), isTrue);
+  });
+
+  test('markSectionActive records timestamp so section is no longer stale', () {
+    final state =
+        ShellNavigationState.initial().markSectionActive(ShellSection.wallet);
+    expect(
+      state.isSectionStale(ShellSection.wallet,
+          threshold: const Duration(seconds: 60)),
+      isFalse,
+    );
+  });
+
+  test('markSectionStale removes timestamp so section becomes stale again', () {
+    final state = ShellNavigationState.initial()
+        .markSectionActive(ShellSection.wallet)
+        .markSectionStale(ShellSection.wallet);
+    expect(state.isSectionStale(ShellSection.wallet), isTrue);
+  });
+
+  test('copyWith carries sectionLastActiveAt through', () {
+    final original =
+        ShellNavigationState.initial().markSectionActive(ShellSection.order);
+    final copied = original.copyWith(inWeb: true);
+    expect(
+      copied.isSectionStale(ShellSection.order,
+          threshold: const Duration(seconds: 60)),
+      isFalse,
+    );
+  });
+
   test('selectSection keeps selected tab and resets web overlay state', () {
     final request =
         URLRequest(url: WebUri('https://old.huoduoduo.com.tw/app/'));

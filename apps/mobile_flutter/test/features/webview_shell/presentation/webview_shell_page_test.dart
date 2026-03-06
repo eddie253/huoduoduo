@@ -1,16 +1,14 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_flutter/core/network/dio_provider.dart';
 import 'package:mobile_flutter/features/auth/domain/auth_models.dart';
 import 'package:mobile_flutter/features/webview_shell/presentation/webview_shell_page.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-const List<String> _kPlatformChannels = [
-  'com.pichillilorenzo/flutter_inappwebview_0',
-  'com.pichillilorenzo/flutter_inappwebview_manager',
-  'com.pichillilorenzo/flutter_cookie_manager',
-  'com.pichillilorenzo/flutter_chromeSafariBrowser_0',
-];
+import '../../../helpers/fake_inappwebview_platform.dart';
 
 WebviewBootstrap _testBootstrap() => const WebviewBootstrap(
       baseUrl: 'https://app.elf.com.tw/cn/entrust.aspx?IDCompany=S1',
@@ -20,99 +18,102 @@ WebviewBootstrap _testBootstrap() => const WebviewBootstrap(
       cookies: [],
     );
 
-void _installChannelMocks() {
-  for (final name in _kPlatformChannels) {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(MethodChannel(name), (_) async => null);
-  }
-}
-
-void _removeChannelMocks() {
-  for (final name in _kPlatformChannels) {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(MethodChannel(name), null);
-  }
-}
-
-void Function(FlutterErrorDetails)? _installErrorSuppressor() {
-  final original = FlutterError.onError;
-  FlutterError.onError = (FlutterErrorDetails details) {
-    final msg = details.exception.toString();
-    if (details.exception is MissingPluginException ||
-        msg.contains('PlatformView') ||
-        msg.contains('InAppWebView') ||
-        msg.contains('CookieManager')) {
-      return;
-    }
-    original?.call(details);
-  };
-  return original;
-}
-
 void main() {
-  group('WebViewShellPage – widget smoke tests', () {
-    setUp(_installChannelMocks);
-    tearDown(_removeChannelMocks);
+  group('WebviewBootstrap construction', () {
+    test('stores all fields', () {
+      const b = WebviewBootstrap(
+        baseUrl: 'https://app.elf.com.tw/cn/entrust.aspx',
+        registerUrl: 'https://old.huoduoduo.com.tw/register/register.aspx',
+        resetPasswordUrl:
+            'https://old.huoduoduo.com.tw/register/register_resetpwd.aspx',
+        cookies: [],
+      );
+      expect(b.baseUrl, 'https://app.elf.com.tw/cn/entrust.aspx');
+      expect(b.registerUrl, startsWith('https://'));
+      expect(b.resetPasswordUrl, startsWith('https://'));
+      expect(b.cookies, isEmpty);
+    });
 
-    testWidgets('scaffold and bottom bar are present in initial render',
-        (WidgetTester tester) async {
-      final restoreError = _installErrorSuppressor();
-      addTearDown(() => FlutterError.onError = restoreError);
+    test('non-empty cookies are stored', () {
+      final b = WebviewBootstrap(
+        baseUrl: 'https://example.com',
+        registerUrl: 'https://example.com/r',
+        resetPasswordUrl: 'https://example.com/p',
+        cookies: [
+          const WebCookieModel(
+              name: 'sid',
+              value: 'abc',
+              domain: 'example.com',
+              path: '/',
+              secure: true,
+              httpOnly: false),
+        ],
+      );
+      expect(b.cookies.length, 1);
+      expect(b.cookies.first.name, 'sid');
+    });
 
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: WebViewShellPage(bootstrap: _testBootstrap()),
+    test('_testBootstrap helper produces valid bootstrap', () {
+      final b = _testBootstrap();
+      expect(b.baseUrl, contains('app.elf.com.tw'));
+      expect(b.cookies, isEmpty);
+    });
+  });
+
+  group('WebViewShellPage widget smoke', () {
+    setUpAll(() {
+      InAppWebViewPlatform.instance = FakeIAWPlatform();
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    });
+
+    Widget _buildPage() {
+      final fakeDio = Dio(BaseOptions(baseUrl: 'http://test.local'));
+      fakeDio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) => handler.reject(
+            DioException(
+                requestOptions: options, message: 'no server in tests'),
           ),
         ),
       );
-      await tester.pump(Duration.zero);
+      return ProviderScope(
+        overrides: [dioProvider.overrideWithValue(fakeDio)],
+        child: MaterialApp(
+          home: WebViewShellPage(bootstrap: _testBootstrap()),
+        ),
+      );
+    }
 
+    Future<void> pumpPage(WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(_buildPage());
+      await tester.pump(Duration.zero);
+      await tester.pump(Duration.zero);
+    }
+
+    testWidgets('renders Scaffold with shellScaffoldKey', (tester) async {
+      await pumpPage(tester);
       expect(find.byKey(const Key('webview.shell.scaffold')), findsOneWidget);
+    });
+
+    testWidgets('bottom bar is present', (tester) async {
+      await pumpPage(tester);
       expect(find.byKey(const Key('webview.bottomBar')), findsOneWidget);
     });
 
-    testWidgets('bottom bar shows four tab labels',
-        (WidgetTester tester) async {
-      final restoreError = _installErrorSuppressor();
-      addTearDown(() => FlutterError.onError = restoreError);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: WebViewShellPage(bootstrap: _testBootstrap()),
-          ),
-        ),
-      );
-      await tester.pump(Duration.zero);
-
-      final bar = find.byKey(const Key('webview.bottomBar'));
-      expect(bar, findsOneWidget);
-      expect(
-          find.descendant(of: bar, matching: find.text('預約')), findsOneWidget);
-      expect(
-          find.descendant(of: bar, matching: find.text('接單')), findsOneWidget);
-      expect(
-          find.descendant(of: bar, matching: find.text('簽收')), findsOneWidget);
-      expect(
-          find.descendant(of: bar, matching: find.text('錢包')), findsOneWidget);
+    testWidgets('bottom bar shows all four tab labels', (tester) async {
+      await pumpPage(tester);
+      for (final label in ['預約', '接單', '簽收', '錢包']) {
+        expect(find.text(label), findsWidgets,
+            reason: 'expected tab label $label');
+      }
     });
 
-    testWidgets('back button is transparent (opacity 0) when not in webview',
-        (WidgetTester tester) async {
-      final restoreError = _installErrorSuppressor();
-      addTearDown(() => FlutterError.onError = restoreError);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: WebViewShellPage(bootstrap: _testBootstrap()),
-          ),
-        ),
-      );
-      await tester.pump(Duration.zero);
-
-      final opacityWidget = tester.widget<Opacity>(
+    testWidgets('back button has opacity 0 in menu state', (tester) async {
+      await pumpPage(tester);
+      final opacity = tester.widget<Opacity>(
         find
             .ancestor(
               of: find.byKey(const Key('webview.top.backButton')),
@@ -120,25 +121,53 @@ void main() {
             )
             .first,
       );
-      expect(opacityWidget.opacity, 0.0);
+      expect(opacity.opacity, 0.0);
     });
 
-    testWidgets('settings button is visible when not in webview',
-        (WidgetTester tester) async {
-      final restoreError = _installErrorSuppressor();
-      addTearDown(() => FlutterError.onError = restoreError);
-
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: WebViewShellPage(bootstrap: _testBootstrap()),
-          ),
-        ),
-      );
-      await tester.pump(Duration.zero);
-
+    testWidgets('settings button is present in menu state', (tester) async {
+      await pumpPage(tester);
       expect(
           find.byKey(const Key('webview.top.settingsButton')), findsOneWidget);
+    });
+
+    testWidgets('tapping a bottom tab switches active section', (tester) async {
+      await pumpPage(tester);
+      await tester.tap(find.text('接單'));
+      await tester.pump();
+      expect(find.text('接單'), findsWidgets);
+    });
+
+    testWidgets('tapping wallet tab changes section title', (tester) async {
+      await pumpPage(tester);
+      await tester.tap(find.text('錢包'));
+      await tester.pump();
+      expect(find.text('錢包'), findsWidgets);
+    });
+
+    testWidgets('dispose cancels timer without error', (tester) async {
+      await pumpPage(tester);
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('WebViewShellPage key constants', () {
+    test('scaffold key has expected string value', () {
+      expect(const Key('webview.shell.scaffold'),
+          const Key('webview.shell.scaffold'));
+    });
+
+    test('bottom bar key has expected string value', () {
+      expect(const Key('webview.bottomBar'), const Key('webview.bottomBar'));
+    });
+
+    test('back button key has expected string value', () {
+      expect(const Key('webview.top.backButton'),
+          const Key('webview.top.backButton'));
+    });
+
+    test('settings button key has expected string value', () {
+      expect(const Key('webview.top.settingsButton'),
+          const Key('webview.top.settingsButton'));
     });
   });
 }

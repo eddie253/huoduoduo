@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:mobile_flutter/features/shipment/application/shipment_upload_orchestrator.dart';
 import 'package:mobile_flutter/features/shipment/data/local/media_local_repository.dart';
-import 'package:mobile_flutter/features/shipment/data/shipment_repository.dart';
+import 'package:mobile_flutter/features/shipment/domain/shipment_models.dart';
+import 'package:mobile_flutter/features/shipment/domain/shipment_repository.dart';
 import 'package:mobile_flutter/features/shipment/domain/media_queue_models.dart';
 
 void main() {
@@ -288,6 +291,50 @@ void main() {
     expect(result.status, MediaQueueStatus.deadLetter);
   });
 
+  test(
+      'duplicate uploadDelivery for same trackingNo returns pending without double-enqueue',
+      () async {
+    final imageFile = File(p.join(tempDir.path, 'dup_guard.jpg'));
+    await imageFile.writeAsBytes(<int>[1, 2, 3]);
+
+    final completer = Completer<void>();
+    final slowRepo = _SlowShipmentRepository(completer.future);
+    final orchestrator = ShipmentUploadOrchestrator(
+      shipmentRepository: slowRepo,
+      mediaLocalRepository: mediaLocalRepository,
+    );
+
+    final first = orchestrator.uploadDelivery(
+      trackingNo: 'TN-DUP',
+      filePath: imageFile.path,
+      fileName: 'dup_guard.jpg',
+      latitude: '25.03',
+      longitude: '121.56',
+    );
+
+    final second = await orchestrator.uploadDelivery(
+      trackingNo: 'TN-DUP',
+      filePath: imageFile.path,
+      fileName: 'dup_guard.jpg',
+      latitude: '25.03',
+      longitude: '121.56',
+    );
+
+    expect(second.status, MediaQueueStatus.pending);
+    expect(second.queueId, -1);
+
+    completer.complete();
+    final firstResult = await first;
+    expect(firstResult.status, MediaQueueStatus.uploaded);
+
+    final pending =
+        await mediaLocalRepository.listByStatus(MediaQueueStatus.pending);
+    final uploaded =
+        await mediaLocalRepository.listByStatus(MediaQueueStatus.uploaded);
+    expect(pending, isEmpty);
+    expect(uploaded, hasLength(1));
+  });
+
   test('extracts UPLOAD_FAILED when error has no legacy error code', () async {
     final imageFile = File(p.join(tempDir.path, 'unknown_fail.jpg'));
     await imageFile.writeAsBytes(<int>[6, 6, 6]);
@@ -320,6 +367,8 @@ class _SuccessShipmentRepository implements ShipmentRepository {
     required String imageFileName,
     required String latitude,
     required String longitude,
+    String? signatureBase64,
+    required String idempotencyKey,
   }) async {}
 
   @override
@@ -331,8 +380,14 @@ class _SuccessShipmentRepository implements ShipmentRepository {
     String? reasonMessage,
     required String latitude,
     required String longitude,
+    required String idempotencyKey,
   }) async {
     exceptionSubmitCount++;
+  }
+
+  @override
+  Future<ShipmentDetail> fetchShipment(String trackingNo) async {
+    return ShipmentDetail(trackingNo: trackingNo, status: 'delivered');
   }
 }
 
@@ -344,8 +399,17 @@ class _FailShipmentRepository extends _SuccessShipmentRepository {
     required String imageFileName,
     required String latitude,
     required String longitude,
+    String? signatureBase64,
+    required String idempotencyKey,
   }) async {
-    throw Exception('LEGACY_TIMEOUT: failed to submit delivery');
+    throw DioException(
+      requestOptions: RequestOptions(path: '/shipments/$trackingNo/delivery'),
+      response: Response<Map<String, dynamic>>(
+        requestOptions: RequestOptions(path: '/shipments/$trackingNo/delivery'),
+        statusCode: 422,
+        data: <String, dynamic>{'code': 'LEGACY_TIMEOUT', 'message': 'timeout'},
+      ),
+    );
   }
 }
 
@@ -357,7 +421,27 @@ class _UnknownFailShipmentRepository extends _SuccessShipmentRepository {
     required String imageFileName,
     required String latitude,
     required String longitude,
+    String? signatureBase64,
+    required String idempotencyKey,
   }) async {
     throw Exception('socket closed by peer');
+  }
+}
+
+class _SlowShipmentRepository extends _SuccessShipmentRepository {
+  _SlowShipmentRepository(this._gate);
+  final Future<void> _gate;
+
+  @override
+  Future<void> submitDelivery({
+    required String trackingNo,
+    required String imageBase64,
+    required String imageFileName,
+    required String latitude,
+    required String longitude,
+    String? signatureBase64,
+    required String idempotencyKey,
+  }) async {
+    await _gate;
   }
 }

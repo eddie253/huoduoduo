@@ -3,31 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mobile_flutter/features/shipment/application/shipment_upload_orchestrator.dart';
-import 'package:mobile_flutter/features/shipment/data/local/media_local_provider.dart';
-import 'package:mobile_flutter/features/shipment/data/local/media_local_repository.dart';
-import 'package:mobile_flutter/features/shipment/data/shipment_repository.dart';
+import 'package:mobile_flutter/features/shipment/domain/media_local_repository.dart';
+import 'package:mobile_flutter/features/shipment/domain/shipment_models.dart';
+import 'package:mobile_flutter/features/shipment/domain/shipment_repository.dart';
 import 'package:mobile_flutter/features/shipment/domain/media_queue_models.dart';
 import 'package:mobile_flutter/features/shipment/presentation/shipment_page.dart';
 
 void main() {
-  testWidgets('renders queue snapshot and refreshes repository snapshot',
+  testWidgets('renders queue snapshot and refreshes via orchestrator',
       (WidgetTester tester) async {
-    final repository = _FakeMediaLocalRepository(
-      pending: <MediaQueueItem>[_item(1, MediaQueueStatus.pending)],
-      failed: <MediaQueueItem>[
-        _item(2, MediaQueueStatus.failed),
-        _item(3, MediaQueueStatus.failed),
-      ],
-      uploaded: <MediaQueueItem>[_item(4, MediaQueueStatus.uploaded)],
-      deadLetter: <MediaQueueItem>[_item(5, MediaQueueStatus.deadLetter)],
+    final orchestrator = _FakeShipmentUploadOrchestrator(
+      queueSnapshot: QueueSnapshot(
+        pending: <MediaQueueItem>[_item(1, MediaQueueStatus.pending)],
+        failed: <MediaQueueItem>[
+          _item(2, MediaQueueStatus.failed),
+          _item(3, MediaQueueStatus.failed),
+        ],
+        uploaded: <MediaQueueItem>[_item(4, MediaQueueStatus.uploaded)],
+        deadLetter: <MediaQueueItem>[_item(5, MediaQueueStatus.deadLetter)],
+      ),
     );
-    final orchestrator = _FakeShipmentUploadOrchestrator();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
-          mediaLocalRepositoryProvider
-              .overrideWith((Ref ref) async => repository),
           shipmentUploadOrchestratorProvider
               .overrideWith((Ref ref) async => orchestrator),
         ],
@@ -41,24 +40,21 @@ void main() {
     expect(find.text('Failed'), findsOneWidget);
     expect(find.text('Uploaded'), findsOneWidget);
     expect(find.text('Dead Letter'), findsOneWidget);
-    expect(repository.listByStatusCallCount, greaterThanOrEqualTo(4));
+    expect(orchestrator.getQueueSnapshotCallCount, greaterThanOrEqualTo(1));
 
-    final beforeRefresh = repository.listByStatusCallCount;
+    final beforeRefresh = orchestrator.getQueueSnapshotCallCount;
     await tester.tap(find.byIcon(Icons.refresh));
     await tester.pumpAndSettle();
-    expect(repository.listByStatusCallCount, greaterThan(beforeRefresh));
+    expect(orchestrator.getQueueSnapshotCallCount, greaterThan(beforeRefresh));
   });
 
   testWidgets('shows tracking-required message when tracking number is empty',
       (WidgetTester tester) async {
-    final repository = _FakeMediaLocalRepository();
     final orchestrator = _FakeShipmentUploadOrchestrator();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
-          mediaLocalRepositoryProvider
-              .overrideWith((Ref ref) async => repository),
           shipmentUploadOrchestratorProvider
               .overrideWith((Ref ref) async => orchestrator),
         ],
@@ -79,14 +75,11 @@ void main() {
 
   testWidgets('shows image-required message when no image is selected',
       (WidgetTester tester) async {
-    final repository = _FakeMediaLocalRepository();
     final orchestrator = _FakeShipmentUploadOrchestrator();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
-          mediaLocalRepositoryProvider
-              .overrideWith((Ref ref) async => repository),
           shipmentUploadOrchestratorProvider
               .overrideWith((Ref ref) async => orchestrator),
         ],
@@ -103,9 +96,6 @@ void main() {
 
   testWidgets('retry failed action uses orchestrator and reports summary',
       (WidgetTester tester) async {
-    final repository = _FakeMediaLocalRepository(
-      failed: <MediaQueueItem>[_item(10, MediaQueueStatus.failed)],
-    );
     final orchestrator = _FakeShipmentUploadOrchestrator(
       retryResult: const RetryBatchResult(
         processed: 3,
@@ -118,8 +108,6 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
-          mediaLocalRepositoryProvider
-              .overrideWith((Ref ref) async => repository),
           shipmentUploadOrchestratorProvider
               .overrideWith((Ref ref) async => orchestrator),
         ],
@@ -152,7 +140,10 @@ MediaQueueItem _item(int id, MediaQueueStatus status) {
     lastErrorCode: status == MediaQueueStatus.failed ? 'LEGACY_TIMEOUT' : null,
     createdAt: now,
     updatedAt: now,
-    metadata: const <String, String>{'latitude': '25.03', 'longitude': '121.56'},
+    metadata: const <String, String>{
+      'latitude': '25.03',
+      'longitude': '121.56'
+    },
   );
 }
 
@@ -232,6 +223,8 @@ class _NoopShipmentRepository implements ShipmentRepository {
     required String imageFileName,
     required String latitude,
     required String longitude,
+    String? signatureBase64,
+    required String idempotencyKey,
   }) async {}
 
   @override
@@ -243,13 +236,21 @@ class _NoopShipmentRepository implements ShipmentRepository {
     String? reasonMessage,
     required String latitude,
     required String longitude,
+    required String idempotencyKey,
   }) async {}
+
+  @override
+  Future<ShipmentDetail> fetchShipment(String trackingNo) async {
+    return ShipmentDetail(trackingNo: trackingNo, status: 'delivered');
+  }
 }
 
 class _FakeShipmentUploadOrchestrator extends ShipmentUploadOrchestrator {
   _FakeShipmentUploadOrchestrator({
+    QueueSnapshot? queueSnapshot,
     RetryBatchResult? retryResult,
-  })  : _retryResult = retryResult ??
+  })  : _queueSnapshot = queueSnapshot ?? QueueSnapshot.empty(),
+        _retryResult = retryResult ??
             const RetryBatchResult(
               processed: 0,
               uploaded: 0,
@@ -261,9 +262,17 @@ class _FakeShipmentUploadOrchestrator extends ShipmentUploadOrchestrator {
           mediaLocalRepository: _FakeMediaLocalRepository(),
         );
 
+  final QueueSnapshot _queueSnapshot;
   final RetryBatchResult _retryResult;
   int retryCallCount = 0;
   int startupMaintenanceCallCount = 0;
+  int getQueueSnapshotCallCount = 0;
+
+  @override
+  Future<QueueSnapshot> getQueueSnapshot() async {
+    getQueueSnapshotCallCount++;
+    return _queueSnapshot;
+  }
 
   @override
   Future<void> runStartupMaintenance({
