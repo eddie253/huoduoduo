@@ -61,7 +61,6 @@ describe('bootstrap() smoke test', () => {
   });
 
   it('defaults to port 3000 when PORT is unset', async () => {
-    delete process.env.PORT;
     await bootstrap();
     expect(mockApp.listen).toHaveBeenCalledWith(3000);
   });

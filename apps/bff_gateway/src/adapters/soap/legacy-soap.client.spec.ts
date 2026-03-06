@@ -194,7 +194,7 @@ describe('LegacySoapClient validateLogin branches', () => {
 describe('LegacySoapClient listReservations branches', () => {
   it('throws LEGACY_BAD_RESPONSE when list response is not valid JSON', async () => {
     const transport = {
-      call: jest.fn(async ({ method }: { method: string }) => ({ GetARVed: 'broken{{json' })[method] ?? 'OK')
+      call: jest.fn(async ({ method }: { method: string }) => ({ GetARVed: 'broken{{json' } as Record<string, string>)[method] ?? 'OK')
     } as unknown as SoapTransportService;
     const config = {
       get: jest.fn((_key: string, fallback: unknown) => fallback)
