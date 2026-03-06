@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Workspace：bff_gateway | Monorepo Wiki</title>
+    <style>
+      :root {
+        --bg: #f6f8fc;
+        --panel: #ffffff;
+        --text: #1c2333;
+        --muted: #5a6475;
+        --line: #d8deea;
+        --accent: #0f6adf;
+        --accent-soft: #e9f2ff;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .layout { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
+      .sidebar { border-right: 1px solid var(--line); background: var(--panel); padding: 16px; overflow: auto; position: sticky; top: 0; height: 100vh; }
+      .sidebar h1 { font-size: 16px; margin: 0 0 12px; }
+      .sidebar h2 { font-size: 13px; margin: 14px 0 6px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+      .sidebar ul { margin: 0; padding-left: 16px; }
+      .sidebar li { margin: 4px 0; }
+      .sidebar a.active { font-weight: 700; color: #0b4fad; background: var(--accent-soft); padding: 2px 6px; border-radius: 6px; display: inline-block; }
+      .main { padding: 28px 40px 48px; }
+      .meta { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+      article { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; overflow-wrap: anywhere; }
+      article h1:first-child { margin-top: 0; }
+      article table { border-collapse: collapse; width: 100%; display: block; overflow: auto; }
+      article th, article td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; font-size: 14px; }
+      article th { background: #f2f5fb; }
+      article code { background: #eef2fb; padding: 0.1em 0.3em; border-radius: 4px; }
+      article pre { background: #10172a; color: #e7ecf7; padding: 12px; border-radius: 8px; overflow: auto; }
+      article pre code { background: transparent; padding: 0; }
+      article .mermaid { background: #ffffff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; overflow: auto; }
+      @media (max-width: 1024px) {
+        .layout { grid-template-columns: 1fr; }
+        .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+        .main { padding: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:build:site`. -->
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>Monorepo Wiki</h1>
+        <h2>Root</h2><ul><li><a href="../01-architecture.html">架構與建置系統</a></li><li><a href="../02-workspaces.html">Workspace 清單與覆蓋範圍</a></li><li><a href="../03-dependency-map.html">Workspace Dependency Map</a></li><li><a href="../04-dev-build-test.html">開發、建置與測試流程</a></li><li><a href="../05-ci-deploy.html">CI 與部署拓撲</a></li><li><a href="../06-governance.html">Repo 治理與邊界</a></li><li><a href="../07-troubleshooting.html">疑難排解手冊</a></li><li><a href="../08-runtime-code-map.html">程式碼語義地圖</a></li><li><a href="../09-ownership-quality.html">Ownership 與品質指標</a></li><li><a href="../10-metrics-trends.html">週期快照與趨勢</a></li><li><a href="../README.html">Monorepo Wiki 首頁</a></li></ul><h2>domains</h2><ul><li><a href="../domains/application-shell.html">領域：應用殼層（Apps）</a></li><li><a href="../domains/README.html">領域索引（Domain Index）</a></li></ul><h2>workspaces</h2><ul><li><a class="active" href="./apps--bff_gateway.html">Workspace：bff_gateway</a></li><li><a href="./apps--mobile_flutter.html">Workspace：mobile_flutter</a></li><li><a href="./README.html">Workspace 詳細索引</a></li></ul>
+      </aside>
+      <main class="main">
+        <p class="meta">workspaces/apps--bff_gateway.mdx<br />建立日期：2026-03-01 ｜ 最後修改：2026-03-05</p>
+        <article><p>{/* AUTO-GENERATED: Do not edit manually. Use <code>pnpm run wiki:generate</code>. */}</p>
+<h1>Workspace：bff_gateway</h1>
+<h2>文件定位</h2>
+<p>單一 workspace 的工程事實頁，供開發與維運快速定位。</p>
+<h2>更新摘要</h2>
+<ul>
+<li>本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。</li>
+<li>排序與格式固定，確保重複生成輸出一致（deterministic）。</li>
+<li>CI Gate 使用 <code>wiki:check</code> 驗證文件是否與程式碼同步。</li>
+</ul>
+<h2>文件中繼資料</h2>
+<table><thead><tr><th>欄位</th><th>內容</th></tr></thead><tbody><tr><td>產生器</td><td><code>node scripts/wiki/generate.mjs --mdx</code></td></tr><tr><td>驗證指令</td><td><code>node scripts/wiki/generate.mjs --check --mdx</code></td></tr><tr><td>輸出範圍</td><td><code>docs/wiki-mdx/*</code></td></tr><tr><td>核心來源</td><td><code>package.json</code>, <code>pnpm-workspace.yaml</code>, <code>turbo.json</code>, <code>Jenkinsfile</code></td></tr></tbody></table>
+<h2>引用檔案</h2>
+<ul>
+<li><a href="../../../apps/bff_gateway/package.json">apps/bff_gateway/package.json</a></li>
+<li><a href="../../../pnpm-workspace.yaml">pnpm-workspace.yaml</a></li>
+<li><a href="../../../scripts/wiki/generate.mjs">scripts/wiki/generate.mjs</a></li>
+</ul>
+<h2>章節目錄</h2>
+<ol>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E8%B3%87%E8%A8%8A">基本資訊</a></li>
+<li><a href="#%E8%85%B3%E6%9C%AC%E6%B8%85%E5%96%AE">腳本清單</a></li>
+<li><a href="#%E7%9B%B8%E4%BE%9D%E6%91%98%E8%A6%81">相依摘要</a></li>
+<li><a href="#workspace-outbound">Workspace Outbound</a></li>
+<li><a href="#workspace-inbound">Workspace Inbound</a></li>
+<li><a href="#%E6%9C%AA%E8%A7%A3%E6%9E%90%E7%9B%B8%E4%BE%9D">未解析相依</a></li>
+</ol>
+<h2>基本資訊</h2>
+<table><thead><tr><th>欄位</th><th>值</th></tr></thead><tbody><tr><td>名稱</td><td>bff_gateway</td></tr><tr><td>版本</td><td>0.1.0</td></tr><tr><td>分類</td><td>apps</td></tr><tr><td>領域</td><td>應用殼層（Apps）</td></tr><tr><td>路徑</td><td>apps/bff_gateway</td></tr><tr><td>可見性</td><td>private</td></tr><tr><td>解析模式</td><td>json</td></tr><tr><td>CODEOWNERS</td><td>-</td></tr><tr><td>最近提交作者</td><td>-</td></tr><tr><td>最近提交日期</td><td>-</td></tr><tr><td>Source Files</td><td>84</td></tr><tr><td>Source LOC</td><td>5738</td></tr><tr><td>Test Files</td><td>13</td></tr><tr><td>TODO/FIXME/HACK</td><td>0</td></tr><tr><td>Route Samples (Prod)</td><td>0</td></tr><tr><td>Route Samples (Test)</td><td>0</td></tr><tr><td>API Endpoint Samples (Prod)</td><td>0</td></tr><tr><td>API Endpoint Samples (Test)</td><td>0</td></tr><tr><td>領域頁</td><td><a href="../domains/application-shell.html">應用殼層（Apps）</a></td></tr></tbody></table>
+<h2>腳本清單</h2>
+<table><thead><tr><th>Script</th><th>Command</th></tr></thead><tbody><tr><td>audit:high</td><td>node -e &quot;const cp=require(&#x27;child_process&#x27;); cp.spawnSync(&#x27;npm&#x27;,[&#x27;audit&#x27;,&#x27;--audit-level=high&#x27;],{stdio:&#x27;inherit&#x27;,shell:true}); process.exit(0);&quot;</td></tr><tr><td>build</td><td>nest build</td></tr><tr><td>check:route-diff</td><td>node ../../ops/ci/check-route-diff.js</td></tr><tr><td>lint</td><td>eslint &quot;src/**/*.ts&quot; --max-warnings=0</td></tr><tr><td>start</td><td>node dist/main.js</td></tr><tr><td>start:dev</td><td>nest start --watch</td></tr><tr><td>test</td><td>jest --passWithNoTests</td></tr><tr><td>test:coverage</td><td>jest --coverage --passWithNoTests</td></tr><tr><td>test:watch</td><td>jest --watch</td></tr></tbody></table>
+<h2>相依摘要</h2>
+<table><thead><tr><th>區段</th><th>總數</th><th>workspace:*</th></tr></thead><tbody><tr><td>dependencies</td><td>12</td><td>0</td></tr><tr><td>devDependencies</td><td>17</td><td>0</td></tr><tr><td>peerDependencies</td><td>0</td><td>0</td></tr><tr><td>optionalDependencies</td><td>0</td><td>0</td></tr></tbody></table>
+<h2>Workspace Outbound</h2>
+<ul>
+<li>無 outbound workspace 相依。</li>
+</ul>
+<h2>Workspace Inbound</h2>
+<ul>
+<li>無 inbound workspace 相依。</li>
+</ul>
+<h2>未解析相依</h2>
+<ul>
+<li>無未解析 workspace 相依。</li>
+</ul></article>
+      </main>
+    </div>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      const blocks = [...document.querySelectorAll('pre > code')]
+        .filter((code) => code.className.includes('language-mermaid'));
+
+      for (const code of blocks) {
+        const pre = code.parentElement;
+        if (!pre) continue;
+        const container = document.createElement('div');
+        container.className = 'mermaid';
+        container.textContent = code.textContent ?? '';
+        pre.replaceWith(container);
+      }
+
+      if (document.querySelector('.mermaid')) {
+        mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' });
+        await mermaid.run({ querySelector: '.mermaid' });
+      }
+    </script>
+  </body>
+</html>

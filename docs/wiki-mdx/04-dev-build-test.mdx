@@ -1,0 +1,58 @@
+---
+title: "開發、建置與測試流程"
+source: "04-dev-build-test.md"
+generated: true
+doc_id: "wiki-04-dev-build-test"
+lang: "zh-TW"
+source_of_truth: "zh-TW"
+translation_status: "source"
+source_hash: "c5009304f27052541b43b4cb7fdd468ca5238e5684248e014920624a166f2814"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# 開發、建置與測試流程
+
+## 文件定位
+整理日常開發、品質閘、E2E 的可執行命令矩陣。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [package.json](../../package.json)
+- [tests/e2e-main/package.json](../../tests/e2e-main/package.json)
+- [turbo.json](../../turbo.json)
+- [Jenkinsfile](../../Jenkinsfile)
+
+## 章節目錄
+1. [Root 指令矩陣](#root-指令矩陣)
+2. [E2E Workspace 指令](#e2e-workspace-指令)
+3. [建議本地流程](#建議本地流程)
+
+## Root 指令矩陣
+| 階段 | Script | Command | 用途 |
+| --- | --- | --- | --- |
+| (none) | - | - | - |
+
+## E2E Workspace 指令
+| Script | Command |
+| --- | --- |
+| (none) | - |
+
+## 建議本地流程
+1. `pnpm install --frozen-lockfile`
+2. `pnpm run dev:main`（或對應 app 的 dev script）
+3. 提交 PR 前先跑 `pnpm run ci:main:gate:fast`
+4. 變更 repo 事實來源後執行 `pnpm run wiki:generate`
+5. push 前執行 `pnpm run wiki:check`

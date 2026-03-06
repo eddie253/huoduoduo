@@ -1,0 +1,72 @@
+---
+title: "Repo 治理與邊界"
+source: "06-governance.md"
+generated: true
+doc_id: "wiki-06-governance"
+lang: "zh-TW"
+source_of_truth: "zh-TW"
+translation_status: "source"
+source_hash: "ab18b8c01153fa534099f6f805ddb064d62f354d95e7153d9331b37c01af2e52"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# Repo 治理與邊界
+
+## 文件定位
+追蹤 nested git 責任歸屬、政策漂移與檢視頻率。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [scripts/verify/repo-layout.config.json](../../scripts/verify/repo-layout.config.json)
+- [docs/engineering/1governance/NESTED_GIT_GOVERNANCE.md](../engineering/1governance/NESTED_GIT_GOVERNANCE.md)
+- [docs/engineering/3standards/REPO_DIRECTORY_STANDARD_PLAN.md](../engineering/3standards/REPO_DIRECTORY_STANDARD_PLAN.md)
+
+## 章節目錄
+1. [治理設定](#治理設定)
+2. [治理指標](#治理指標)
+3. [已登記 Nested Git](#已登記-nested-git)
+4. [漂移報告](#漂移報告)
+
+## 治理設定
+- team: unset
+- lastReviewedOn: unset
+- cadenceDays: unset
+
+## 治理指標
+| 指標 | 數值 |
+| --- | --- |
+| 已登記 nested git 條目 | 0 |
+| 實際偵測 nested git 目錄 | 1 |
+| 未登記 nested git 目錄 | 1 |
+| 設定存在但未偵測到 | 0 |
+
+## 已登記 Nested Git
+| Path | Mode | Owner | Status | TargetState | SyncCadence |
+| --- | --- | --- | --- | --- | --- |
+| (none) | - | - | - | - | - |
+
+## 漂移報告
+### 未登記的 nested `.git` 目錄
+| Path |
+| --- |
+| apps/skills/flutter-skills/.git |
+
+### 設定有登記但未被偵測
+- 無。
+
+## 常用治理指令
+1. `pnpm run verify:repo:layout`
+2. `pnpm run verify:repo:governance`

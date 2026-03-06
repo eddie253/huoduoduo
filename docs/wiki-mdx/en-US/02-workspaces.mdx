@@ -1,0 +1,67 @@
+---
+title: "[EN DRAFT] Workspace 清單與覆蓋範圍"
+source: "02-workspaces.md"
+generated: true
+doc_id: "wiki-02-workspaces"
+lang: "en-US"
+source_of_truth: "zh-TW"
+translation_status: "draft"
+source_hash: "db74a2e17d59d6cf4660816d1e028839046a55113c4e5dfdde271bc8f283c232"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm --filter @repo/wiki run sync:en` after `wiki:generate`. */}
+
+> Auto-generated English skeleton.
+> Source (zh-TW): `../02-workspaces.mdx`
+> Translation mode: draft (manual translation required).
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# Workspace 清單與覆蓋範圍
+
+## 文件定位
+提供 deterministic 的 workspace 清冊，含 fallback 與未納管診斷。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [package.json](../../package.json)
+- [pnpm-workspace.yaml](../../pnpm-workspace.yaml)
+- [scripts/verify/repo-layout.config.json](../../scripts/verify/repo-layout.config.json)
+
+## 章節目錄
+1. [覆蓋摘要](#覆蓋摘要)
+2. [已納管 Workspace 清冊](#已納管-workspace-清冊)
+3. [解析警示（Fallback/Missing）](#解析警示fallbackmissing)
+4. [未納管 Package 目錄](#未納管-package-目錄)
+
+## 覆蓋摘要
+- 已納管 workspace：**2**
+- 未納管 package 目錄：**0**
+- 解析警示（fallback/missing）：**0**
+
+| 分類 | 數量 |
+| --- | --- |
+| apps | 2 |
+
+## 已納管 Workspace 清冊
+| 分類 | 名稱 | 版本 | 可見性 | 解析模式 | 路徑 | 詳細頁 |
+| --- | --- | --- | --- | --- | --- | --- |
+| apps | bff_gateway | 0.1.0 | private | json | apps/bff_gateway | [查看](./workspaces/apps--bff_gateway.mdx) |
+| apps | mobile_flutter | 0.1.0 | private | json | apps/mobile_flutter | [查看](./workspaces/apps--mobile_flutter.mdx) |
+
+## 解析警示（Fallback/Missing）
+- 無解析警示。
+
+## 未納管 Package 目錄
+- 未發現未納管 package 目錄。

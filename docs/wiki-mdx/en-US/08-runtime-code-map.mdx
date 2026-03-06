@@ -1,0 +1,86 @@
+---
+title: "[EN DRAFT] 程式碼語義地圖"
+source: "08-runtime-code-map.md"
+generated: true
+doc_id: "wiki-08-runtime-code-map"
+lang: "en-US"
+source_of_truth: "zh-TW"
+translation_status: "draft"
+source_hash: "ac6766493dbd8583e5a42f0e472ec5676d7e70cf5cb7ff27ee71f3619eea8e7d"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm --filter @repo/wiki run sync:en` after `wiki:generate`. */}
+
+> Auto-generated English skeleton.
+> Source (zh-TW): `../08-runtime-code-map.mdx`
+> Translation mode: draft (manual translation required).
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# 程式碼語義地圖
+
+## 文件定位
+基於 src 掃描結果，盤點 workspace import 關係、路由樣本與 API 端點樣本。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [pnpm-workspace.yaml](../../pnpm-workspace.yaml)
+- [apps/bob-web-apps-main/src/router/routes](../../apps/bob-web-apps-main/src/router/routes)
+- [packages](../../packages)
+- [scripts/wiki/generate.mjs](../../scripts/wiki/generate.mjs)
+
+## 章節目錄
+1. [掃描摘要](#掃描摘要)
+2. [Workspace Import 邊](#workspace-import-邊)
+3. [路由樣本（Production）](#路由樣本production)
+4. [路由樣本（Test）](#路由樣本test)
+5. [API 端點樣本（Production）](#api-端點樣本production)
+6. [API 端點樣本（Test）](#api-端點樣本test)
+7. [未解析 Workspace Import](#未解析-workspace-import)
+
+## 掃描摘要
+| 指標 | 數值 |
+| --- | --- |
+| 掃描檔案數 | 84 |
+| 掃描 production 檔案數 | 71 |
+| 掃描 test 檔案數 | 13 |
+| 掃描程式行數 | 5738 |
+| Workspace import 邊（去重） | 0 |
+| 路由樣本數（production） | 0 |
+| 路由樣本數（test） | 0 |
+| API 端點樣本數（production） | 0 |
+| API 端點樣本數（test） | 0 |
+| API 授權標記（Prod auth/public/unknown） | 0/0/0 |
+| API 授權標記（Test auth/public/unknown） | 0/0/0 |
+| API 授權中介層標記（Prod 標記/無標記） | 0/0 |
+| API 授權中介層標記（Test 標記/無標記） | 0/0 |
+| 未解析 workspace import | 0 |
+
+## Workspace Import 邊
+- 無 workspace import 邊。
+
+## 路由樣本（Production）
+- 無 production 路由樣本。
+
+## 路由樣本（Test）
+- 無 test 路由樣本。
+
+## API 端點樣本（Production）
+- 無 production API 樣本。
+
+## API 端點樣本（Test）
+- 無 test API 樣本。
+
+## 未解析 Workspace Import
+- 無未解析 workspace import。

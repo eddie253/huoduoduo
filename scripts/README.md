@@ -33,6 +33,27 @@ cd apps/mobile_flutter
 flutter test integration_test/login_to_webview_test.dart -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:3000/v1 --dart-define=UAT_ACCOUNT=<你的帳號> --dart-define=UAT_PASSWORD=<你的密碼> --dart-define=UAT_LOGIN_TIMEOUT_SECONDS=90
 ```
 
+### 自動化（從 .env.local 讀取 UAT 帳密）
+
+以下指令會從 `apps/mobile_flutter/.env.local` 讀取：
+
+- `UAT_ACCOUNT`
+- `UAT_PASSWORD`
+- `API_BASE_URL`（可選，預設 `http://10.0.2.2:3000/v1`）
+- `UAT_LOGIN_TIMEOUT_SECONDS`（可選，預設 90）
+
+在 repo 根目錄執行：
+
+```powershell
+npm run mobile:test:uat-login-it
+```
+
+如需指定裝置與 emulator：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run-mobile-uat-integration-test.ps1 -DeviceId emulator-5554 -EmulatorId didi_api34
+```
+
 ## 5) Troubleshooting：模擬器右側黑條/多餘畫面
 
 症狀通常是 AVD 設定異常（多螢幕旗標或 GPU 關閉），不是 Flutter 程式碼問題。

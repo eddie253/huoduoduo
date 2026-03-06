@@ -1,0 +1,21 @@
+{
+  "commitHash": "unknown",
+  "shortHash": "unknown",
+  "commitDate": "1970-01-01",
+  "workspaceCount": 2,
+  "scannedFiles": 84,
+  "scannedProdFiles": 71,
+  "scannedTestFiles": 13,
+  "sourceFiles": 84,
+  "sourceLoc": 5738,
+  "todoTotal": 0,
+  "importEdgeCount": 0,
+  "routeSampleProd": 0,
+  "routeSampleTest": 0,
+  "apiSampleProd": 0,
+  "apiSampleTest": 0,
+  "unresolvedWorkspaceImports": 0,
+  "riskHigh": 0,
+  "riskMedium": 0,
+  "riskLow": 2
+}

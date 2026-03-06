@@ -1,0 +1,101 @@
+---
+title: "Monorepo Wiki 首頁"
+source: "README.md"
+generated: true
+doc_id: "wiki-README"
+lang: "zh-TW"
+source_of_truth: "zh-TW"
+translation_status: "source"
+source_hash: "6b8f6cf2ad96bd98baca18d54dcbf9b816d99858eb7abf4295fc325adbf39ac4"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# Monorepo Wiki 首頁
+
+## 文件定位
+本 Wiki 由程式碼事實自動生成，並由 CI 強制檢查同步。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [package.json](../../package.json)
+- [pnpm-workspace.yaml](../../pnpm-workspace.yaml)
+- [turbo.json](../../turbo.json)
+- [Jenkinsfile](../../Jenkinsfile)
+- [scripts/wiki/generate.mjs](../../scripts/wiki/generate.mjs)
+
+## 章節目錄
+1. [重點摘要](#重點摘要)
+2. [快速入口](#快速入口)
+3. [文件導覽](#文件導覽)
+4. [Workspace 指標](#workspace-指標)
+5. [更新契約](#更新契約)
+
+### 文件清單
+1. [README.md](./README.mdx)
+2. [01-architecture.md](./01-architecture.mdx)
+3. [02-workspaces.md](./02-workspaces.mdx)
+4. [03-dependency-map.md](./03-dependency-map.mdx)
+5. [04-dev-build-test.md](./04-dev-build-test.mdx)
+6. [05-ci-deploy.md](./05-ci-deploy.mdx)
+7. [06-governance.md](./06-governance.mdx)
+8. [07-troubleshooting.md](./07-troubleshooting.mdx)
+9. [08-runtime-code-map.md](./08-runtime-code-map.mdx)
+10. [09-ownership-quality.md](./09-ownership-quality.mdx)
+11. [10-metrics-trends.md](./10-metrics-trends.mdx)
+12. [workspaces/README.md](./workspaces/README.mdx)
+13. [domains/README.md](./domains/README.mdx)
+
+## 重點摘要
+- 已納管 workspace：**2**
+- 生成基線工作區（含被排除）：**3**
+- 生成 workspace 詳細頁：**2**
+- 生成領域頁：**1**
+- 程式碼掃描檔案：**84**（production: 71 / test: 13）
+- 未納管 package 目錄：**0**
+- 解析警示（fallback/missing）：**0**
+- CI Gate 已納入 `wiki:check`，防止文件過期。
+
+## 快速入口
+- [Workspace 詳細索引](./workspaces/README.mdx)
+- [領域索引](./domains/README.mdx)
+- [程式碼語義地圖](./08-runtime-code-map.mdx)
+
+## 文件導覽
+| 文件 | 用途 |
+| --- | --- |
+| [README.md](./README.mdx) | 入口頁與維護契約 |
+| [01-architecture.md](./01-architecture.mdx) | 架構分層與工具契約 |
+| [02-workspaces.md](./02-workspaces.mdx) | workspace 清單與覆蓋範圍 |
+| [03-dependency-map.md](./03-dependency-map.mdx) | workspace:* 相依拓撲 |
+| [04-dev-build-test.md](./04-dev-build-test.mdx) | 日常開發與測試流程 |
+| [05-ci-deploy.md](./05-ci-deploy.mdx) | CI Gate 與部署路徑 |
+| [06-governance.md](./06-governance.mdx) | nested git 與治理稽核 |
+| [07-troubleshooting.md](./07-troubleshooting.mdx) | 常見異常處理手冊 |
+| [08-runtime-code-map.md](./08-runtime-code-map.mdx) | 程式碼語義地圖（import/routes/api） |
+| [09-ownership-quality.md](./09-ownership-quality.mdx) | 維護責任與品質風險指標 |
+| [10-metrics-trends.md](./10-metrics-trends.mdx) | 週期快照與趨勢變化 |
+| [workspaces/README.md](./workspaces/README.mdx) | 每個 workspace 的詳細工程頁（自動生成） |
+| [domains/README.md](./domains/README.mdx) | 按領域聚合的架構/相依觀測頁（自動生成） |
+
+## Workspace 指標
+| 分類 | 數量 |
+| --- | --- |
+| apps | 2 |
+
+## 更新契約
+1. 產生文件：`pnpm run wiki:generate`
+2. 驗證同步：`pnpm run wiki:check`
+3. 任何影響事實來源的 PR，需一併提交 `docs/wiki-mdx/*`

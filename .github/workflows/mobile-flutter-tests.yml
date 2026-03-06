@@ -1,0 +1,33 @@
+name: Mobile Flutter Tests
+
+on:
+  push:
+    paths:
+      - 'apps/mobile_flutter/**'
+      - '.github/workflows/mobile-flutter-tests.yml'
+  pull_request:
+    paths:
+      - 'apps/mobile_flutter/**'
+      - '.github/workflows/mobile-flutter-tests.yml'
+
+jobs:
+  mobile_flutter_unit_widget_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile_flutter
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Flutter analyze
+        run: flutter analyze
+
+      - name: Flutter unit & widget tests
+        run: flutter test

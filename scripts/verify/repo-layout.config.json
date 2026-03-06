@@ -1,0 +1,6 @@
+{
+  "$schema": "./repo-layout.schema.json",
+  "nestedGitGovernance": [],
+  "walkSkipDirectories": [],
+  "governanceReview": {}
+}

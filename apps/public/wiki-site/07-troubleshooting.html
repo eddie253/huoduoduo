@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>疑難排解手冊 | Monorepo Wiki</title>
+    <style>
+      :root {
+        --bg: #f6f8fc;
+        --panel: #ffffff;
+        --text: #1c2333;
+        --muted: #5a6475;
+        --line: #d8deea;
+        --accent: #0f6adf;
+        --accent-soft: #e9f2ff;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .layout { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
+      .sidebar { border-right: 1px solid var(--line); background: var(--panel); padding: 16px; overflow: auto; position: sticky; top: 0; height: 100vh; }
+      .sidebar h1 { font-size: 16px; margin: 0 0 12px; }
+      .sidebar h2 { font-size: 13px; margin: 14px 0 6px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+      .sidebar ul { margin: 0; padding-left: 16px; }
+      .sidebar li { margin: 4px 0; }
+      .sidebar a.active { font-weight: 700; color: #0b4fad; background: var(--accent-soft); padding: 2px 6px; border-radius: 6px; display: inline-block; }
+      .main { padding: 28px 40px 48px; }
+      .meta { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+      article { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; overflow-wrap: anywhere; }
+      article h1:first-child { margin-top: 0; }
+      article table { border-collapse: collapse; width: 100%; display: block; overflow: auto; }
+      article th, article td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; font-size: 14px; }
+      article th { background: #f2f5fb; }
+      article code { background: #eef2fb; padding: 0.1em 0.3em; border-radius: 4px; }
+      article pre { background: #10172a; color: #e7ecf7; padding: 12px; border-radius: 8px; overflow: auto; }
+      article pre code { background: transparent; padding: 0; }
+      article .mermaid { background: #ffffff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; overflow: auto; }
+      @media (max-width: 1024px) {
+        .layout { grid-template-columns: 1fr; }
+        .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+        .main { padding: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:build:site`. -->
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>Monorepo Wiki</h1>
+        <h2>Root</h2><ul><li><a href="./01-architecture.html">架構與建置系統</a></li><li><a href="./02-workspaces.html">Workspace 清單與覆蓋範圍</a></li><li><a href="./03-dependency-map.html">Workspace Dependency Map</a></li><li><a href="./04-dev-build-test.html">開發、建置與測試流程</a></li><li><a href="./05-ci-deploy.html">CI 與部署拓撲</a></li><li><a href="./06-governance.html">Repo 治理與邊界</a></li><li><a class="active" href="./07-troubleshooting.html">疑難排解手冊</a></li><li><a href="./08-runtime-code-map.html">程式碼語義地圖</a></li><li><a href="./09-ownership-quality.html">Ownership 與品質指標</a></li><li><a href="./10-metrics-trends.html">週期快照與趨勢</a></li><li><a href="./README.html">Monorepo Wiki 首頁</a></li></ul><h2>domains</h2><ul><li><a href="./domains/application-shell.html">領域：應用殼層（Apps）</a></li><li><a href="./domains/README.html">領域索引（Domain Index）</a></li></ul><h2>workspaces</h2><ul><li><a href="./workspaces/apps--bff_gateway.html">Workspace：bff_gateway</a></li><li><a href="./workspaces/apps--mobile_flutter.html">Workspace：mobile_flutter</a></li><li><a href="./workspaces/README.html">Workspace 詳細索引</a></li></ul>
+      </aside>
+      <main class="main">
+        <p class="meta">07-troubleshooting.mdx<br />建立日期：2026-03-01 ｜ 最後修改：2026-03-05</p>
+        <article><p>{/* AUTO-GENERATED: Do not edit manually. Use <code>pnpm run wiki:generate</code>. */}</p>
+<h1>疑難排解手冊</h1>
+<h2>文件定位</h2>
+<p>提供可執行的診斷路徑與修復動作，降低 Gate/部署回歸風險。</p>
+<h2>更新摘要</h2>
+<ul>
+<li>本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。</li>
+<li>排序與格式固定，確保重複生成輸出一致（deterministic）。</li>
+<li>CI Gate 使用 <code>wiki:check</code> 驗證文件是否與程式碼同步。</li>
+</ul>
+<h2>文件中繼資料</h2>
+<table><thead><tr><th>欄位</th><th>內容</th></tr></thead><tbody><tr><td>產生器</td><td><code>node scripts/wiki/generate.mjs --mdx</code></td></tr><tr><td>驗證指令</td><td><code>node scripts/wiki/generate.mjs --check --mdx</code></td></tr><tr><td>輸出範圍</td><td><code>docs/wiki-mdx/*</code></td></tr><tr><td>核心來源</td><td><code>package.json</code>, <code>pnpm-workspace.yaml</code>, <code>turbo.json</code>, <code>Jenkinsfile</code></td></tr></tbody></table>
+<h2>引用檔案</h2>
+<ul>
+<li><a href="../../package.json">package.json</a></li>
+<li><a href="../../pnpm-workspace.yaml">pnpm-workspace.yaml</a></li>
+<li><a href="../../scripts/verify/repo-layout.config.json">scripts/verify/repo-layout.config.json</a></li>
+<li><a href="../../scripts/wiki/generate.mjs">scripts/wiki/generate.mjs</a></li>
+</ul>
+<h2>章節目錄</h2>
+<ol>
+<li><a href="#%E4%BA%8B%E4%BB%B6%E7%9F%A9%E9%99%A3">事件矩陣</a></li>
+<li><a href="#%E5%BF%AB%E9%80%9F%E6%8C%87%E4%BB%A4%E7%B4%A2%E5%BC%95">快速指令索引</a></li>
+<li><a href="#repo-%E7%8F%BE%E6%B3%81%E8%A8%8A%E8%99%9F">Repo 現況訊號</a></li>
+</ol>
+<h2>事件矩陣</h2>
+<table><thead><tr><th>症狀</th><th>診斷</th><th>可能原因</th><th>修復方式</th></tr></thead><tbody><tr><td><code>wiki:check</code> 失敗</td><td>執行 <code>pnpm run wiki:check</code> 查看漂移檔案。</td><td>文件內容已落後於程式碼事實。</td><td>執行 <code>pnpm run wiki:generate</code> 並提交 <code>docs/wiki-mdx/*</code>。</td></tr><tr><td>Workspace 未出現在清冊</td><td>比對 <code>pnpm -r list --depth -1 --json</code> 與 <code>pnpm-workspace.yaml</code>。</td><td>include/exclude 規則或目錄位置不一致。</td><td>調整 workspace 規則或修正目錄位置。</td></tr><tr><td>Fallback/Missing 解析警示</td><td>檢查目標 <code>package.json</code> 是否可被 JSON.parse。</td><td>JSON 格式錯誤或檔案缺失。</td><td>修正 JSON 或補齊檔案後重生 wiki。</td></tr><tr><td>Nested git 漂移</td><td>執行 <code>pnpm run verify:repo:governance</code>。</td><td>實際 <code>.git</code> 邊界與治理設定不一致。</td><td>更新 <code>scripts/verify/repo-layout.config.json</code> 或移除非預期 nested repo。</td></tr><tr><td>Gate 通過但部署失敗</td><td>檢查 Jenkins deploy log 與 manifest 代換。</td><td>憑證、tag、manifest 內容不一致。</td><td>修正部署參數後重新觸發 pipeline。</td></tr></tbody></table>
+<h2>快速指令索引</h2>
+<ol>
+<li><code>pnpm run wiki:generate</code></li>
+<li><code>pnpm run wiki:check</code></li>
+<li><code>pnpm run verify:repo:layout</code></li>
+<li><code>pnpm run verify:repo:governance</code></li>
+<li><code>pnpm run ci:main:gate:fast</code></li>
+</ol>
+<h2>Repo 現況訊號</h2>
+<ul>
+<li>解析警示數（fallback/missing）：<strong>0</strong></li>
+<li>未登記 nested git 數量：<strong>1</strong></li>
+<li>設定存在但未偵測數量：<strong>0</strong></li>
+</ul></article>
+      </main>
+    </div>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      const blocks = [...document.querySelectorAll('pre > code')]
+        .filter((code) => code.className.includes('language-mermaid'));
+
+      for (const code of blocks) {
+        const pre = code.parentElement;
+        if (!pre) continue;
+        const container = document.createElement('div');
+        container.className = 'mermaid';
+        container.textContent = code.textContent ?? '';
+        pre.replaceWith(container);
+      }
+
+      if (document.querySelector('.mermaid')) {
+        mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' });
+        await mermaid.run({ querySelector: '.mermaid' });
+      }
+    </script>
+  </body>
+</html>

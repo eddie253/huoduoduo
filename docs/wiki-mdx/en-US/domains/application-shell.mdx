@@ -1,0 +1,72 @@
+---
+title: "[EN DRAFT] 領域：應用殼層（Apps）"
+source: "domains/application-shell.md"
+generated: true
+doc_id: "wiki-domains--application-shell"
+lang: "en-US"
+source_of_truth: "zh-TW"
+translation_status: "draft"
+source_hash: "608521cd048587fe436020f88e5504dd1b1326635d154ddc9fed581c22000d7c"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm --filter @repo/wiki run sync:en` after `wiki:generate`. */}
+
+> Auto-generated English skeleton.
+> Source (zh-TW): `../domains/application-shell.mdx`
+> Translation mode: draft (manual translation required).
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# 領域：應用殼層（Apps）
+
+## 文件定位
+對外可部署應用與主要執行入口。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [pnpm-workspace.yaml](../../../pnpm-workspace.yaml)
+- [scripts/wiki/generate.mjs](../../../scripts/wiki/generate.mjs)
+- [package.json](../../../package.json)
+
+## 章節目錄
+1. [領域摘要](#領域摘要)
+2. [Workspace 清單](#workspace-清單)
+3. [跨領域 Outbound](#跨領域-outbound)
+4. [跨領域 Inbound](#跨領域-inbound)
+5. [未解析相依](#未解析相依)
+
+## 領域摘要
+| 指標 | 數值 |
+| --- | --- |
+| Workspace 數量 | 2 |
+| Outbound workspace 邊 | 0 |
+| Inbound workspace 邊 | 0 |
+| 領域內部邊 | 0 |
+| 跨領域 Outbound 邊 | 0 |
+| 跨領域 Inbound 邊 | 0 |
+
+## Workspace 清單
+| 分類 | 名稱 | 版本 | 路徑 | 詳細頁 |
+| --- | --- | --- | --- | --- |
+| apps | bff_gateway | 0.1.0 | apps/bff_gateway | [查看](../workspaces/apps--bff_gateway.mdx) |
+| apps | mobile_flutter | 0.1.0 | apps/mobile_flutter | [查看](../workspaces/apps--mobile_flutter.mdx) |
+
+## 跨領域 Outbound
+- 無跨領域 outbound。
+
+## 跨領域 Inbound
+- 無跨領域 inbound。
+
+## 未解析相依
+- 無未解析 workspace 相依。

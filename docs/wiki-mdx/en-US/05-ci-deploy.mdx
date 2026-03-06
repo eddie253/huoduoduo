@@ -1,0 +1,76 @@
+---
+title: "[EN DRAFT] CI 與部署拓撲"
+source: "05-ci-deploy.md"
+generated: true
+doc_id: "wiki-05-ci-deploy"
+lang: "en-US"
+source_of_truth: "zh-TW"
+translation_status: "draft"
+source_hash: "0bfc78cbc7eb4ee4796a8a76e23e4b5e112c4c6f9414b458033a0d419d1d6544"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm --filter @repo/wiki run sync:en` after `wiki:generate`. */}
+
+> Auto-generated English skeleton.
+> Source (zh-TW): `../05-ci-deploy.mdx`
+> Translation mode: draft (manual translation required).
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# CI 與部署拓撲
+
+## 文件定位
+整理 Jenkins Stage、關鍵命令與部署產物責任邊界。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [Jenkinsfile](../../Jenkinsfile)
+- [deploy/deploy-deployment.yaml](../../deploy/deploy-deployment.yaml)
+- [deploy/deploy-service.yaml](../../deploy/deploy-service.yaml)
+- [deploy/deploy-ingress.yaml](../../deploy/deploy-ingress.yaml)
+- [scripts/deploy/Dockerfile](../../scripts/deploy/Dockerfile)
+- [scripts/deploy/nginx.conf](../../scripts/deploy/nginx.conf)
+
+## 章節目錄
+1. [Jenkins Stage 流程](#jenkins-stage-流程)
+2. [關鍵 CI 指令](#關鍵-ci-指令)
+3. [部署產物](#部署產物)
+4. [CI Gate 契約](#ci-gate-契約)
+
+## Jenkins Stage 流程
+| 順序 | Stage |
+| --- | --- |
+| 1 | Checkout SCM |
+| 2 | Main Quality Gate |
+| 3 | Build & Push Images |
+| 4 | Deploy to Staging |
+
+## 關鍵 CI 指令
+| Command | 用途 |
+| --- | --- |
+| docker build -t $REGISTRY/$REGISTRY_NAMESPACE/$APP_NAME:$APP_VER-$BUILD_NUMBER -f Dockerfile . | 建置發布映像 |
+| docker push $REGISTRY/$REGISTRY_NAMESPACE/$APP_NAME:$APP_VER-$BUILD_NUMBER | 推送映像到 Registry |
+| kubectl apply -f - | 套用 Kubernetes 清單 |
+| pnpm run ci:main:e2e:prepare | Pipeline 命令 |
+| pnpm run ci:main:gate:full | Pipeline 命令 |
+
+## 部署產物
+| 檔案 | 角色 |
+| --- | --- |
+| (none) | - |
+
+## CI Gate 契約
+- `ci:main:gate:fast` 已納入 `wiki:check`；文件漂移即失敗。
+- Gate 綠燈代表程式、測試與 wiki 同步。
+- Deploy stage 依賴 Jenkins 憑證與 `deploy/*.yaml` 清單。

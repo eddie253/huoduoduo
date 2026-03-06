@@ -1,0 +1,67 @@
+---
+title: "[EN DRAFT] 疑難排解手冊"
+source: "07-troubleshooting.md"
+generated: true
+doc_id: "wiki-07-troubleshooting"
+lang: "en-US"
+source_of_truth: "zh-TW"
+translation_status: "draft"
+source_hash: "270e175ba380b4ade2401bfeb5e8c14a871367c556a2e0809224af55d37eb66f"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm --filter @repo/wiki run sync:en` after `wiki:generate`. */}
+
+> Auto-generated English skeleton.
+> Source (zh-TW): `../07-troubleshooting.mdx`
+> Translation mode: draft (manual translation required).
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# 疑難排解手冊
+
+## 文件定位
+提供可執行的診斷路徑與修復動作，降低 Gate/部署回歸風險。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [package.json](../../package.json)
+- [pnpm-workspace.yaml](../../pnpm-workspace.yaml)
+- [scripts/verify/repo-layout.config.json](../../scripts/verify/repo-layout.config.json)
+- [scripts/wiki/generate.mjs](../../scripts/wiki/generate.mjs)
+
+## 章節目錄
+1. [事件矩陣](#事件矩陣)
+2. [快速指令索引](#快速指令索引)
+3. [Repo 現況訊號](#repo-現況訊號)
+
+## 事件矩陣
+| 症狀 | 診斷 | 可能原因 | 修復方式 |
+| --- | --- | --- | --- |
+| `wiki:check` 失敗 | 執行 `pnpm run wiki:check` 查看漂移檔案。 | 文件內容已落後於程式碼事實。 | 執行 `pnpm run wiki:generate` 並提交 `docs/wiki-mdx/*`。 |
+| Workspace 未出現在清冊 | 比對 `pnpm -r list --depth -1 --json` 與 `pnpm-workspace.yaml`。 | include/exclude 規則或目錄位置不一致。 | 調整 workspace 規則或修正目錄位置。 |
+| Fallback/Missing 解析警示 | 檢查目標 `package.json` 是否可被 JSON.parse。 | JSON 格式錯誤或檔案缺失。 | 修正 JSON 或補齊檔案後重生 wiki。 |
+| Nested git 漂移 | 執行 `pnpm run verify:repo:governance`。 | 實際 `.git` 邊界與治理設定不一致。 | 更新 `scripts/verify/repo-layout.config.json` 或移除非預期 nested repo。 |
+| Gate 通過但部署失敗 | 檢查 Jenkins deploy log 與 manifest 代換。 | 憑證、tag、manifest 內容不一致。 | 修正部署參數後重新觸發 pipeline。 |
+
+## 快速指令索引
+1. `pnpm run wiki:generate`
+2. `pnpm run wiki:check`
+3. `pnpm run verify:repo:layout`
+4. `pnpm run verify:repo:governance`
+5. `pnpm run ci:main:gate:fast`
+
+## Repo 現況訊號
+- 解析警示數（fallback/missing）：**0**
+- 未登記 nested git 數量：**1**
+- 設定存在但未偵測數量：**0**

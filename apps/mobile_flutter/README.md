@@ -23,14 +23,14 @@ Flutter client for Wave 2 -> Wave 4 migration.
 ```bash
 flutter pub get
 flutter analyze
-flutter test lib
+flutter test
 flutter build apk --debug
 ```
 
 ## Coverage
 
 ```bash
-flutter test --coverage lib
+flutter test --coverage
 ```
 
 Monorepo helper commands (from repo root):
@@ -41,6 +41,11 @@ npm run mobile:coverage:check
 ```
 
 `npm run mobile:coverage:check` enforces Flutter line coverage >= 65.
+
+## CI automation
+
+- Jenkins：維持原本的 mobile verify & apk build（依 repo root scripts）。
+- GitHub Actions：`.github/workflows/mobile-flutter-tests.yml` 在 push / PR 變動 `apps/mobile_flutter/**` 時會自動跑 `flutter analyze` 與 `flutter test`。
 
 Coverage artifacts are generated in:
 

@@ -1,0 +1,66 @@
+---
+title: "Ownership 與品質指標"
+source: "09-ownership-quality.md"
+generated: true
+doc_id: "wiki-09-ownership-quality"
+lang: "zh-TW"
+source_of_truth: "zh-TW"
+translation_status: "source"
+source_hash: "9eb1af135b0e69b574daeb9e42c127d663ac892f861ad4c9571858310e64f986"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# Ownership 與品質指標
+
+## 文件定位
+彙整 workspace 責任歸屬（CODEOWNERS + git）與靜態品質風險指標。
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [scripts/wiki/wiki.config.json](../../scripts/wiki/wiki.config.json)
+- [package.json](../../package.json)
+- [scripts/wiki/generate.mjs](../../scripts/wiki/generate.mjs)
+
+## 章節目錄
+1. [Ownership 摘要](#ownership-摘要)
+2. [Ownership 清單](#ownership-清單)
+3. [品質指標](#品質指標)
+4. [風險 Top 清單](#風險-top-清單)
+
+## Ownership 摘要
+| 指標 | 數值 |
+| --- | --- |
+| workspace 數量 | 2 |
+| 有 CODEOWNERS 規則 | 0 |
+| 可解析最近提交作者 | 0 |
+
+## Ownership 清單
+| Workspace | CODEOWNERS | Last Commit Author | Last Commit Date | Top Contributors |
+| --- | --- | --- | --- | --- |
+| bff_gateway | - | - | - | - |
+| mobile_flutter | - | - | - | - |
+
+## 品質指標
+| Workspace | SourceFiles | LOC | TestFiles | TODO | RoutesProd | RoutesTest | ApiProd | ApiTest | OutDeps | InDeps | RiskScore | RiskLevel |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| bff_gateway | 84 | 5738 | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 10 | low |
+| mobile_flutter | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 15 | low |
+
+## 風險 Top 清單
+| Workspace | RiskScore | RiskLevel | Reason |
+| --- | --- | --- | --- |
+| mobile_flutter | 15 | low | 無測試檔 |
+| bff_gateway | 10 | low | 程式行數偏大 |

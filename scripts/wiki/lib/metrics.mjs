@@ -1,6 +1,7 @@
 ﻿import fs from 'node:fs';
 import path from 'node:path';
 import { repoRoot, wikiDir, norm, regEsc, runWithFallback } from './io.mjs';
+import { globToRegExp } from './deps.mjs';
 
 export function collectOwnership(managedRows) {
   const rules = parseCodeownersRules();

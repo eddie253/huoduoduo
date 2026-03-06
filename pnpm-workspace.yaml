@@ -1,0 +1,4 @@
+packages:
+  - apps/bff_gateway
+  - apps/mobile_flutter
+  - scripts/wiki

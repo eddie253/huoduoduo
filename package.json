@@ -18,13 +18,14 @@
     "bff:error-code-map": "node ops/ci/check-error-code-map.js",
     "bff:verify": "npm run bff:route-diff && npm run bff:error-code-map && npm run bff:lint && npm run bff:test -- --runInBand && npm run bff:build",
     "mobile:analyze": "cd apps/mobile_flutter && flutter analyze",
-    "mobile:test": "cd apps/mobile_flutter && flutter test lib",
+    "mobile:test": "cd apps/mobile_flutter && flutter test",
     "mobile:build:apk:debug": "cd apps/mobile_flutter && flutter build apk --debug",
     "mobile:build:ios:nocodesign": "cd apps/mobile_flutter && flutter build ios --no-codesign",
     "mobile:verify": "npm run mobile:analyze && npm run mobile:test && npm run mobile:build:apk:debug",
     "mobile:test:coverage": "node ops/ci/run-flutter-coverage.js",
     "mobile:coverage:check": "node ops/ci/check-flutter-coverage.js apps/mobile_flutter/coverage/lcov.info 65",
     "mobile:run:auto-login": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-mobile-auto-login.ps1",
+    "mobile:test:uat-login-it": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-mobile-uat-integration-test.ps1",
     "mobile:repro:route-nav": "powershell -ExecutionPolicy Bypass -File .\\scripts\\repro-route-nav.ps1",
     "mobile:log:bridge": "powershell -ExecutionPolicy Bypass -File .\\scripts\\tail-mobile-bridge-log.ps1",
     "mobile:log:all": "powershell -ExecutionPolicy Bypass -File .\\scripts\\tail-mobile-bridge-log.ps1 -ShowAll",
@@ -42,4 +43,4 @@
   "devDependencies": {
     "turbo": "^2.0.0"
   }
-}
+

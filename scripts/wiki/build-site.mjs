@@ -13,7 +13,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..', '..');
 const mdxDir = path.resolve(repoRoot, 'docs/wiki-mdx');
-const siteDir = path.resolve(repoRoot, 'apps/bob-web-apps-main/public/wiki-site');
+const siteDir = path.resolve(repoRoot, 'apps/public/wiki-site');
 const legacySiteDir = path.resolve(repoRoot, 'docs/wiki-site');
 const generatedMarker = '<!-- AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:build:site`. -->';
 const isCheckMode = process.argv.includes('--check');
@@ -65,12 +65,12 @@ async function main() {
     }
     for (const rel of stale) drift.push(`${rel}: stale-generated-file`);
     if (drift.length > 0) {
-      console.error('wiki:site:check 失敗：apps/bob-web-apps-main/public/wiki-site 與目前 MDX 文件不同步。');
+      console.error('wiki:site:check 失敗：apps/public/wiki-site 與目前 MDX 文件不同步。');
       for (const item of drift) console.error(`- ${item}`);
       console.error('\n請執行 `pnpm run wiki:build:site` 更新前端 wiki 靜態頁。');
       process.exit(1);
     }
-    console.log('wiki:site:check 通過：apps/bob-web-apps-main/public/wiki-site 已與 docs/wiki-mdx 同步。');
+    console.log('wiki:site:check 通過：apps/public/wiki-site 已與 docs/wiki-mdx 同步。');
     return;
   }
 
@@ -86,7 +86,7 @@ async function main() {
     fs.rmSync(legacySiteDir, { recursive: true, force: true });
   }
 
-  console.log(`wiki:site 完成：已更新 apps/bob-web-apps-main/public/wiki-site 下 ${expected.size} 份 HTML。`);
+  console.log(`wiki:site 完成：已更新 apps/public/wiki-site 下 ${expected.size} 份 HTML。`);
   if (syncMainPublic) {
     console.log('wiki:site 相容模式：`--sync-main-public` 旗標已無需額外同步，輸出目錄已直接指向 apps/public/wiki-site。');
   }

@@ -93,7 +93,11 @@ export function notFound(err) {
   return stderr.includes('not recognized') || stderr.includes('not found');
 }
 
-export function readJson(rel) { return JSON.parse(fs.readFileSync(path.resolve(repoRoot, rel), 'utf8')); }
+export function readJson(rel) {
+  const raw = fs.readFileSync(path.resolve(repoRoot, rel), 'utf8');
+  const normalized = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
+  return JSON.parse(normalized);
+}
 
 export function strMap(v) {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return {};

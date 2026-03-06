@@ -1,0 +1,68 @@
+---
+title: "Workspace Dependency Map"
+source: "03-dependency-map.md"
+generated: true
+doc_id: "wiki-03-dependency-map"
+lang: "zh-TW"
+source_of_truth: "zh-TW"
+translation_status: "source"
+source_hash: "f7bc307e867d7e7c2ebb9aade0e988fb05cf23d4ac1d4f18b4595e057b24ec63"
+owner: "bob"
+last_synced_utc: "2026-03-01T00:00:00Z"
+---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
+# Workspace Dependency Map
+
+## 文件定位
+Covers local workspace dependencies, including workspace protocol and non-workspace protocol specs.
+
+## 更新摘要
+- 本文件由程式碼與設定檔事實自動生成，不依賴人工手寫敘述。
+- 排序與格式固定，確保重複生成輸出一致（deterministic）。
+- CI Gate 使用 `wiki:check` 驗證文件是否與程式碼同步。
+
+## 文件中繼資料
+| 欄位 | 內容 |
+| --- | --- |
+| 產生器 | `node scripts/wiki/generate.mjs --mdx` |
+| 驗證指令 | `node scripts/wiki/generate.mjs --check --mdx` |
+| 輸出範圍 | `docs/wiki-mdx/*` |
+| 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
+
+## 引用檔案
+- [package.json](../../package.json)
+- [apps/bob-web-apps-main/package.json](../../apps/bob-web-apps-main/package.json)
+- [tests/e2e-main/package.json](../../tests/e2e-main/package.json)
+
+## 章節目錄
+1. [Dependency Summary](#dependency-summary)
+2. [Hub Nodes](#hub-nodes)
+3. [Mermaid Graph](#mermaid-graph)
+4. [Local Workspace Edges](#local-workspace-edges)
+5. [Local Edges Without Workspace Protocol](#local-edges-without-workspace-protocol)
+6. [Unresolved Workspace Protocol Edges](#unresolved-workspace-protocol-edges)
+
+## Dependency Summary
+- Local workspace edges: **0**
+- Workspace protocol edges (`workspace:*`): **0**
+- Local edges without workspace protocol: **0**
+- Unresolved workspace protocol edges: **0**
+- Hub nodes shown: **2**
+
+## Hub Nodes
+| Workspace | Outbound | Inbound |
+| --- | --- | --- |
+| bff_gateway | 0 | 0 |
+| mobile_flutter | 0 | 0 |
+
+## Mermaid Graph
+- No workspace dependency edges found.
+
+## Local Workspace Edges
+- No local workspace dependency edges found.
+
+## Local Edges Without Workspace Protocol
+- None.
+
+## Unresolved Workspace Protocol Edges
+- None.
