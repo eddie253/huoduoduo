@@ -24,7 +24,10 @@ describe('bootstrap() smoke test', () => {
     (helmet as unknown as jest.Mock).mockReturnValue(jest.fn());
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+    delete process.env.PORT;
+  });
 
   it('creates NestJS app with cors enabled', async () => {
     await bootstrap();
@@ -55,7 +58,6 @@ describe('bootstrap() smoke test', () => {
     process.env.PORT = '8080';
     await bootstrap();
     expect(mockApp.listen).toHaveBeenCalledWith(8080);
-    delete process.env.PORT;
   });
 
   it('defaults to port 3000 when PORT is unset', async () => {

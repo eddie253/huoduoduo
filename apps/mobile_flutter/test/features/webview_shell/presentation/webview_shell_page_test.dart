@@ -50,18 +50,6 @@ void Function(FlutterErrorDetails)? _installErrorSuppressor() {
 }
 
 void main() {
-  group('WebViewShellPage – static key constants', () {
-    test('key strings match expected values', () {
-      expect(const Key('webview.shell.scaffold'),
-          const Key('webview.shell.scaffold'));
-      expect(const Key('webview.bottomBar'), const Key('webview.bottomBar'));
-      expect(const Key('webview.top.backButton'),
-          const Key('webview.top.backButton'));
-      expect(const Key('webview.top.settingsButton'),
-          const Key('webview.top.settingsButton'));
-    });
-  });
-
   group('WebViewShellPage – widget smoke tests', () {
     setUp(_installChannelMocks);
     tearDown(_removeChannelMocks);

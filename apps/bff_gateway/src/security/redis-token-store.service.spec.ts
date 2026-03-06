@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { ServiceUnavailableException } from '@nestjs/common';
+import { createClient } from 'redis';
 import { RedisTokenStoreService, RefreshTokenState } from './redis-token-store.service';
 
 const mockConnect = jest.fn();
@@ -39,7 +40,7 @@ describe('RedisTokenStoreService', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     redisInstance = {
       on: mockOn.mockImplementation((event: string, handler: (...args: any[]) => void) => {
         if (event === 'error') {
@@ -55,6 +56,7 @@ describe('RedisTokenStoreService', () => {
       isOpen: true,
       isReady: true
     };
+    (createClient as jest.Mock).mockReturnValue(redisInstance);
   });
 
   it('connects on module init and marks ready', async () => {

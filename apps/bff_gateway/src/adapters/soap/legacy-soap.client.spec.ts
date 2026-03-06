@@ -189,8 +189,17 @@ describe('LegacySoapClient validateLogin branches', () => {
     });
   });
 
+});
+
+describe('LegacySoapClient listReservations branches', () => {
   it('throws LEGACY_BAD_RESPONSE when list response is not valid JSON', async () => {
-    const { client } = makeErrorClient({ GetARVed: 'broken{{json' });
+    const transport = {
+      call: jest.fn(async ({ method }: { method: string }) => ({ GetARVed: 'broken{{json' })[method] ?? 'OK')
+    } as unknown as SoapTransportService;
+    const config = {
+      get: jest.fn((_key: string, fallback: unknown) => fallback)
+    } as unknown as ConfigService;
+    const client = new LegacySoapClient(transport, config);
     await expect(client.listReservations('standard', 'D001')).rejects.toMatchObject({
       code: 'LEGACY_BAD_RESPONSE', statusCode: 502
     });
