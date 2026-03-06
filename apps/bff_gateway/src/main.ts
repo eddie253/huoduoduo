@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { LegacySoapExceptionFilter } from './security/legacy-soap-exception.filter';
 
-async function bootstrap(): Promise<void> {
+export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { cors: true });
 
   app.use(
@@ -28,4 +28,6 @@ async function bootstrap(): Promise<void> {
   await app.listen(port);
 }
 
-void bootstrap();
+if (process.env.NODE_ENV !== 'test') {
+  void bootstrap();
+}

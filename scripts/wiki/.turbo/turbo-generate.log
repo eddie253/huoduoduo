@@ -1,0 +1,6 @@
+
+> @repo/wiki@0.1.0 generate C:\Users\EDDIE\Downloads\APP_didiexpress-main\HDD-Express\scripts\wiki
+> node ./generate.mjs --mdx && node ./sync-en.mjs
+
+wiki:generate 完成：已更新 docs/wiki-mdx 下 18 份文件。
+wiki:sync:en wrote 16 file(s) to docs/wiki-mdx/en-US.

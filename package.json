@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Monorepo root for Flutter + BFF migration baseline.",
+  "packageManager": "pnpm@10.28.2",
   "workspaces": [
     "apps/bff_gateway",
     "scripts/wiki"
@@ -43,4 +44,5 @@
   "devDependencies": {
     "turbo": "^2.0.0"
   }
+}
 

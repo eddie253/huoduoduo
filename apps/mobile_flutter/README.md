@@ -52,6 +52,20 @@ Coverage artifacts are generated in:
 - `apps/mobile_flutter/coverage/lcov.info` (raw)
 - `reports/coverage/mobile/lcov.info` (collected)
 
+## Unit / Widget test coverage (PLAN23)
+
+New test files added to raise line coverage above 65%:
+
+| Test file | Source covered |
+|-----------|---------------|
+| `test/app/theme/app_theme_preset_test.dart` | `lib/app/theme/app_theme_preset.dart` – `fromStorageKey` all branches, round-trip, color properties |
+| `test/app/theme/theme_preference_store_test.dart` | `lib/app/theme/theme_preference_store.dart` + `AppThemePrefs` – read/write/copyWith |
+| `test/core/storage/token_storage_test.dart` | `lib/core/storage/token_storage.dart` – saveTokens, read, clear (method-channel mock) |
+| `test/features/webview_shell/presentation/webview_shell_page_test.dart` | `lib/features/webview_shell/presentation/webview_shell_page.dart` – scaffold, bottom bar tabs, back-button opacity, settings button |
+
+> Widget tests for `WebViewShellPage` suppress `MissingPluginException` from `InAppWebView` / `CookieManager`
+> platform channels (mocked via `setMockMethodCallHandler`) and are safe to run in headless CI.
+
 ## Android real-device smoke
 
 ```bash

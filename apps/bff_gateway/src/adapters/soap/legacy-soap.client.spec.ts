@@ -123,3 +123,199 @@ describe('LegacySoapClient reservation mode mapping', () => {
     expect((transport.call as jest.Mock).mock.calls[1][0].method).toBe('GetVersion');
   });
 });
+
+describe('LegacySoapClient validateLogin branches', () => {
+  const makeErrorClient = (responseMap: Record<string, string>) => {
+    const transport = {
+      call: jest.fn(async ({ method }: { method: string }) => responseMap[method] ?? 'OK')
+    } as unknown as SoapTransportService;
+    const config = {
+      get: jest.fn((_key: string, fallback: unknown) => fallback)
+    } as unknown as ConfigService;
+    return { client: new LegacySoapClient(transport, config), transport };
+  };
+
+  it('returns null when GetLogin response is empty array', async () => {
+    const { client } = makeErrorClient({ GetLogin: '[]' });
+    const result = await client.validateLogin('user', 'pass');
+    expect(result).toBeNull();
+  });
+
+  it('returns LegacyUser when response contains 契約編號', async () => {
+    const { client } = makeErrorClient({
+      GetLogin: JSON.stringify([{ '契約編號': 'D001', '姓名': 'Driver', '代理區域職位': 'driver' }])
+    });
+    const result = await client.validateLogin('driver', 'pass');
+    expect(result).toMatchObject({ id: 'D001', contractNo: 'D001', account: 'driver', displayName: 'Driver', role: 'driver' });
+  });
+
+  it('uses DNUM key as fallback for contractNo', async () => {
+    const { client } = makeErrorClient({
+      GetLogin: JSON.stringify([{ DNUM: 'D002' }])
+    });
+    const result = await client.validateLogin('driver2', 'pass');
+    expect(result?.contractNo).toBe('D002');
+  });
+
+  it('defaults displayName to account when 姓名 is missing', async () => {
+    const { client } = makeErrorClient({
+      GetLogin: JSON.stringify([{ '契約編號': 'D003' }])
+    });
+    const result = await client.validateLogin('myaccount', 'pass');
+    expect(result?.displayName).toBe('myaccount');
+  });
+
+  it('defaults role to "driver" when 代理區域職位 is missing', async () => {
+    const { client } = makeErrorClient({
+      GetLogin: JSON.stringify([{ '契約編號': 'D004', '姓名': 'X' }])
+    });
+    const result = await client.validateLogin('acc', 'pass');
+    expect(result?.role).toBe('driver');
+  });
+
+  it('throws LEGACY_BAD_RESPONSE when contractNo is missing from row', async () => {
+    const { client } = makeErrorClient({
+      GetLogin: JSON.stringify([{ '姓名': 'NoContract' }])
+    });
+    await expect(client.validateLogin('user', 'pass')).rejects.toMatchObject({
+      code: 'LEGACY_BAD_RESPONSE', statusCode: 502
+    });
+  });
+
+  it('throws LEGACY_BUSINESS_ERROR on "Error" prefixed response', async () => {
+    const { client } = makeErrorClient({ GetLogin: 'Error: invalid credentials' });
+    await expect(client.validateLogin('user', 'pass')).rejects.toMatchObject({
+      code: 'LEGACY_BUSINESS_ERROR', statusCode: 422
+    });
+  });
+
+  it('throws LEGACY_BAD_RESPONSE when list response is not valid JSON', async () => {
+    const { client } = makeErrorClient({ GetARVed: 'broken{{json' });
+    await expect(client.listReservations('standard', 'D001')).rejects.toMatchObject({
+      code: 'LEGACY_BAD_RESPONSE', statusCode: 502
+    });
+  });
+});
+
+describe('LegacySoapClient buildWebviewCookies', () => {
+  it('returns three cookies using fallback domain from WEBVIEW_BASE_URL', async () => {
+    const transport = { call: jest.fn(async () => 'OK') } as unknown as SoapTransportService;
+    const config = { get: jest.fn((_key: string, fallback: unknown) => fallback) } as unknown as ConfigService;
+    const client = new LegacySoapClient(transport, config);
+
+    const cookies = await client.buildWebviewCookies('account-1', 'id-token-1');
+    expect(cookies).toHaveLength(3);
+    expect(cookies[0].name).toBe('Account');
+    expect(cookies[0].value).toBe('account-1');
+    expect(cookies[1].name).toBe('Identify');
+    expect(cookies[1].value).toBe('id-token-1');
+    expect(cookies[2].name).toBe('Kind');
+    expect(cookies[2].value).toBe('android');
+    expect(cookies.every((c) => c.secure)).toBe(true);
+    expect(cookies.every((c) => c.path === '/')).toBe(true);
+  });
+
+  it('uses WEBVIEW_COOKIE_DOMAIN config when provided', async () => {
+    const transport = { call: jest.fn(async () => 'OK') } as unknown as SoapTransportService;
+    const config = {
+      get: jest.fn((key: string, fallback: unknown) => {
+        if (key === 'WEBVIEW_COOKIE_DOMAIN') return 'custom.domain.com';
+        return fallback;
+      })
+    } as unknown as ConfigService;
+    const client = new LegacySoapClient(transport, config);
+
+    const cookies = await client.buildWebviewCookies('acc', 'id');
+    expect(cookies[0].domain).toBe('custom.domain.com');
+  });
+});
+
+describe('LegacySoapClient getBulletins', () => {
+  const makeClient = (raw: string) => {
+    const transport = { call: jest.fn(async () => raw) } as unknown as SoapTransportService;
+    const config = { get: jest.fn((_k: string, fb: unknown) => fb) } as unknown as ConfigService;
+    return new LegacySoapClient(transport, config);
+  };
+
+  it('returns empty array when response is null string', async () => {
+    const client = makeClient('null');
+    expect(await client.getBulletins()).toEqual([]);
+  });
+
+  it('maps bulletin records with 公告標題 field', async () => {
+    const client = makeClient(JSON.stringify([
+      { UID: 'U1', '公告標題': 'Announcement', '公告日期': '2026-03' }
+    ]));
+    const result = await client.getBulletins();
+    expect(result).toHaveLength(1);
+    expect(result[0].title).toBe('Announcement');
+    expect(result[0].uid).toBe('U1');
+    expect(result[0].date).toBe('2026-03');
+  });
+
+  it('filters out records with blank title', async () => {
+    const client = makeClient(JSON.stringify([{ UID: 'U2', '公告標題': '   ' }]));
+    expect(await client.getBulletins()).toHaveLength(0);
+  });
+
+  it('throws LEGACY_BUSINESS_ERROR when response starts with Error', async () => {
+    const client = makeClient('Error: bulletin fetch failed');
+    await expect(client.getBulletins()).rejects.toMatchObject({ code: 'LEGACY_BUSINESS_ERROR' });
+  });
+});
+
+describe('LegacySoapClient getShipment fallback logic', () => {
+  it('throws LEGACY_BUSINESS_ERROR when GetShipment_elf returns business error', async () => {
+    const transport = {
+      call: jest.fn(async ({ method }: { method: string }) => {
+        if (method === 'GetShipment_elf') return 'Error: not found';
+        return '[]';
+      })
+    } as unknown as SoapTransportService;
+    const config = { get: jest.fn((_k: string, fb: unknown) => fb) } as unknown as ConfigService;
+    const client = new LegacySoapClient(transport, config);
+    await expect(client.getShipment('T001')).rejects.toMatchObject({ code: 'LEGACY_BUSINESS_ERROR', statusCode: 422 });
+  });
+
+  it('falls back to GetShipment when GetShipment_elf returns empty', async () => {
+    const transport = {
+      call: jest.fn(async ({ method }: { method: string }) => {
+        if (method === 'GetShipment_elf') return '[]';
+        if (method === 'GetShipment') {
+          return JSON.stringify([{
+            '查件貨號': 'T999', '收件人': 'Bob', '地址': 'Addr',
+            '電話': '', '手機': '', '郵遞區號': '', '縣市': '', '地區': '',
+            '配送狀態': 'delivered'
+          }]);
+        }
+        return '[]';
+      })
+    } as unknown as SoapTransportService;
+    const config = { get: jest.fn((_k: string, fb: unknown) => fb) } as unknown as ConfigService;
+    const client = new LegacySoapClient(transport, config);
+    const result = await client.getShipment('T999');
+    expect(result.trackingNo).toBe('T999');
+    expect(result.recipient).toBe('Bob');
+  });
+
+  it('throws LEGACY_BAD_RESPONSE when both SOAP methods return empty', async () => {
+    const transport = { call: jest.fn(async () => '[]') } as unknown as SoapTransportService;
+    const config = { get: jest.fn((_k: string, fb: unknown) => fb) } as unknown as ConfigService;
+    const client = new LegacySoapClient(transport, config);
+    await expect(client.getShipment('T000')).rejects.toMatchObject({ code: 'LEGACY_BAD_RESPONSE', statusCode: 502 });
+  });
+});
+
+describe('LegacySoapClient updateRegId', () => {
+  it('calls UpdateRegID with all params', async () => {
+    const transport = { call: jest.fn(async () => 'OK') } as unknown as SoapTransportService;
+    const config = { get: jest.fn((_k: string, fb: unknown) => fb) } as unknown as ConfigService;
+    const client = new LegacySoapClient(transport, config);
+
+    await client.updateRegId('D001', 'reg-token', 'Android', 2);
+    expect((transport.call as jest.Mock).mock.calls[0][0]).toMatchObject({
+      method: 'UpdateRegID',
+      params: { DNUM: 'D001', RegID: 'reg-token', Kind: 'Android', Version: '2' }
+    });
+  });
+});
