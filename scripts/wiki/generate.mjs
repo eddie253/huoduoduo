@@ -60,10 +60,10 @@ const GENERATED_MARKER = '{/* AUTO-GENERATED: Do not edit manually. Use `pnpm ru
 
 const PAGE_REFS = {
   'README.md': ['package.json', 'pnpm-workspace.yaml', 'turbo.json', 'Jenkinsfile', 'scripts/wiki/generate.mjs'],
-  '01-architecture.md': ['package.json', 'pnpm-workspace.yaml', 'turbo.json', 'apps/bob-web-apps-main/package.json', 'scripts/verify/repo-layout.config.json'],
+  '01-architecture.md': ['package.json', 'pnpm-workspace.yaml', 'turbo.json', 'apps/bff_hdd/package.json', 'scripts/verify/repo-layout.config.json'],
   '02-workspaces.md': ['package.json', 'pnpm-workspace.yaml', 'scripts/verify/repo-layout.config.json'],
-  '03-dependency-map.md': ['package.json', 'apps/bob-web-apps-main/package.json', 'tests/e2e-main/package.json'],
-  '04-dev-build-test.md': ['package.json', 'tests/e2e-main/package.json', 'turbo.json', 'Jenkinsfile'],
+  '03-dependency-map.md': ['package.json', 'apps/bff_hdd/package.json', 'apps/mobile_flutter/package.json'],
+  '04-dev-build-test.md': ['package.json', 'apps/bff_hdd/package.json', 'apps/mobile_flutter/package.json', 'turbo.json', 'Jenkinsfile'],
   '05-ci-deploy.md': ['Jenkinsfile', 'deploy/deploy-deployment.yaml', 'deploy/deploy-service.yaml', 'deploy/deploy-ingress.yaml', 'scripts/deploy/Dockerfile', 'scripts/deploy/nginx.conf'],
   '06-governance.md': [
     'scripts/verify/repo-layout.config.json',
@@ -71,7 +71,7 @@ const PAGE_REFS = {
     'docs/engineering/3standards/REPO_DIRECTORY_STANDARD_PLAN.md',
   ],
   '07-troubleshooting.md': ['package.json', 'pnpm-workspace.yaml', 'scripts/verify/repo-layout.config.json', 'scripts/wiki/generate.mjs'],
-  '08-runtime-code-map.md': ['pnpm-workspace.yaml', 'apps/bob-web-apps-main/src/router/routes', 'packages', 'scripts/wiki/generate.mjs'],
+  '08-runtime-code-map.md': ['pnpm-workspace.yaml', 'apps/bff_hdd/src', 'apps/mobile_flutter/lib', 'packages', 'scripts/wiki/generate.mjs'],
   '09-ownership-quality.md': ['scripts/wiki/wiki.config.json', 'package.json', 'scripts/wiki/generate.mjs'],
   '10-metrics-trends.md': ['docs/wiki-mdx/metrics/history.json', 'scripts/wiki/generate.mjs', 'scripts/wiki/wiki.config.json'],
 };
@@ -358,7 +358,7 @@ function buildArchitecture(ctx) {
     '  A["Edit Source"] --> B["pnpm run wiki:generate"]',
     '  B --> C["docs/wiki-mdx/*.mdx + metrics/*.json"]',
     '  C --> D["pnpm run wiki:build:site"]',
-    '  D --> E["apps/bob-web-apps-main/public/wiki-site/*.html"]',
+    '  D --> E["apps/public/wiki-site/*.html"]',
     '  E --> F["pnpm run wiki:check / wiki:check:site"]',
     '```',
     '',
@@ -379,7 +379,7 @@ function buildArchitecture(ctx) {
     '|       |-- sync-en.mjs',
     '|       `-- build-site.mjs',
     '`-- apps/',
-    '    `-- bob-web-apps-main/public/wiki-site/',
+    '    `-- public/wiki-site/',
     '```',
   ].join('\n');
 }
@@ -492,8 +492,8 @@ function buildDev(ctx) {
     '',
     '## 建議本地流程',
     '1. `pnpm install --frozen-lockfile`',
-    '2. `pnpm run dev:main`（或對應 app 的 dev script）',
-    '3. 提交 PR 前先跑 `pnpm run ci:main:gate:fast`',
+    '2. `npm run bff:dev`（或執行對應 app 的本地啟動流程）',
+    '3. 提交 PR 前先跑 `npm run turbo:verify`',
     '4. 變更 repo 事實來源後執行 `pnpm run wiki:generate`',
     '5. push 前執行 `pnpm run wiki:check`',
   ].join('\n');
@@ -521,7 +521,7 @@ function buildCi(ctx) {
     ...table(['檔案', '角色'], deploy.length ? deploy : [['(none)', '-']]),
     '',
     '## CI Gate 契約',
-    '- `ci:main:gate:fast` 已納入 `wiki:check`；文件漂移即失敗。',
+    '- `turbo:verify` 已納入 `wiki:check`；文件漂移即失敗。',
     '- Gate 綠燈代表程式、測試與 wiki 同步。',
     '- Deploy stage 依賴 Jenkins 憑證與 `deploy/*.yaml` 清單。',
   ].join('\n');
@@ -593,7 +593,7 @@ function buildTroubleshooting(ctx) {
     '2. `pnpm run wiki:check`',
     '3. `pnpm run verify:repo:layout`',
     '4. `pnpm run verify:repo:governance`',
-    '5. `pnpm run ci:main:gate:fast`',
+    '5. `npm run turbo:verify`',
     '',
     '## Repo 現況訊號',
     `- 解析警示數（fallback/missing）：**${ctx.fallbackRows.length}**`,

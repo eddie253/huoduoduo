@@ -6,7 +6,7 @@ doc_id: "wiki-01-architecture"
 lang: "zh-TW"
 source_of_truth: "zh-TW"
 translation_status: "source"
-source_hash: "c54cfa2c22ae2885ce06fcac24f09f84e039bdfa37ad1fd1dd8ba9e439881b65"
+source_hash: "57457d8b91c05c887cb388a9062f43e238a7cf4bf866830ad901b16076dc1f7c"
 owner: "bob"
 last_synced_utc: "2026-03-01T00:00:00Z"
 ---
@@ -33,7 +33,7 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 - [package.json](../../package.json)
 - [pnpm-workspace.yaml](../../pnpm-workspace.yaml)
 - [turbo.json](../../turbo.json)
-- [apps/bob-web-apps-main/package.json](../../apps/bob-web-apps-main/package.json)
+- [apps/bff_hdd/package.json](../../apps/bff_hdd/package.json)
 - [scripts/verify/repo-layout.config.json](../../scripts/verify/repo-layout.config.json)
 
 ## 章節目錄
@@ -63,7 +63,7 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 ### Include Patterns
 | 規則 |
 | --- |
-| apps/bff_gateway |
+| apps/bff_hdd |
 | apps/mobile_flutter |
 | scripts/wiki |
 
@@ -111,7 +111,7 @@ flowchart LR
   A["Edit Source"] --> B["pnpm run wiki:generate"]
   B --> C["docs/wiki-mdx/*.mdx + metrics/*.json"]
   C --> D["pnpm run wiki:build:site"]
-  D --> E["apps/bob-web-apps-main/public/wiki-site/*.html"]
+  D --> E["apps/public/wiki-site/*.html"]
   E --> F["pnpm run wiki:check / wiki:check:site"]
 ```
 
@@ -132,5 +132,5 @@ flowchart LR
 |       |-- sync-en.mjs
 |       `-- build-site.mjs
 `-- apps/
-    `-- bob-web-apps-main/public/wiki-site/
+    `-- public/wiki-site/
 ```

@@ -134,7 +134,7 @@ class ShipmentUploadOrchestrator {
     int maxRetryCount = defaultMaxRetryCount,
   }) async {
     if (_activeTrackingNos.contains(trackingNo)) {
-      return ShipmentUploadResult(
+      return const ShipmentUploadResult(
         queueId: -1,
         status: MediaQueueStatus.pending,
       );
@@ -173,7 +173,7 @@ class ShipmentUploadOrchestrator {
     int maxRetryCount = defaultMaxRetryCount,
   }) async {
     if (_activeTrackingNos.contains(trackingNo)) {
-      return ShipmentUploadResult(
+      return const ShipmentUploadResult(
         queueId: -1,
         status: MediaQueueStatus.pending,
       );

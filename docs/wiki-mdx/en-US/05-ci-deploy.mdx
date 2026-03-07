@@ -6,11 +6,11 @@ doc_id: "wiki-05-ci-deploy"
 lang: "en-US"
 source_of_truth: "zh-TW"
 translation_status: "draft"
-source_hash: "0bfc78cbc7eb4ee4796a8a76e23e4b5e112c4c6f9414b458033a0d419d1d6544"
+source_hash: "22e0031f9bcc20def27fd389a37ebdb9d4099b8b26a088d7d489eb4380d9d452"
 owner: "bob"
 last_synced_utc: "2026-03-01T00:00:00Z"
 ---
-{/* AUTO-GENERATED: Do not edit manually. Use `pnpm --filter @repo/wiki run sync:en` after `wiki:generate`. */}
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:sync:en` after `pnpm run wiki:generate`. */}
 
 > Auto-generated English skeleton.
 > Source (zh-TW): `../05-ci-deploy.mdx`
@@ -71,6 +71,6 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 | (none) | - |
 
 ## CI Gate 契約
-- `ci:main:gate:fast` 已納入 `wiki:check`；文件漂移即失敗。
+- `turbo:verify` 已納入 `wiki:check`；文件漂移即失敗。
 - Gate 綠燈代表程式、測試與 wiki 同步。
 - Deploy stage 依賴 Jenkins 憑證與 `deploy/*.yaml` 清單。

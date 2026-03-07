@@ -6,7 +6,7 @@ doc_id: "wiki-04-dev-build-test"
 lang: "zh-TW"
 source_of_truth: "zh-TW"
 translation_status: "source"
-source_hash: "c5009304f27052541b43b4cb7fdd468ca5238e5684248e014920624a166f2814"
+source_hash: "a7705057d6b0b4c1c28664f211018be5690517402c8d0f8caff9aefd8ebbd1f9"
 owner: "bob"
 last_synced_utc: "2026-03-01T00:00:00Z"
 ---
@@ -31,7 +31,8 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 
 ## 引用檔案
 - [package.json](../../package.json)
-- [tests/e2e-main/package.json](../../tests/e2e-main/package.json)
+- [apps/bff_hdd/package.json](../../apps/bff_hdd/package.json)
+- [apps/mobile_flutter/package.json](../../apps/mobile_flutter/package.json)
 - [turbo.json](../../turbo.json)
 - [Jenkinsfile](../../Jenkinsfile)
 
@@ -43,7 +44,12 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 ## Root 指令矩陣
 | 階段 | Script | Command | 用途 |
 | --- | --- | --- | --- |
-| (none) | - | - | - |
+| 文件 | wiki:build:site | pnpm --filter "@repo/wiki" run build:site | Repo 工作流命令 |
+| 文件 | wiki:check | pnpm --filter "@repo/wiki" run check | 檢查 docs/wiki-mdx 是否同步 |
+| 文件 | wiki:check:en | pnpm --filter "@repo/wiki" run check:en | Repo 工作流命令 |
+| 文件 | wiki:check:site | pnpm --filter "@repo/wiki" run check:site | Repo 工作流命令 |
+| 文件 | wiki:generate | pnpm --filter "@repo/wiki" run generate | 依 repo 事實重建 docs/wiki-mdx |
+| 文件 | wiki:sync:en | pnpm --filter "@repo/wiki" run sync:en | Repo 工作流命令 |
 
 ## E2E Workspace 指令
 | Script | Command |
@@ -52,7 +58,7 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 
 ## 建議本地流程
 1. `pnpm install --frozen-lockfile`
-2. `pnpm run dev:main`（或對應 app 的 dev script）
-3. 提交 PR 前先跑 `pnpm run ci:main:gate:fast`
+2. `npm run bff:dev`（或執行對應 app 的本地啟動流程）
+3. 提交 PR 前先跑 `npm run turbo:verify`
 4. 變更 repo 事實來源後執行 `pnpm run wiki:generate`
 5. push 前執行 `pnpm run wiki:check`
