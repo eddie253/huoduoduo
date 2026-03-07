@@ -40,7 +40,7 @@ class ZxingEngineAdapter implements ScanEngineAdapter {
       return null;
     }
 
-    final int? durationMs = engineCode.duration;
+    final int durationMs = engineCode.duration;
     if (durationMs != null && durationMs < minReliableDecodeMs) {
       return null;
     }

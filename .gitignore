@@ -90,6 +90,9 @@ docs/plans/*
 !docs/plans/PLAN27.md
 !docs/plans/PLAN28.md
 !docs/plans/PLAN29.md
+!docs/plans/PLAN30.md
+!docs/plans/PLAN31.md
+!docs/plans/PLAN32.md
 test_output*.txt
 test_output*.log
 docs/architecture/LEGACY_BASELINE_MANIFEST.txt

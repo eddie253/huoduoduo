@@ -35,7 +35,7 @@ void main() {
     });
 
     test('non-empty cookies are stored', () {
-      final b = WebviewBootstrap(
+      const b = WebviewBootstrap(
         baseUrl: 'https://example.com',
         registerUrl: 'https://example.com/r',
         resetPasswordUrl: 'https://example.com/p',
@@ -67,7 +67,7 @@ void main() {
       databaseFactory = databaseFactoryFfi;
     });
 
-    Widget _buildPage() {
+    Widget buildPage() {
       final fakeDio = Dio(BaseOptions(baseUrl: 'http://test.local'));
       fakeDio.interceptors.add(
         InterceptorsWrapper(
@@ -88,7 +88,7 @@ void main() {
     Future<void> pumpPage(WidgetTester tester) async {
       await tester.binding.setSurfaceSize(const Size(800, 1400));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      await tester.pumpWidget(_buildPage());
+      await tester.pumpWidget(buildPage());
       await tester.pump(Duration.zero);
       await tester.pump(Duration.zero);
     }
