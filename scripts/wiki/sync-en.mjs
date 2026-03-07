@@ -11,7 +11,7 @@ const repoRoot = path.resolve(scriptDir, '..', '..');
 const zhRoot = path.resolve(repoRoot, 'docs/wiki-mdx');
 const enRoot = path.resolve(repoRoot, 'docs/wiki-mdx/en-US');
 const marker =
-  '{/* AUTO-GENERATED: Do not edit manually. Use `pnpm --filter @repo/wiki run sync:en` after `wiki:generate`. */}';
+  '{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:sync:en` after `pnpm run wiki:generate`. */}';
 const isCheckMode = process.argv.includes('--check');
 
 main();
@@ -89,7 +89,7 @@ function main() {
       for (const item of drift) {
         console.error(`- ${item}`);
       }
-      console.error('\nRun: `pnpm --filter @repo/wiki run sync:en`.');
+      console.error('\nRun: `pnpm run wiki:sync:en`.');
       process.exit(1);
     }
     console.log('wiki:sync:en check passed.');

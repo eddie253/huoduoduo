@@ -1,17 +1,22 @@
 ---
-title: "Workspace：bff_gateway"
-source: "workspaces/apps--bff_gateway.md"
+title: "[EN DRAFT] Workspace：bff_hdd"
+source: "workspaces/apps--bff_hdd.md"
 generated: true
-doc_id: "wiki-workspaces--apps--bff_gateway"
-lang: "zh-TW"
+doc_id: "wiki-workspaces--apps--bff_hdd"
+lang: "en-US"
 source_of_truth: "zh-TW"
-translation_status: "source"
-source_hash: "c1594e604c5f6915242554b9d2157e978367eda37baa6df281727b871ff13279"
+translation_status: "draft"
+source_hash: "f94f25dff28264ccb4df5c6448d7c95327a226f3cf53346f2724c52a072b6cb4"
 owner: "bob"
 last_synced_utc: "2026-03-01T00:00:00Z"
 ---
+{/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:sync:en` after `pnpm run wiki:generate`. */}
+
+> Auto-generated English skeleton.
+> Source (zh-TW): `../workspaces/apps--bff_hdd.mdx`
+> Translation mode: draft (manual translation required).
 {/* AUTO-GENERATED: Do not edit manually. Use `pnpm run wiki:generate`. */}
-# Workspace：bff_gateway
+# Workspace：bff_hdd
 
 ## 文件定位
 單一 workspace 的工程事實頁，供開發與維運快速定位。
@@ -30,7 +35,7 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 | 核心來源 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Jenkinsfile` |
 
 ## 引用檔案
-- [apps/bff_gateway/package.json](../../../apps/bff_gateway/package.json)
+- [apps/bff_hdd/package.json](../../../apps/bff_hdd/package.json)
 - [pnpm-workspace.yaml](../../../pnpm-workspace.yaml)
 - [scripts/wiki/generate.mjs](../../../scripts/wiki/generate.mjs)
 
@@ -45,19 +50,19 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 ## 基本資訊
 | 欄位 | 值 |
 | --- | --- |
-| 名稱 | bff_gateway |
+| 名稱 | bff_hdd |
 | 版本 | 0.1.0 |
 | 分類 | apps |
 | 領域 | 應用殼層（Apps） |
-| 路徑 | apps/bff_gateway |
+| 路徑 | apps/bff_hdd |
 | 可見性 | private |
 | 解析模式 | json |
 | CODEOWNERS | - |
 | 最近提交作者 | - |
 | 最近提交日期 | - |
-| Source Files | 89 |
-| Source LOC | 6535 |
-| Test Files | 16 |
+| Source Files | 98 |
+| Source LOC | 7194 |
+| Test Files | 18 |
 | TODO/FIXME/HACK | 0 |
 | Route Samples (Prod) | 0 |
 | Route Samples (Test) | 0 |
@@ -69,11 +74,11 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 | Script | Command |
 | --- | --- |
 | audit:high | node -e "const cp=require('child_process'); cp.spawnSync('npm',['audit','--audit-level=high'],{stdio:'inherit',shell:true}); process.exit(0);" |
-| build | nest build |
+| build | node ../../node_modules/@nestjs/cli/bin/nest.js build |
 | check:route-diff | node ../../ops/ci/check-route-diff.js |
 | lint | eslint "src/**/*.ts" --max-warnings=0 |
 | start | node dist/main.js |
-| start:dev | nest start --watch |
+| start:dev | node ../../node_modules/@nestjs/cli/bin/nest.js start --watch |
 | test | jest --passWithNoTests |
 | test:coverage | jest --coverage --passWithNoTests |
 | test:watch | jest --watch |
@@ -81,8 +86,8 @@ last_synced_utc: "2026-03-01T00:00:00Z"
 ## 相依摘要
 | 區段 | 總數 | workspace:* |
 | --- | --- | --- |
-| dependencies | 12 | 0 |
-| devDependencies | 17 | 0 |
+| dependencies | 15 | 0 |
+| devDependencies | 16 | 0 |
 | peerDependencies | 0 | 0 |
 | optionalDependencies | 0 | 0 |
 

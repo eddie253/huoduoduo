@@ -2,10 +2,40 @@
 
 以下指令都在 **repo 根目錄** 執行。
 
+## 全量一鍵流程
+
+正式規範文件：`docs/plans/PLAN30.md`
+
+```powershell
+pnpm run quality:full
+```
+
+CI 版本（不含 clean）：
+
+```powershell
+pnpm run quality:full:ci
+```
+
+## 0) 環境清理（推薦）
+
+```powershell
+pnpm run clean
+```
+
+- 清掉 repo 內 `node_modules`
+- 清掉 Flutter 本地建置產物（`build/`、`.dart_tool/`、`android/.gradle` 等）
+- 會嘗試執行 `flutter clean`（若本機有 flutter）
+
+深度清理（含 Flutter pub cache + Docker builder cache + pnpm store）：
+
+```powershell
+pnpm run clean:deep
+```
+
 ## 1) 啟動本機 BFF（終端機 A）
 
 ```powershell
-npm run bff:start:local
+pnpm run bff:start:local
 ```
 
 ## 2) Flutter 全清重建 + 模擬器啟動（終端機 B）
@@ -17,7 +47,7 @@ $root=(Get-Location).Path; $adb='C:\Users\EDDIE\AppData\Local\Android\Sdk\platfo
 ## 3) 可選：單終端背景啟動 BFF + App
 
 ```powershell
-$root=(Get-Location).Path; $adb='C:\Users\EDDIE\AppData\Local\Android\Sdk\platform-tools\adb.exe'; $emu='C:\Users\EDDIE\AppData\Local\Android\Sdk\emulator\emulator.exe'; Start-Job -Name bff -ScriptBlock { param($p) Set-Location $p; npm run bff:start:local } -ArgumentList $root | Out-Null; Start-Sleep 3; Start-Process -FilePath $emu -ArgumentList '-avd didi_api34 -wipe-data -no-snapshot-load -netdelay none -netspeed full'; & $adb wait-for-device; do { Start-Sleep 2; $ok=(& $adb shell getprop sys.boot_completed).Trim() } while ($ok -ne '1'); pushd "$root\apps\mobile_flutter"; flutter clean; flutter pub get; flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:3000/v1; popd
+$root=(Get-Location).Path; $adb='C:\Users\EDDIE\AppData\Local\Android\Sdk\platform-tools\adb.exe'; $emu='C:\Users\EDDIE\AppData\Local\Android\Sdk\emulator\emulator.exe'; Start-Job -Name bff -ScriptBlock { param($p) Set-Location $p; pnpm run bff:start:local } -ArgumentList $root | Out-Null; Start-Sleep 3; Start-Process -FilePath $emu -ArgumentList '-avd didi_api34 -wipe-data -no-snapshot-load -netdelay none -netspeed full'; & $adb wait-for-device; do { Start-Sleep 2; $ok=(& $adb shell getprop sys.boot_completed).Trim() } while ($ok -ne '1'); pushd "$root\apps\mobile_flutter"; flutter clean; flutter pub get; flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:3000/v1; popd
 ```
 
 結束後關閉背景 BFF：
@@ -45,7 +75,7 @@ flutter test integration_test/login_to_webview_test.dart -d emulator-5554 --dart
 在 repo 根目錄執行：
 
 ```powershell
-npm run mobile:test:uat-login-it
+pnpm run mobile:test:uat-login-it
 ```
 
 如需指定裝置與 emulator：
