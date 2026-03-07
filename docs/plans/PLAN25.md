@@ -4,6 +4,7 @@
 **審查範圍**：`apps/mobile_flutter` 全 HTTP 層 + 業務流程
 **比對基礎**：`contracts/openapi/huoduoduo-v1.openapi.yaml`、舊版 `AppWebView.java` bridge 行為矩陣
 **現況測試**：253/253 （P1-P3 完成後）
+**BFF 對應狀態**：已由 `PLAN29` 完成後端實作（idempotency guard + signatureBase64 分流）
 
 ---
 

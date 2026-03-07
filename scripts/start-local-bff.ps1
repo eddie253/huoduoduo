@@ -77,8 +77,8 @@ if (-not (Test-RedisPing -RedisCliPath $redisCli)) {
 Write-Host '[Redis] OK (PONG)'
 Ensure-BffPortAvailable
 
-Invoke-StrictCommand -Step 'Build BFF Dist' -Command { & ".\apps\bff_gateway\node_modules\.bin\tsc.CMD" -p apps/bff_gateway/tsconfig.build.json --incremental false }
+Invoke-StrictCommand -Step 'Build BFF Dist' -Command { & ".\apps\bff_hdd\node_modules\.bin\tsc.CMD" -p apps/bff_hdd/tsconfig.build.json --incremental false }
 
 Write-Host '[BFF] Starting on http://127.0.0.1:3000'
 Write-Host '[BFF] Keep this terminal open.'
-npm --workspace apps/bff_gateway run start
+npm --workspace apps/bff_hdd run start

@@ -207,7 +207,7 @@ function Ensure-BffReady {
 
   Write-Step "Starting BFF with 'npm run bff:dev'..."
   Write-Step "Pre-building BFF dist to avoid watch bootstrap race..."
-  & npm.cmd --workspace apps/bff_gateway run build | Out-Null
+  & npm.cmd --workspace apps/bff_hdd run build | Out-Null
   if ($LASTEXITCODE -ne 0) {
     throw "BFF build failed before dev start (exit=$LASTEXITCODE)."
   }

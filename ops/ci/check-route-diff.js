@@ -3,7 +3,7 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..', '..');
 const openApiPath = path.join(repoRoot, 'contracts', 'openapi', 'huoduoduo-v1.openapi.yaml');
-const controllersRoot = path.join(repoRoot, 'apps', 'bff_gateway', 'src', 'modules');
+const controllersRoot = path.join(repoRoot, 'apps', 'bff_hdd', 'src', 'modules');
 
 function readOpenApiPaths() {
   const content = fs.readFileSync(openApiPath, 'utf8');

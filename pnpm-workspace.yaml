@@ -1,4 +1,4 @@
 packages:
-  - apps/bff_gateway
+  - apps/bff_hdd
   - apps/mobile_flutter
   - scripts/wiki

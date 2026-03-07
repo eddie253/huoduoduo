@@ -1,12 +1,12 @@
 services:
-  bff_gateway:
+  bff_hdd:
     profiles: ["dev"]
     image: node:20-alpine
     working_dir: /repo
     volumes:
       - ../../:/repo
       - repo_node_modules:/repo/node_modules
-    command: sh -c "npm ci && npm --workspace apps/bff_gateway run start:dev"
+    command: sh -c "npm ci && npm --workspace apps/bff_hdd run start:dev"
     environment:
       PORT: 3000
       JWT_SECRET: dev-only-secret-change-me
@@ -26,12 +26,12 @@ services:
     depends_on:
       - redis
 
-  bff_gateway_prod:
+  bff_hdd_prod:
     profiles: ["prod"]
     build:
       context: ../../
-      dockerfile: apps/bff_gateway/Dockerfile
-    image: hdd/bff-gateway:latest
+      dockerfile: apps/bff_hdd/Dockerfile
+    image: hdd/bff-hdd:latest
     environment:
       PORT: 3000
       JWT_SECRET: dev-only-secret-change-me

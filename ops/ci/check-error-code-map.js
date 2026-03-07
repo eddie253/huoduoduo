@@ -5,7 +5,7 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..', '..');
 const docPath = path.join(repoRoot, 'contracts', 'legacy', 'error-code-mapping-v1.md');
-const bffSrcPath = path.join(repoRoot, 'apps', 'bff_gateway', 'src');
+const bffSrcPath = path.join(repoRoot, 'apps', 'bff_hdd', 'src');
 const flutterLibPath = path.join(repoRoot, 'apps', 'mobile_flutter', 'lib');
 const uatSmokeScriptPath = path.join(repoRoot, 'scripts', 'run-wave2-uat-smoke.ps1');
 
@@ -56,7 +56,7 @@ function main() {
   const failures = [];
   for (const code of codes) {
     if (code.startsWith('LEGACY_') && !bffText.includes(code)) {
-      failures.push(`${code} missing in apps/bff_gateway/src`);
+      failures.push(`${code} missing in apps/bff_hdd/src`);
     } else if (code.startsWith('BRIDGE_') && !flutterText.includes(code)) {
       failures.push(`${code} missing in apps/mobile_flutter/lib`);
     } else if (code === 'UAT_DATA_BLOCKED' && !uatSmokeText.includes(code)) {

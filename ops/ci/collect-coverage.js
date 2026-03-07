@@ -111,7 +111,7 @@ const component = (argValue('component') || 'summary').toLowerCase();
 const repoRoot = path.resolve(__dirname, '..', '..');
 const reportRoot = path.join(repoRoot, 'reports', 'coverage');
 
-const sourceBffDir = path.join(repoRoot, 'apps', 'bff_gateway', 'coverage');
+const sourceBffDir = path.join(repoRoot, 'apps', 'bff_hdd', 'coverage');
 const sourceMobileDir = path.join(repoRoot, 'apps', 'mobile_flutter', 'coverage');
 
 const reportBffDir = path.join(reportRoot, 'bff');

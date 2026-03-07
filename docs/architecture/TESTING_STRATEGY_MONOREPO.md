@@ -1,9 +1,9 @@
 ﻿# Monorepo Testing Strategy
 
 Doc ID: HDD-DOCS-ARCHITECTURE-TESTING-STRATEGY-MONOREPO
-Version: v1.1
+Version: v1.2
 Owner: Architecture Lead
-Last Updated: 2026-03-05
+Last Updated: 2026-03-07
 Review Status: Draft
 CN/EN Pair Link: N/A
 
@@ -21,7 +21,7 @@ This document defines testing placement and execution strategy for the huoduoduo
 3. Repo-level `tests/` is reserved for cross-service tests only.
 
 ### Required Layout
-1. `apps/bff_gateway/src/**/*.spec.ts`: BFF unit/integration tests.
+1. `apps/bff_hdd/src/**/*.spec.ts`: BFF unit/integration tests.
 2. `apps/mobile_flutter/lib/**/*_test.dart`: Flutter unit/widget/feature tests (colocated with source).
 3. Top-level `tests/**` is reserved for E2E/coverage/evidence docs and artifacts, not Flutter unit test code.
 
@@ -40,7 +40,7 @@ This document defines testing placement and execution strategy for the huoduoduo
    5. iOS compile gate in macOS CI: `flutter build ios --no-codesign`
 
 ## CI Ownership
-1. `bff_gateway` job owns Node/Nest quality gates.
+1. `bff_hdd` job owns Node/Nest quality gates.
 2. `mobile_flutter` job owns Android Flutter quality gates.
 3. `mobile_flutter_ios_compile` job owns iOS compile gate.
 4. `coverage_report` job publishes cross-app coverage summary artifacts.

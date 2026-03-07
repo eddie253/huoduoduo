@@ -5,16 +5,16 @@
   "description": "Monorepo root for Flutter + BFF migration baseline.",
   "packageManager": "pnpm@10.28.2",
   "workspaces": [
-    "apps/bff_gateway",
+    "apps/bff_hdd",
     "scripts/wiki"
   ],
   "scripts": {
-    "bff:dev": "npm --workspace apps/bff_gateway run start:dev",
-    "bff:lint": "npm --workspace apps/bff_gateway run lint",
-    "bff:build": "npm --workspace apps/bff_gateway run build",
+    "bff:dev": "npm --workspace apps/bff_hdd run start:dev",
+    "bff:lint": "npm --workspace apps/bff_hdd run lint",
+    "bff:build": "npm --workspace apps/bff_hdd run build",
     "bff:start:local": "powershell -ExecutionPolicy Bypass -File .\\scripts\\start-local-bff.ps1",
-    "bff:test": "npm --workspace apps/bff_gateway run test",
-    "bff:test:coverage": "npm --workspace apps/bff_gateway run test:coverage -- --runInBand",
+    "bff:test": "npm --workspace apps/bff_hdd run test",
+    "bff:test:coverage": "npm --workspace apps/bff_hdd run test:coverage -- --runInBand",
     "bff:route-diff": "node ops/ci/check-route-diff.js",
     "bff:error-code-map": "node ops/ci/check-error-code-map.js",
     "bff:verify": "npm run bff:route-diff && npm run bff:error-code-map && npm run bff:lint && npm run bff:test -- --runInBand && npm run bff:build",
@@ -38,8 +38,8 @@
     "wave2:uat-smoke": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run-wave2-uat-smoke.ps1",
     "turbo:wiki:generate": "pnpm exec turbo run generate --filter=@repo/wiki",
     "turbo:wiki:check": "pnpm exec turbo run check --filter=@repo/wiki",
-    "turbo:bff:verify": "pnpm exec turbo run lint test build --filter=bff_gateway",
-    "turbo:verify": "pnpm exec turbo run lint test build check --filter=bff_gateway --filter=@repo/wiki"
+    "turbo:bff:verify": "pnpm exec turbo run lint test build --filter=bff_hdd",
+    "turbo:verify": "pnpm exec turbo run lint test build check --filter=bff_hdd --filter=@repo/wiki"
   },
   "devDependencies": {
     "turbo": "^2.0.0"

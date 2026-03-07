@@ -1,5 +1,7 @@
 # PLAN27 — 可靠性與定位修正計畫
 
+> BFF 對應狀態：`PLAN29` 已完成 `/orders/{trackingNo}/accept`、`/drivers/location`、`/drivers/location/batch` 與 409/idempotency 映射。
+
 ## 問題對照：舊 APP vs. 新 APP
 
 | # | 問題描述 | 舊 APP | 新 APP 現況 | 根本原因 |

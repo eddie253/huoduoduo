@@ -311,6 +311,7 @@ paths:
           schema:
             type: string
             maxLength: 32
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
       requestBody:
         required: true
         content:
@@ -347,6 +348,7 @@ paths:
           schema:
             type: string
             maxLength: 32
+        - $ref: '#/components/parameters/IdempotencyKeyRequiredHeader'
       requestBody:
         required: true
         content:
@@ -370,6 +372,92 @@ paths:
                 properties:
                   ok:
                     type: boolean
+  /orders/{trackingNo}/accept:
+    post:
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      summary: Accept order with idempotency protection.
+      parameters:
+        - name: trackingNo
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      responses:
+        "200":
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        "400":
+          description: Missing idempotency key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "409":
+          description: Order already accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /drivers/location:
+    post:
+      tags: [DriverLocation]
+      security:
+        - bearerAuth: []
+      summary: Submit one driver location point.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriverLocationRequest'
+      responses:
+        "200":
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+  /drivers/location/batch:
+    post:
+      tags: [DriverLocation]
+      security:
+        - bearerAuth: []
+      summary: Submit driver locations in batch (max 20).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriverLocationBatchRequest'
+      responses:
+        "200":
+          description: Accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        "413":
+          description: Batch size exceeds limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /reservations:
     get:
       tags: [Reservations]
@@ -818,6 +906,20 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
+    IdempotencyKeyHeader:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 128
+    IdempotencyKeyRequiredHeader:
+      name: X-Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        maxLength: 128
     ReservationMode:
       name: mode
       in: query
@@ -1106,6 +1208,30 @@ components:
         longitude:
           type: string
           maxLength: 32
+    DriverLocationRequest:
+      type: object
+      required: [trackingNo, lat, lng]
+      properties:
+        trackingNo:
+          type: string
+          maxLength: 64
+        lat:
+          type: string
+          maxLength: 32
+        lng:
+          type: string
+          maxLength: 32
+        accuracyMeters:
+          type: string
+          maxLength: 16
+        recordedAt:
+          type: string
+          maxLength: 32
+    DriverLocationBatchRequest:
+      type: array
+      maxItems: 20
+      items:
+        $ref: '#/components/schemas/DriverLocationRequest'
     ShipmentResponse:
       type: object
       required:

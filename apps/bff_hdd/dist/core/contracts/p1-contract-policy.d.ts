@@ -1,0 +1,25 @@
+export declare const P1_CONTRACT_LIMITS: {
+    readonly token: 4096;
+    readonly refreshToken: 1024;
+    readonly userId: 64;
+    readonly contractNo: 64;
+    readonly userName: 128;
+    readonly role: 32;
+    readonly url: 2048;
+    readonly cookieCount: 20;
+    readonly cookieName: 64;
+    readonly cookieValue: 4096;
+    readonly cookieDomain: 255;
+    readonly cookiePath: 255;
+    readonly bulletinMessage: 2000;
+    readonly datetime: 40;
+    readonly subject: 64;
+    readonly deviceId: 64;
+    readonly platform: 16;
+    readonly fcmToken: 4096;
+};
+export declare function ensureMax(field: string, value: string, max: number): string;
+export declare function ensureOptionalMax(field: string, value: string | null | undefined, max: number): string | null;
+export declare function ensureMaxItems(field: string, count: number, max: number): void;
+export declare function truncateMax(value: string, max: number): string;
+export declare function ensureIsoDatetime(field: string, value: string | null, max: number): string | null;

@@ -1,9 +1,9 @@
 ﻿# Coverage Policy
 
 Doc ID: HDD-DOCS-ARCHITECTURE-COVERAGE-POLICY
-Version: v1.0
+Version: v1.1
 Owner: Architecture Lead
-Last Updated: 2026-03-05
+Last Updated: 2026-03-07
 Review Status: Draft
 CN/EN Pair Link: N/A
 
@@ -16,15 +16,16 @@ CN/EN Pair Link: N/A
 Provide deterministic and enforceable coverage gates for the monorepo.
 
 ## Coverage Engines
-1. BFF (`apps/bff_gateway`): Jest with `coverageProvider: v8`.
+1. BFF (`apps/bff_hdd`): Jest with `coverageProvider: v8`.
 2. Mobile (`apps/mobile_flutter`): `flutter test --coverage test lib` (LCOV).
 
 ## Coverage Thresholds
 ### BFF Global Thresholds
-1. lines >= 60
-2. statements >= 60
-3. functions >= 60
-4. branches >= 75
+1. lines >= 78
+2. statements >= 78
+3. functions >= 75
+4. branches >= 65
+5. source of truth: `apps/bff_hdd/package.json` -> `jest.coverageThreshold.global`
 
 ### Flutter Thresholds
 1. baseline gate: line coverage >= 65
@@ -40,7 +41,7 @@ Coverage reports are normalized under:
 4. `reports/coverage/index.html` (visual dashboard)
 
 ## CI Enforcement
-1. BFF threshold failure fails `bff_gateway` job.
+1. BFF threshold failure fails `bff_hdd` job.
 2. Flutter threshold failure fails `mobile_flutter` job.
 3. `coverage_report` job aggregates both artifacts and publishes summary.
 
